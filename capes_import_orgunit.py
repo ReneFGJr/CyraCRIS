@@ -41,7 +41,7 @@ def import_orgunit(file_path):
         data = nome.split(";")
         print(f"{idx}: {data}")
         nome = data[0].strip("'")
-        query = "SELECT * FROM rdf_literal WHERE name = '{}'".format(nome)
+        query = "SELECT * FROM rdf_literal WHERE n_name = '{}'".format(nome)
         print("========="+query)
         rows = database.query(query)
         if len(rows) == 0:
