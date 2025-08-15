@@ -42,10 +42,7 @@ def import_orgunit(file_path):
         print(f"{idx}: {data}")
         nome = data[0].strip("'")
         query = "SELECT * FROM rdf_literal WHERE n_name = '{}'".format(nome)
-        print("========="+query)
         rows = database.query(query)
         if len(rows) == 0:
             query = "INSERT INTO rdf_literal (n_name,n_lock,n_lang,n_charset) VALUES ('"+nome+"',1,'"+lang+"','"+charset+"')"
             database.insert(query)
-            sys.exit()
-        print("===>",rows)
