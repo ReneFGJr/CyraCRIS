@@ -39,7 +39,6 @@ def import_orgunit(file_path):
 
     for idx, nome in enumerate(ies_list, start=1):
         data = nome.split(";")
-        print(f"{idx}: {data}")
         nome = data[0].strip("'")
         query = "SELECT * FROM rdf_literal WHERE n_name = '{}'".format(nome)
         rows = database.query(query)
