@@ -1,5 +1,5 @@
 import helper_nbr
-import functions, database
+import functions, database, sys
 
 
 def import_orgunit2(file_path):
@@ -34,6 +34,8 @@ def import_orgunit(file_path):
 
     # Gera lista ordenada alfabeticamente
     ies_list = sorted(ies_set)
+    charset = "utf8mb4"
+    lang = "pt"
 
     for idx, nome in enumerate(ies_list, start=1):
         data = nome.split(";")
@@ -43,5 +45,8 @@ def import_orgunit(file_path):
         print("========="+query)
         rows = database.query(query)
         if len(rows) == 0:
+            query = "INSERT INTO rdf_literal (n_name,n_lock,n_lang,n_charset) VALUES ('{nome},1,{lang},{chatset}')"
+            print(query)
             print("Nenhum resultado encontrado.")
+            sys.exit()
         print("===>",rows)
