@@ -46,7 +46,6 @@ def import_orgunit(file_path):
         rows = database.query(query)
         if len(rows) == 0:
             query = "INSERT INTO rdf_literal (n_name,n_lock,n_lang,n_charset) VALUES ('"+nome+"',1,'"+lang+"','"+charset+"')"
-            print(query)
-            print("Nenhum resultado encontrado.")
+            database.insert(query)
             sys.exit()
         print("===>",rows)
