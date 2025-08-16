@@ -21,3 +21,7 @@
 
 Modelo BRcris
  https://github.com/projetos-codic-ibict/brcris-model/blob/atualizacao-modelo/modelo_brcris.xml
+
+Fonte dos dados:
+ Portal e-mec (Cursos de Graduação)
+ https://emec.mec.gov.br/emec/nova

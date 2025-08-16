@@ -16,6 +16,8 @@ def execute_query(qr, fetch=False):
                     resultados = cursor.fetchall()
                 else:
                     conexao.commit()
+                cursor.close()
+                conexao.close()
 
     except mysql.connector.Error as erro:
         print(f"Erro de Banco de Dados: {erro}")

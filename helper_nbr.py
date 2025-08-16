@@ -1,5 +1,14 @@
 import re
 from typing import Optional
+import zlib
+
+def crc32_hex(s: str, enc='utf-8') -> str:
+    b = s.encode(enc)
+    return f"{zlib.crc32(b) & 0xFFFFFFFF:08x}"  # máscara p/ 32 bits
+
+def adler32_hex(s: str, enc='utf-8') -> str:
+    b = s.encode(enc)
+    return f"{zlib.adler32(b) & 0xFFFFFFFF:08x}"
 
 # Palavras que devem ficar em minúsculas (exceto se forem a 1ª palavra)
 STOPWORDS = {
@@ -53,6 +62,11 @@ STOPWORDS = {
     "van"
 }
 
+def removeStopWords(n):
+    words = n.split(" ")
+    words = [w for w in words if w.lower() not in STOPWORDS]
+    return " ".join(words)
+
 def nbr_author(n):
     n = n.replace("'","´")
     n2 = n
@@ -84,7 +98,30 @@ def nbr_corporate(n: Optional[str], rows=None) -> str:
     if n is None:
         return ""
 
+    n = n.replace("'","´")
+
+    ################# Separador " - "
+    if (n.find(' -') > 0):
+        nn = n.find(' -')
+        n = n[:nn]
+
+    ################# Remoções
     n = n.replace('(','( ')
+    n = n.replace('/',' ')
+
+    ################# Abreviaturas
+    n = n.replace('Univ.','Universidade')
+    n = n.replace('Educ.','Educação')
+
+    ################# Exessões
+    n = n.replace('Inc.','Inc#')
+    n = n.replace('Ltda.','Ltda#')
+
+    n = n.replace('.',' ')
+
+    ################# Exessões
+    n = n.replace('Inc#','Inc.')
+    n = n.replace('Ltda#','Ltda.')
 
     # Normaliza espaços e quebras de linha
     s = str(n).replace("\r", " ").replace("\n", " ")
@@ -114,6 +151,7 @@ def nbr_corporate(n: Optional[str], rows=None) -> str:
     s = " ".join(titled)
     s = s.replace('( ', '(')
     s = s.replace(' )', ')')
+    s = s.replace('S.a', 'S.A.')
 
     s = s.replace('Usp', 'Universidade de São Paulo')
     return s

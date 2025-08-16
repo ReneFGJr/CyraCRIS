@@ -16,7 +16,7 @@ def db():
         config = {
             'user': 'root',
             'password': '',
-            'host': 'cip.brapci.inf.br',
+            'host': '127.0.0.1',
             'database': 'cyracris',
             'charset': 'utf8'
         }
