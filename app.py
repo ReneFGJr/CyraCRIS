@@ -18,3 +18,6 @@ def status():
 @app.get("/orgunit")
 def search():
     return jsonify(status=200, message="API is running",item=request.args)
+
+if __name__ == "__main__":
+    print("OK")
