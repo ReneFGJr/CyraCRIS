@@ -7,6 +7,11 @@ def header():
     print("CyraCRIS Tools    v0.25.08.15")
     print("=============================")
 
+
+def search(arg1, arg2=None):
+    result = rdf.search(arg1, arg2)
+    return result
+
 if __name__ == "__main__":
     args = sys.argv[1:]  # Captura argumentos da linha de comando
 
@@ -40,7 +45,7 @@ if __name__ == "__main__":
         print(json_rdf)
     ########################################################## SEARCH
     elif (args[0] == "search"):
-        json_rdf = rdf.search(args[1])
+        json_rdf = search(args[1], args[2] if len(args) > 2 else None)
         print(json_rdf)
     ########################################################## ADD REMISSIVE
     elif (args[0] == "addRemissive"):
