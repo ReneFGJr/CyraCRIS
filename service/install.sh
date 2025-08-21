@@ -7,7 +7,7 @@ cp *.py /opt/cyracris/.
 cp requirements.txt /opt/cyracris/.
 
 echo "Usuário"
-sudo mkdir -p /opt/myapi && sudo chown $USER:$USER /opt/myapi
+sudo mkdir -p /opt/cyracris && sudo chown $USER:$USER /opt/cyracris
 
 echo "NEVE"
 cd /opt/cyracris
