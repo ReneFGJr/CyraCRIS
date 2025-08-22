@@ -1,6 +1,6 @@
 import database
 import rdfClass, rdfData
-import sys
+import sys, orgUnit
 
 def findConcept(name,Class):
     ClassID = rdfClass.getClass(Class)
@@ -22,16 +22,21 @@ def getConcept(ID):
 
     dt = rdfData.getData(ID)
 
+    orgUnitID = ''
+    if row[0][1] == 'CorporateBody':
+        orgUnitID = orgUnit.format(row[0][0])
+
     dd = {
+        'ID': orgUnitID,
         'status': '200',
         'concept': {
         'ID': row[0][0],
-        'Class': row[0][1],
-        'Origin': row[0][2],
-        'Name': row[0][3],
-        'Lang': row[0][4],
+        'class': row[0][1],
+        'origin': row[0][2],
+        'name': row[0][3],
+        'lang': row[0][4],
         },
-        'Data': dt
+        'data': dt
     }
     return dd
 

@@ -1,5 +1,6 @@
 import pandas as pd
 import os, sys
+import re
 
 # Caminho do arquivo
 # file_path = "data/terceiros/br-capes-colsucup-prog-2021-2025-03-31.csv"
@@ -16,7 +17,9 @@ def openCSV(file):
         print(f"⚠ Erro ao ler o arquivo: {e}")
         return None
 
-
+def sonumero(s):
+    so_numeros = re.sub(r"\D+", "", s)
+    return so_numeros
 
 if __name__ == "__main__":
     df = openCSV(file_path)

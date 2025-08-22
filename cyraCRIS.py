@@ -9,8 +9,22 @@ def header():
 
 
 def search(arg1, arg2=None):
-    result = rdf.search(arg1, arg2)
-    return result
+    result = rdf.search(arg1, arg2) or []
+    # Garante lista (caso a busca retorne 1 objeto ou um gerador)
+    if not isinstance(result, (list, tuple)):
+        result = [result]
+    result = list(result)
+
+    n = len(result)
+    if n == 0:
+        dt = {"status": 404, "message": "Not Found"}
+    elif n == 1:
+        orgunit = orgUnit.format(result[0][0])
+        dt = {"status": 200, "message": "OK", "orgunit": orgunit}
+    else:
+        dt = {"status": 500, "message": "Multiple items found", "items": result}
+    return dt
+
 
 if __name__ == "__main__":
     args = sys.argv[1:]  # Captura argumentos da linha de comando

@@ -1,6 +1,10 @@
 import database, sys, helper_nbr
 import rdfLiteral, rdfConcept, rdfClass, rdfData
 
+def format(name):
+    orgunit = f"BRCRIS-{int(name):08d}"
+    return orgunit
+
 def add(name):
     name = helper_nbr.nbr_corporate(name.strip())
     idN = rdfLiteral.register(name, "pt", "utf8mb4")
