@@ -5,19 +5,13 @@ After=network.target
 [Service]
 User=www-data
 Group=www-data
-WorkingDirectory=/data/CyraCRIS
-EnvironmentFile=/etc/cyracris.env
+WorkingDirectory=/data/CyraCRIS/
+# EnvironmentFile=/etc/cyracris.env
 # Ajuste o caminho do Python do seu venv:
-ExecStart=/data/CyraCRIS/venv/bin/gunicorn \
-    --workers ${WORKERS:-4} \
-    --bind 0.0.0.0:${PORT:-8000} \
-    --timeout 60 \
-    --access-logfile - \
-    --error-logfile - \
-    app:app
+ExecStart=/data/CyraCRIS/venv/bin/gunicorn -b 0.0.0.0:5000 app:app
 Restart=on-failure
 RestartSec=5
-# Hardening (opcional, pode afrouxar se precisar de escrita fora do diretório):
+# Hardening (opcional, pode afrouxar se precisar de escrita fora >
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=full
