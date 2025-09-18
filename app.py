@@ -2,8 +2,9 @@
 from pathlib import Path
 from flask import Flask, Response, send_file, render_template, request, jsonify
 from flask_cors import CORS, cross_origin
-import cyraCRIS
+import cyraCRIS, orgUnit
 import rdf, functions
+import rdfConcept
 
 # Se seu arquivo HTML está em "html/multi_api.html",
 # torne "html" a pasta de templates:
@@ -24,6 +25,23 @@ def json_response(payload, status=200):
 def main():
     # Vai procurar html/multi_api.html
     return render_template("multi_api.html")
+
+@app.get("/list")
+def list():
+    data = orgUnit.list()
+    return render_template("listOrgUnit.html", data=data, format_id=orgUnit.format)
+
+@app.get("/orgUnit/<id>")
+def addOrgUnit(id):
+    data = rdfConcept.getConcept(id)
+    print(data)
+    return render_template("OrgUnit.html", data=data, format_id=orgUnit.format)
+
+@app.get("/check/orgunit")
+def checkOrgUnit():
+    data = orgUnit.check()
+    return jsonify(data), 200
+
 
 @app.get("/status")
 def status():

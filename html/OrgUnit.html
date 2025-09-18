@@ -1,0 +1,16 @@
+<h1>Organization Unit Details</h1>
+    ID: {% print(data['ID']) %}
+Class: {% print(data['concept']['Class']) %}
+<br>Label: {% print(data['concept']['Label']) %}
+<br>Description: {% print(data['concept']['ID']) %}
+<br>Created At: {% print(data['concept']['class']) %}
+
+{% for key, value in data['concept'].items() %}
+    <br>{{ key }}: {{ value }}
+{% endfor %}
+
+{% for values in data['data'].items() %}
+    {% for key, value in values.items() %}
+    <br>{{ key }}: {{ value }}
+    {% endfor %}
+{% endfor %}

@@ -1,5 +1,15 @@
 import socket
 
+
+def url():
+  hostname = socket.gethostname()
+  if (hostname == 'DESKTOP-M0Q0TD7'):
+    return 'http://localhost:8000'
+  elif (hostname == 'DESKTOP-1KULHVO'):
+    return 'http://localhost:8000'
+  else:
+    return 'http://brapci.inf.br'
+
 def db():
   hostname = socket.gethostname()
   if (hostname == 'DESKTOP-M0Q0TD7'):
