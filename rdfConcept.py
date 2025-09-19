@@ -7,7 +7,7 @@ def findConcept(name,Class):
     LiteralID = rdfData.conceptExists(name)
 
 def getConcept(ID):
-    cp = 'id_cc, c_class, cc_origin, n_name, n_lang, cc_use, cc_updated, cc_created'
+    cp = 'id_cc, c_class, cc_origin, n_name, n_lang, cc_use, cc_update, cc_created'
     query = "select {} from rdf_concept ".format(cp)
     query += " inner join rdf_class ON rdf_class.id_c = rdf_concept.cc_class "
     query += " inner join rdf_literal ON rdf_literal.id_n = rdf_concept.cc_pref_term "
@@ -36,8 +36,8 @@ def getConcept(ID):
         'origin': row[0][2],
         'name': row[0][3],
         'lang': row[0][4],
-        'created': row[0][6],
-        'updated': row[0][5]
+        'created': row[0][7],
+        'updated': row[0][6]
         },
         'data': dt
     }
