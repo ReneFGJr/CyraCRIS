@@ -41,7 +41,8 @@ def check():
 
                     idN = rdfLiteral.register(name3, "pt", "utf8mb4")
                     rdfData.register(id, 0, rdfClass.getClass('altLabel'), idN)
-                    print(" ID->",id)
+                    print(" ID->",id,idN)
+                    sys.exit()
                 else:
                     print("ORG->",name2)
                     dataN = dataN[0]

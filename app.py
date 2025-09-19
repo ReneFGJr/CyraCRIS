@@ -31,11 +31,14 @@ def list():
     data = orgUnit.list()
     return render_template("listOrgUnit.html", data=data, format_id=orgUnit.format)
 
-@app.get("/orgUnit/<id>")
-def addOrgUnit(id):
-    data = rdfConcept.getConcept(id)
-    print(data)
-    return render_template("OrgUnit.html", data=data, format_id=orgUnit.format)
+
+@app.get("/orgunit/v/<org_id>")
+def viewer(org_id: str):
+    org_id = functions.sonumero(org_id)
+    data = rdfConcept.getConcept(org_id)
+    sx = render_template("header.html", data=data, format_id=orgUnit.format)
+    sx += render_template("OrgUnit.html", data=data, format_id=orgUnit.format)
+    return sx
 
 @app.get("/status")
 def status():

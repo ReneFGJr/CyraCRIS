@@ -1,16 +1,94 @@
-<h1>Organization Unit Details</h1>
-    ID: {% print(data['ID']) %}
-Class: {% print(data['concept']['Class']) %}
-<br>Label: {% print(data['concept']['Label']) %}
-<br>Description: {% print(data['concept']['ID']) %}
-<br>Created At: {% print(data['concept']['class']) %}
 
-{% for key, value in data['concept'].items() %}
-    <br>{{ key }}: {{ value }}
-{% endfor %}
+<body class="bg-light">
+<div class="container my-4">
+  <div class="d-flex align-items-center mb-3">
+    <h1 class="h3 mb-0">Organization Unit Details</h1>
+    <span class="badge text-bg-secondary ms-3">ID {{ data.get('ID', '—') }}</span>
+  </div>
 
-{% for values in data['data'].items() %}
-    {% for key, value in values.items() %}
-    <br>{{ key }}: {{ value }}
-    {% endfor %}
-{% endfor %}
+  <!-- Resumo do conceito -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="fw-semibold text-muted small">Class</div>
+          <div>{{ data.get('concept', {}).get('class', '—') }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="fw-semibold text-muted small">Label</div>
+          <div>{{ data.get('concept', {}).get('name', '—') }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="fw-semibold text-muted small">Concept ID</div>
+          <div>{{ data.get('concept', {}).get('ID', '—') }}</div>
+        </div>
+        <div class="col-md-6">
+          <div class="fw-semibold text-muted small">Created At</div>
+          <div>{{ data.get('concept', {}).get('created', data.get('concept', {}).get('origin', '—')) }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Todos os campos do conceito (key/value) -->
+  {% if data.get('concept') %}
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-white">
+      <strong>Metadados do conceito</strong>
+    </div>
+    <div class="card-body">
+      <dl class="row mb-0">
+        {% for key, value in data.get('concept', {}).items()|list|sort %}
+          <dt class="col-sm-3">{{ key }}</dt>
+          <dd class="col-sm-9">{{ value if value is not none and value != '' else '—' }}</dd>
+        {% endfor %}
+      </dl>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Tabela de propriedades/valores -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-white">
+      <strong>Propriedades</strong>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-striped table-hover mb-0 align-middle">
+          <thead class="table-light">
+            <tr>
+              <th style="width: 24%">Property</th>
+              <th style="width: 28%">Name</th>
+              <th>Value</th>
+            </tr>
+          </thead>
+          <tbody>
+          {% for row in data.get('data', []) %}
+            <tr>
+              <td>{{ row.get('Property', '—') }}</td>
+              <td>{{ row.get('Name', '—') }}</td>
+              <td>
+                {{ row.get('ValueName')
+                   or row.get('Value')
+                   or row.get('value')
+                   or '—' }}
+              </td>
+            </tr>
+          {% else %}
+            <tr>
+              <td colspan="3" class="text-center text-muted py-4">Sem propriedades para exibir.</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Debug opcional -->
+  <!--
+  <pre class="mt-4 small bg-white p-3 border rounded">{{ data | tojson(indent=2) }}</pre>
+  -->
+</div>
+</body>
+</html>
