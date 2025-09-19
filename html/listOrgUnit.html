@@ -21,8 +21,9 @@
             {% tot = 0 %}
             {% set format_id = lambda id: 'OU' + str(id).zfill(6) %}
             {% for row in data %}
+            {% tot = tot + 1 %}
             <tr>
-                <td>{{ tot++ }}</td>
+                <td>{{ tot }}</td>
                 <td><a href="/orgUnit/{{ format_id(row[0]) }}" class="link">{{ format_id(row[0]) }}</a></td>
                 <td>{{ row[2] }}</td>
                 <td>{{ row[3] }}</td>
