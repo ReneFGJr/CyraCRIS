@@ -41,23 +41,6 @@
     </div>
   </div>
 
-  <!-- Todos os campos do conceito (key/value) -->
-  {% if data.get('concept') %}
-  <div class="card shadow-sm mb-4">
-    <div class="card-header bg-white">
-      <strong>Metadados do conceito</strong>
-    </div>
-    <div class="card-body">
-      <dl class="row mb-0">
-        {% for key, value in data.get('concept', {}).items()|list|sort %}
-          <dt class="col-sm-3">{{ key }}</dt>
-          <dd class="col-sm-9">{{ value if value is not none and value != '' else '—' }}</dd>
-        {% endfor %}
-      </dl>
-    </div>
-  </div>
-  {% endif %}
-
   <!-- Tabela de propriedades/valores -->
   <div class="card shadow-sm">
     <div class="card-header bg-white">

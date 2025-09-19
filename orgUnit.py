@@ -7,7 +7,7 @@ def list():
     sql = sql + " LEFT JOIN rdf_literal ON cc_pref_term = id_n "
     sql = sql + " WHERE cc_class = 1 "
     sql = sql + " AND cc_use = 0 "
-    sql = sql + " ORDER BY cc_pref_term ASC"
+    sql = sql + " ORDER BY n_name ASC"
     rows = database.query(sql)
     return rows
 
@@ -18,7 +18,7 @@ def check():
     sql = sql + " WHERE cc_class = 1 "
     sql = sql + " AND cc_use = 0 "
     sql = sql + " AND n_name like '%(%'"
-    sql = sql + " ORDER BY cc_pref_term ASC"
+    sql = sql + " ORDER BY n_name ASC"
     rows = database.query(sql)
 
     for i, row in enumerate(rows):
@@ -40,8 +40,9 @@ def check():
                     database.query(sql)
 
                     idN = rdfLiteral.register(name3, "pt", "utf8mb4")
-                    rdfData.register(id, 0, rdfClass.getClass('altLabel'), idN)
-                    print(" ID->",id,idN)
+                    Origin = 'R'+str(dataR[0][0])
+                    rdfConcept.register("CorporateBody", Origin, idN)
+                    print("Novo->",name3)
                     sys.exit()
                 else:
                     print("ORG->",name2)

@@ -5,6 +5,7 @@ from flask_cors import CORS, cross_origin
 import cyraCRIS, orgUnit
 import rdf, functions
 import rdfConcept
+import rdfLiteral
 
 # Se seu arquivo HTML está em "html/multi_api.html",
 # torne "html" a pasta de templates:
@@ -32,12 +33,28 @@ def list():
     return render_template("listOrgUnit.html", data=data, format_id=orgUnit.format)
 
 
+@app.post("/orgunit/selecionar")
+def orgunit_selecionar():
+    ids = request.form.getlist("ids")  # lista com vários IDs
+    # faça o que precisar com os IDs (batch, export, etc.)
+    # Ex.: flash(f"{len(ids)} itens selecionados: {ids}")
+    return jsonify({"status": 200, "message": "API is running","data":ids}), 200
+
+
 @app.get("/orgunit/v/<org_id>")
 def viewer(org_id: str):
     org_id = functions.sonumero(org_id)
     data = rdfConcept.getConcept(org_id)
     sx = render_template("header.html", data=data, format_id=orgUnit.format)
     sx += render_template("OrgUnit.html", data=data, format_id=orgUnit.format)
+
+    name = data.get('concept', {}).get('name', '')
+    name = "Universidade de Sao Paulo"
+    data2 = rdfLiteral.findLike(name, 1)
+    sx += render_template("listOrgUnitChecked.html",
+                          data=data2,
+                          format_id=orgUnit.format)
+
     return sx
 
 @app.get("/status")

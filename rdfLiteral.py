@@ -10,6 +10,7 @@ def find(name, Class=0):
 
     if Class > 0:
         query += " AND cc_class = {}".format(Class)
+    query += " ORDER BY n_name ASC"
     rows = database.query(query)
 
     if rows == []:
@@ -35,6 +36,7 @@ def findExact(name, Class=0):
 
     if Class > 0:
         query += " AND cc_class = {}".format(Class)
+    query += " ORDER BY n_name ASC"
     rows = database.query(query)
 
     return rows
@@ -47,6 +49,7 @@ def findLike(name, Class=0):
     query += " WHERE n_name LIKE '%{}%'".format(name)
     if Class > 0:
         query += " AND cc_class = {}".format(Class)
+    query += " ORDER BY n_name ASC"
     rows = database.query(query)
 
     if rows == []:
