@@ -2,7 +2,7 @@ import database, sys, helper_nbr
 import rdfLiteral, rdfConcept, rdfClass, rdfData
 
 def list():
-    sql = "SELECT id_cc as ID, cc_pref_term as IDp, n_name as NAME "
+    sql = "SELECT id_cc as ID, cc_pref_term as IDp, n_name as NAME, cc_origin as ORIGIN "
     sql = sql + " FROM rdf_concept "
     sql = sql + " LEFT JOIN rdf_literal ON cc_pref_term = id_n "
     sql = sql + " WHERE cc_class = 1 "
