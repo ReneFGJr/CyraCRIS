@@ -30,17 +30,34 @@ def check():
         print(id,name,tot,dataR,'\r\n')
         if (tot == 1):
             name2 = dataR[0][2]
+            name3 = name2
             if '(' in name2:
                 name2 = name2.split('(')[0].strip()
+                dataN = rdfLiteral.findExact(name2,1)
 
-                idn = str(dataR[0][1])
-                sql = "update rdf_literal set n_name = '"+name2+"' where id_n = "+idn
-                database.query(sql)
+                if (len(dataN) == 0):
+                    idn = str(dataR[0][1])
+                    print(" name2->",name2)
+                    print(" name3->",name3)
+                    sql = "update rdf_literal set n_name = '"+name2+"' where id_n = "+idn
+                    database.query(sql)
 
-                idN = rdfLiteral.register(name2, "pt", "utf8mb4")
-                rdfData.register(id, 0, rdfClass.getClass('altLabel'), idN)
-                print("    OK",idN)
-        return row
+                    idN = rdfLiteral.register(name3, "pt", "utf8mb4")
+                    rdfData.register(id, 0, rdfClass.getClass('altLabel'), idN)
+                    print(" ID->",id)
+                else:
+                    print("ROW->",row)
+                    print("="*50)
+                    dataN = dataN[0]
+                    print("OOO->",dataN[0])
+
+                    sql = "update rdf_concept set cc_use = "+str(dataN[0])+" where id_cc = "+str(id)
+                    database.query(sql)
+                    print(" SQL->",sql)
+
+                    idN = rdfLiteral.register(name3, "pt", "utf8mb4")
+                    rdfData.register(id, 0, rdfClass.getClass('altLabel'), idN)
+        #return row
     return []
 
 

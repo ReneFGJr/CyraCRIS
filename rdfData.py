@@ -26,9 +26,7 @@ def getData(ID):
     query += " inner join rdf_literal ON cc_pref_term = id_n "
     query += "WHERE d_r2 = '{}'".format(ID)
     query += " AND d_literal = 0 "
-    print(query)
     row3 = database.query(query)
-    print(row3)
 
     row = row1 + row2 + row3
 

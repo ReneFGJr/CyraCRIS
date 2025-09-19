@@ -58,6 +58,10 @@ if __name__ == "__main__":
         json_rdf = orgUnit.add(args[1])
         print(json_rdf)
     ########################################################## SEARCH
+    elif (args[0] == "check"):
+        json_rdf = orgUnit.check()
+        print(json_rdf)
+    ########################################################## SEARCH
     elif (args[0] == "search"):
         json_rdf = search(args[1], args[2] if len(args) > 2 else None)
         print(json_rdf)

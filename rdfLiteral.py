@@ -17,6 +17,20 @@ def find(name, Class=0):
 
     return rows
 
+def findExact(name, Class=0):
+    name = name.replace("'","´")
+    cp = "d_r1, id_n, n_name, n_lang"
+    query = "SELECT {} FROM rdf_literal ".format(cp)
+    query += "JOIN rdf_data ON rdf_literal.id_n = rdf_data.d_literal "
+    query += "JOIN rdf_concept on d_r1 = id_cc"
+    query += " WHERE n_name = '{}'".format(name)
+
+    if Class > 0:
+        query += " AND cc_class = {}".format(Class)
+    rows = database.query(query)
+
+    return rows
+
 def findLike(name, Class=0):
     cp = "d_r1, id_n, n_name, n_lang"
     query = "SELECT {} FROM rdf_literal ".format(cp)

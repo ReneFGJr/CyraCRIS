@@ -37,12 +37,6 @@ def addOrgUnit(id):
     print(data)
     return render_template("OrgUnit.html", data=data, format_id=orgUnit.format)
 
-@app.get("/check/orgunit")
-def checkOrgUnit():
-    data = orgUnit.check()
-    return jsonify(data), 200
-
-
 @app.get("/status")
 def status():
     return jsonify({"status": 200, "message": "API is running"}), 200
