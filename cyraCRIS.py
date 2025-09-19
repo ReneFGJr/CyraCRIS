@@ -41,10 +41,12 @@ if __name__ == "__main__":
             capes_import_orgunit.import_orgunit(file_path)
 
         elif (args[1] == 'emec'):
+            print("Importando Lattes v0.25.08.15")
             file_path = "data/terceiros/portal-e-mec-graduacao.csv"
             capes_import_orgunit.import_orgunit_emec(file_path)
 
         elif (args[1] == 'lattes'):
+            print("Importando Lattes v0.25.08.19")
             file_path = "data/terceiros/br-cnpq-lattes.csv"
             capes_import_orgunit.import_orgunit_lattes(file_path)
 
