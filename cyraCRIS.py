@@ -44,6 +44,10 @@ if __name__ == "__main__":
             file_path = "data/terceiros/portal-e-mec-graduacao.csv"
             capes_import_orgunit.import_orgunit_emec(file_path)
 
+        elif (args[1] == 'lattes'):
+            file_path = "data/terceiros/br-cnpq-lattes.csv"
+            capes_import_orgunit.import_orgunit_lattes(file_path)
+
     ####################### Recupera Elemento
     elif (args[0] == "zerar"):
         database.query('TRUNCATE `rdf_concept`')

@@ -2,6 +2,59 @@ import helper_nbr
 import functions, orgUnit, sys
 import geoCity, rdfClass, rdfData, rdfLiteral
 
+def import_orgunit_lattes(file_path):
+    df = functions.openCSV(file_path)
+    ies_set = set()
+    city_set = set()
+    erro = 0
+
+    for index, row in df.iterrows():
+        nome = row['NOME-INSTITUICAO-EMPRESA']
+        if '(' in nome:
+            nome = nome.split('(')[0].strip()
+
+        if '- ' in nome:
+            pos = nome.find('- ')
+            if pos < 10:
+                nomeP = nome.split('- ', 1)[0].strip()
+                nome = nome.split('- ', 1)[1].strip() if '- ' in nome else nome.strip()
+                nome = nomeP + ' ' + nome
+            else:
+                nome = nome.split('- ', 1)[0].strip()
+
+        nome = helper_nbr.nbr_corporate(nome)
+
+        if nome == 'Nao Informado':
+            continue
+
+        ################# Instituições
+        try:
+            name = nome
+            ies_set.add(name)  # evita repetições
+        except Exception as e:
+            erro += 1
+
+    print("Processando instituições...")
+    ies_set = sorted(ies_set)
+
+    for IES in ies_set:
+        ok = rdfLiteral.tem_letras(IES)
+        if IES == '' or IES is None or IES == '-' or not ok:
+            continue
+
+        nome = IES.strip("'").strip(" ")
+
+        dt = rdfLiteral.findExact(nome, 1)
+
+        if (dt != []):
+            print("Já existe ", nome)
+            continue
+
+        IDo = orgUnit.register(nome)
+        print(IDo, nome)
+
+    sys.exit()
+
 def import_orgunit_emec(file_path):
 
     df = functions.openCSV(file_path)

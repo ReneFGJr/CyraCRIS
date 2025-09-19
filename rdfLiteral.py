@@ -17,6 +17,14 @@ def find(name, Class=0):
 
     return rows
 
+
+def tem_letras(texto: str) -> bool:
+    """
+    Retorna True se existir pelo menos uma letra na string.
+    """
+    return any(char.isalpha() for char in texto)
+
+
 def findExact(name, Class=0):
     name = name.replace("'","´")
     cp = "d_r1, id_n, n_name, n_lang"

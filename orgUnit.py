@@ -27,7 +27,6 @@ def check():
         dataR = rdfLiteral.find(name,1)
         tot = len(dataR)
 
-        print(id,name,tot,dataR,'\r\n')
         if (tot == 1):
             name2 = dataR[0][2]
             name3 = name2
@@ -37,8 +36,6 @@ def check():
 
                 if (len(dataN) == 0):
                     idn = str(dataR[0][1])
-                    print(" name2->",name2)
-                    print(" name3->",name3)
                     sql = "update rdf_literal set n_name = '"+name2+"' where id_n = "+idn
                     database.query(sql)
 
@@ -46,18 +43,14 @@ def check():
                     rdfData.register(id, 0, rdfClass.getClass('altLabel'), idN)
                     print(" ID->",id)
                 else:
-                    print("ROW->",row)
-                    print("="*50)
+                    print("ORG->",name2)
                     dataN = dataN[0]
-                    print("OOO->",dataN[0])
 
                     sql = "update rdf_concept set cc_use = "+str(dataN[0])+" where id_cc = "+str(id)
                     database.query(sql)
-                    print(" SQL->",sql)
 
                     idN = rdfLiteral.register(name3, "pt", "utf8mb4")
                     rdfData.register(id, 0, rdfClass.getClass('altLabel'), idN)
-        #return row
     return []
 
 
@@ -79,22 +72,28 @@ def add(name):
     dd = {'status':'200','id': IDc}
     return dd
 
-def register(nome, sigla, capes, capes_org):
+def register(nome, sigla='', capes='', capes_org=''):
     ##################################### Registra Nomes
+    idSigla = 0
+    idCapes = 0
+    idCapesOrg = 0
+
     idN = rdfLiteral.register(nome, "pt", "utf8mb4")
-    idSigla = rdfLiteral.register(sigla, "pt", "utf8mb4")
-    idCapes = rdfLiteral.register(capes, "pt", "utf8mb4")
-    idCapesOrg = rdfLiteral.register(capes_org, "pt", "utf8mb4")
+    if (sigla != '' and sigla is not None):
+        idSigla = rdfLiteral.register(sigla, "pt", "utf8mb4")
+    if (capes != '' and capes is not None):
+        idCapes = rdfLiteral.register(capes, "pt", "utf8mb4")
+    if (capes_org != '' and capes_org is not None):
+        idCapesOrg = rdfLiteral.register(capes_org, "pt", "utf8mb4")
+    if (capes == ''):
+        capes = 'O:' + helper_nbr.hash(nome)
 
     ##################################### Registra Conceitos OrgUnit
     IDc = rdfConcept.register("CorporateBody", capes, idN)
 
     ################### Propriedades
-    prop = rdfClass.getClass('hasAcronym')
-    rdfData.register(IDc, 0, prop, idSigla)
-
-    ################### Capes
-    rdfData.register(IDc, 0, prop, idSigla)
-    rdfData.register(IDc, 0, prop, idSigla)
+    if (idSigla != 0):
+        prop = rdfClass.getClass('hasAcronym')
+        rdfData.register(IDc, 0, prop, idSigla)
 
     return IDc

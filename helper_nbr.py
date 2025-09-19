@@ -1,6 +1,14 @@
 import re
 from typing import Optional
-import zlib
+import zlib, hashlib
+
+
+def hash(texto: str,tamanho=15) -> str:
+    """
+    Gera uma hash SHA-256 a partir de uma string.
+    """
+    return hashlib.sha256(texto.encode()).hexdigest()[:tamanho]
+
 
 def crc32_hex(s: str, enc='utf-8') -> str:
     b = s.encode(enc)
