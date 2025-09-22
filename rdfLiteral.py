@@ -41,15 +41,18 @@ def findExact(name, Class=0):
 
     return rows
 
-def findLike(name, Class=0):
+def findLike(name, Class=0, remissive=False):
     cp = "d_r1, id_n, n_name, n_lang"
     query = "SELECT {} FROM rdf_literal ".format(cp)
     query += "JOIN rdf_data ON rdf_literal.id_n = rdf_data.d_literal "
     query += "JOIN rdf_concept on d_r1 = id_cc"
-    query += " WHERE n_name LIKE '%{}%'".format(name)
+    query += " WHERE (n_name LIKE '%{}%'".format(name)+") "
+    if (remissive != True):
+        query += " AND (cc_use = 0) "
     if Class > 0:
-        query += " AND cc_class = {}".format(Class)
+        query += " AND (cc_class = {}".format(Class)+")"
     query += " ORDER BY n_name ASC"
+    print(query)
     rows = database.query(query)
 
     if rows == []:

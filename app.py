@@ -36,9 +36,12 @@ def list():
 @app.post("/orgunit/selecionar")
 def orgunit_selecionar():
     ids = request.form.getlist("ids")  # lista com vários IDs
+    org_id = request.form.get("ID")
     # faça o que precisar com os IDs (batch, export, etc.)
     # Ex.: flash(f"{len(ids)} itens selecionados: {ids}")
-    return jsonify({"status": 200, "message": "API is running","data":ids}), 200
+    import orgUnit
+    return orgUnit.saveUSE(org_id, ids)
+    #return jsonify({"status": 200, "message": "API is running","data":ids,"org_id":org_id}), 200
 
 
 @app.get("/orgunit/v/<org_id>")
@@ -48,11 +51,20 @@ def viewer(org_id: str):
     sx = render_template("header.html", data=data, format_id=orgUnit.format)
     sx += render_template("OrgUnit.html", data=data, format_id=orgUnit.format)
 
-    name = data.get('concept', {}).get('name', '')
-    name = "Universidade de Sao Paulo"
-    data2 = rdfLiteral.findLike(name, 1)
+    # pega ?q= do GET; se não vazio, usa em 'name'
+    q = request.args.get('q', '')
+    q = q.strip() if q is not None else ''
+
+    if q == '':
+        name = data.get('concept', {}).get('name', '')
+    else:
+        name = q
+    #name = "Universidade de Sao Paulo"
+    data2 = rdfLiteral.findLike(name, 1, False)
     sx += render_template("listOrgUnitChecked.html",
                           data=data2,
+                          org_id = org_id,
+                          name = name,
                           format_id=orgUnit.format)
 
     return sx

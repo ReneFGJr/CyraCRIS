@@ -7,6 +7,14 @@ def findConcept(name,Class):
     LiteralID = rdfData.conceptExists(name)
 
 def getConcept(ID):
+
+
+    query = "select cc_use from rdf_concept where id_cc = '{}'".format(ID)
+    row = database.query(query)
+    print(row)
+    if (row[0][0] > 0):
+        return getConcept(row[0][0])
+
     cp = 'id_cc, c_class, cc_origin, n_name, n_lang, cc_use, cc_update, cc_created'
     query = "select {} from rdf_concept ".format(cp)
     query += " inner join rdf_class ON rdf_class.id_c = rdf_concept.cc_class "

@@ -1,5 +1,6 @@
 import sys
-import capes_import_orgunit
+import mod_import_orgunit
+import mod_rtasks
 import rdf, orgUnit
 import database
 
@@ -38,17 +39,18 @@ if __name__ == "__main__":
     if (args[0] == "import"):
         if (args[1] == 'capes'):
             file_path = "data/terceiros/br-capes-colsucup-prog-2023-2025-03-31.csv"
-            capes_import_orgunit.import_orgunit(file_path)
+            mod_import_orgunit.import_orgunit(file_path)
 
         elif (args[1] == 'emec'):
             print("Importando Lattes v0.25.08.15")
             file_path = "data/terceiros/portal-e-mec-graduacao.csv"
-            capes_import_orgunit.import_orgunit_emec(file_path)
+            mod_import_orgunit.import_orgunit_emec(file_path)
 
         elif (args[1] == 'lattes'):
             print("Importando Lattes v0.25.08.19")
             file_path = "data/terceiros/br-cnpq-lattes.csv"
-            capes_import_orgunit.import_orgunit_lattes(file_path)
+            mod_import_orgunit.import_orgunit_lattes(file_path)
+
 
     ####################### Recupera Elemento
     elif (args[0] == "zerar"):
@@ -56,6 +58,8 @@ if __name__ == "__main__":
         database.query('TRUNCATE `rdf_data`')
         database.query('TRUNCATE `rdf_literal`')
         print("Database Zerada")
+    elif (args[0] == 'ror'):
+        mod_rtasks.ror()
     ####################### Recupera Elemento
     elif (args[0] == "c"):
         json_rdf = rdf.c(args[1])

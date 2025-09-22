@@ -1,5 +1,23 @@
 import database, sys, helper_nbr
 import rdfLiteral, rdfConcept, rdfClass, rdfData
+import functions
+
+def saveUSE(org_id, ids):
+    org_id = int(org_id)
+    if (org_id == 0):
+        return {"status":"400","message":"OrgUnit ID inválido"}
+
+    for id in ids:
+        id = int(functions.sonumero(id))
+        if (id == 0):
+            continue
+        if (id == org_id):
+            continue
+
+        sql = "update rdf_concept set cc_use = "+str(org_id)+" where id_cc = "+str(id)
+        database.query(sql)
+
+    return {"status":"200","message":f"{len(ids)} registros atualizados"}
 
 def list():
     sql = "SELECT id_cc as ID, cc_pref_term as IDp, n_name as NAME, cc_origin as ORIGIN "
