@@ -8,7 +8,6 @@ def findConcept(name,Class):
 
 def getConcept(ID):
 
-
     query = "select cc_use from rdf_concept where id_cc = '{}'".format(ID)
     row = database.query(query)
     print(row)

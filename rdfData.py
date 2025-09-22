@@ -1,6 +1,46 @@
 import database
 import sys
 
+def getDataAll():
+    cp = "d_r1 as c1, d_r2 as c2, c_class, n_name, n_lang"
+    query = "SELECT "+cp+" FROM rdf_data "
+    query += "inner join rdf_class ON d_p = id_c "
+    query += " inner join rdf_literal ON d_literal = id_n "
+    query += "WHERE d_literal > 0 "
+    row1 = database.query(query)
+
+    cp = "d_r1 as c1, d_r2 as c2, c_class, n_name, n_lang"
+    query = "SELECT "+cp+" FROM rdf_data "
+    query += "inner join rdf_class ON d_p = id_c "
+    query += " inner join rdf_concept ON d_r2 = id_cc "
+    query += " inner join rdf_literal ON cc_pref_term = id_n "
+    query += "WHERE d_literal = 0 "
+    row2 = database.query(query)
+
+    cp = "d_r2 as c1, d_r1 as c2, c_class, n_name, n_lang"
+    query = "SELECT "+cp+" FROM rdf_data "
+    query += "inner join rdf_class ON d_p = id_c "
+    query += " inner join rdf_concept ON d_r1 = id_cc "
+    query += " inner join rdf_literal ON cc_pref_term = id_n "
+    query += "WHERE  d_literal = 0 "
+    row3 = database.query(query)
+
+    row = row1 + row2 + row3
+
+    if (row == []):
+        return []
+    else:
+        dd = []
+        for i in range(len(row)):
+            dr = {
+                'ID': row[i][1],
+                'Property': row[i][2],
+                'Name': row[i][3],
+                'Lang': row[i][4]
+            }
+            dd.append(dr)
+        return dd
+
 def getData(ID):
     cp = "d_r1 as c1, d_r2 as c2, c_class, n_name, n_lang"
     query = "SELECT "+cp+" FROM rdf_data "
@@ -28,7 +68,13 @@ def getData(ID):
     query += " AND d_literal = 0 "
     row3 = database.query(query)
 
-    row = row1 + row2 + row3
+    cp = str(ID) + " as c1, 0 as c2, 'altLabel' as c_class, n_name, n_lang"
+    query = "SELECT "+cp+" FROM rdf_concept "
+    query += " inner join rdf_literal ON cc_pref_term = id_n "
+    query += " WHERE cc_use = '{}'".format(ID)
+    row4 = database.query(query)
+
+    row = row1 + row2 + row3 + row4
 
     if (row == []):
         return 0

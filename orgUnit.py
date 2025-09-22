@@ -2,6 +2,37 @@ import database, sys, helper_nbr
 import rdfLiteral, rdfConcept, rdfClass, rdfData
 import functions
 
+def orgunits(width: int = 8):
+    #dataAll = rdfData.getDataAll()
+    #return dataAll
+    query = """
+        SELECT id_cc, n_name, n_lang
+        FROM rdf_concept
+        INNER JOIN rdf_literal ON cc_pref_term = id_n
+        WHERE cc_use = 0
+        ORDER BY n_name ASC
+    """
+    rows = database.query(query)
+
+    out = []
+    for id_cc, n_name, n_lang in rows:
+        # formata o ID como zero-padded (ex.: 00001234)
+        try:
+            code = format(f"{int(id_cc):0{width}d}")
+        except (TypeError, ValueError):
+            # fallback: apenas string
+            code = str(id_cc)
+
+        # logs opcionais
+        # print((id_cc, n_name, n_lang))
+        # print("*" * 20)
+        # print(code)
+        # print("*" * 20)
+
+        out.append({"code": code, "name": n_name, "lang": n_lang,"data":{}})
+    return out
+
+
 def saveUSE(org_id, ids):
     org_id = int(org_id)
     if (org_id == 0):

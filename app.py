@@ -73,6 +73,11 @@ def viewer(org_id: str):
 def status():
     return jsonify({"status": 200, "message": "API is running"}), 200
 
+@app.get("/orgunits")
+def orgunits():
+    data = orgUnit.orgunits()
+    return jsonify({"status": 200, "data": data}), 200
+
 # Ex.: GET /orgunit/12345678
 @app.get("/orgunit/id/<org_id>")
 def show(org_id: str):
