@@ -99,6 +99,14 @@ def search():
     return json_response(result, 200)
 
 # (Opcional) Se quiser servir o HTML sem templates:
+@app.get("/lost")
+def lost():
+    import mod_lost
+    data = mod_lost.showLost()
+    print(data)
+    return json_response(data, 200)
+
+# (Opcional) Se quiser servir o HTML sem templates:
 @app.get("/tester2")
 def tester2():
     return send_file(
