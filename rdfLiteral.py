@@ -2,7 +2,7 @@ import database, sys, helper_nbr
 
 def find(name, Class=0):
     name = name.replace("'","´")
-    cp = "d_r1, id_n, n_name, n_lang"
+    cp = "d_r1, id_n, n_name, n_lang, cc_use"
     query = "SELECT {} FROM rdf_literal ".format(cp)
     query += "JOIN rdf_data ON rdf_literal.id_n = rdf_data.d_literal "
     query += "JOIN rdf_concept on d_r1 = id_cc"
@@ -28,11 +28,12 @@ def tem_letras(texto: str) -> bool:
 
 def findExact(name, Class=0):
     name = name.replace("'","´")
-    cp = "d_r1, id_n, n_name, n_lang"
+    cp = "d_r1, id_n, n_name, n_lang, cc_use"
     query = "SELECT {} FROM rdf_literal ".format(cp)
     query += "JOIN rdf_data ON rdf_literal.id_n = rdf_data.d_literal "
     query += "JOIN rdf_concept on d_r1 = id_cc"
     query += " WHERE n_name = '{}'".format(name)
+    query += " AND (cc_use = 0) "
 
     if Class > 0:
         query += " AND cc_class = {}".format(Class)
@@ -42,7 +43,7 @@ def findExact(name, Class=0):
     return rows
 
 def findLike(name, Class=0, remissive=False):
-    cp = "d_r1, id_n, n_name, n_lang"
+    cp = "d_r1, id_n, n_name, n_lang, cc_use"
     query = "SELECT {} FROM rdf_literal ".format(cp)
     query += "JOIN rdf_data ON rdf_literal.id_n = rdf_data.d_literal "
     query += "JOIN rdf_concept on d_r1 = id_cc"

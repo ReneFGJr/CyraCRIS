@@ -8,11 +8,14 @@ def addRemissive(de,para):
 
 def search(name,Class="*"):
     name = helper_nbr.nbr_corporate(name)
-    dt = rdfLiteral.find(name)
+    dt = rdfLiteral.findExact(name)
     total = len(dt)
-    if (total != 1):
-        Class = 'orgUnit'
-        rdfLost.register(name, Class)
+    if (total == 0):
+        dt = rdfLiteral.find(name)
+        total = len(dt)
+        if (total != 1):
+            Class = 'orgUnit'
+            rdfLost.register(name, Class)
     return dt
 
 def c(ID):
