@@ -6,12 +6,15 @@ import cyraCRIS, orgUnit
 import rdf, functions
 import rdfConcept
 import rdfLiteral
+from flasgger import Swagger
 
 # Se seu arquivo HTML está em "html/multi_api.html",
 # torne "html" a pasta de templates:
 app = Flask(__name__, template_folder="html")
 # libera tudo (ajuste para sua origem em produção)
 CORS(app, resources={r"/*": {"origins": "*"}})
+
+swagger = Swagger(app)
 
 # --- helpers -------------------------------------------------
 def json_response(payload, status=200):
@@ -23,11 +26,22 @@ def json_response(payload, status=200):
 
 # --- rotas ---------------------------------------------------
 @app.get("/")
+# Vai procurar html/multi_api.html
 def main():
     # Vai procurar html/multi_api.html
     return render_template("multi_api.html")
 
+@app.get("/apidoc")
+# @descrition: Documentação dos endpoints das APIs
+# @return: HTML com a documentação dos endpoints
+def apidoc():
+    import mod_apidoc
+    return Response(mod_apidoc.gerar_documentacao_api("app.py"),
+                    mimetype="text/html; charset=utf-8")
+
 @app.get("/list")
+# @descrition: Lista todas as unidades organizacionais
+# @return: HTML com a lista de unidades organizacionais
 def list():
     data = orgUnit.list()
     return render_template("listOrgUnit.html", data=data, format_id=orgUnit.format)
@@ -89,6 +103,8 @@ def show(org_id: str):
 
 # Ex.: GET /orgunit/search?q=UFRGS
 @app.get("/orgunit/search")
+# @descrition: Pesquisa unidades organizacionais por nome, variável '?q=termo'
+# @return: JSON com a lista de unidades organizacionais encontradas
 def search():
     q = (request.args.get("q") or "").strip()
     if not q:
@@ -100,19 +116,15 @@ def search():
 
 # (Opcional) Se quiser servir o HTML sem templates:
 @app.get("/lost")
+# @descrition: Mostra itens não localizados (lost) no CyraCRIS
+# @return: JSON com a lista de itens lost
 def lost():
     import mod_lost
     data = mod_lost.showLost()
     print(data)
     return json_response(data, 200)
 
-# (Opcional) Se quiser servir o HTML sem templates:
-@app.get("/tester2")
-def tester2():
-    return send_file(
-        Path("html") / "multi_api.html",
-        mimetype="text/html; charset=utf-8"
-    )
+
 
 #if __name__ == "__main__":
 #    app.run(debug=True)
