@@ -77,14 +77,15 @@ def gerar_documentacao_api(arquivo_py: str) -> str:
     ]
 
     for r in rotas:
-        html.append(f"<tr>"
-                    f"<td>{r['metodo']}</td>"
-                    f"<td><code>{escape(r['rota'])}</code></td>"
-                    f"<td>{escape(r['descricao'] or '-')}</td>"
-                    f"<td>{escape(r['params'] or '-')}</td>"
-                    f"<td>{'<br>'.join(r['entradas']) or '-'}</td>"
-                    f"<td>{escape(r['retorno'] or '-')}</td>"
-                    f"</tr>")
+        html.append(
+            f"<tr>"
+            f"<td>{r['metodo']}</td>"
+            f"<td><a href=\"{r['rota']}\" target=\"_blank\"><code>{escape(r['rota'])}</code></td>"
+            f"<td>{escape(r['descricao'] or '-')}</td>"
+            f"<td>{escape(r['params'] or '-')}</td>"
+            f"<td>{'<br>'.join(r['entradas']) or '-'}</td>"
+            f"<td>{escape(r['retorno'] or '-')}</td>"
+            f"</tr>")
 
     html.append("</table></body></html>")
     return "\n".join(html)
