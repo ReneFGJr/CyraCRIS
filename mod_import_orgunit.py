@@ -50,7 +50,6 @@ def register(nome):
         return "Erro"
 
     nome = IES.strip("'").strip(" ")
-    print("IES: ",nome)
 
     dt = rdfLiteral.findExact(nome, 1)
 
@@ -61,6 +60,4 @@ def register(nome):
     IDo = orgUnit.register(nome)
     print(IDo, nome)
 
-    print("Fim do processamento, Erros:", erro)
-    sys.exit()
 
