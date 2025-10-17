@@ -1,12 +1,13 @@
 # app.py
 from pathlib import Path
-from flask import Flask, Response, send_file, render_template, request, jsonify
+from flask import Flask, Response, send_file, render_template, request, jsonify, render_template_string
 from flask_cors import CORS, cross_origin
 import cyraCRIS, orgUnit
 import rdf, functions
 import rdfConcept
 import rdfLiteral
 from flasgger import Swagger
+import mod_lost
 
 # Se seu arquivo HTML está em "html/multi_api.html",
 # torne "html" a pasta de templates:
@@ -119,10 +120,76 @@ def search():
 # @descrition: Mostra itens não localizados (lost) no CyraCRIS
 # @return: JSON com a lista de itens lost
 def lost():
-    import mod_lost
-    data = mod_lost.showLost()
+    # Captura parâmetros GET
+    name = request.args.get("name", "")
+    ltype = request.args.get("ltype", "")
+
+    # Busca no banco de dados via módulo mod_lost
+    data = mod_lost.showLost(name, ltype)
     print(data)
-    return json_response(data, 200)
+
+    # Monta o HTML dinamicamente
+    html = """
+    <!DOCTYPE html>
+    <html lang="pt-br">
+    <head>
+        <meta charset="UTF-8">
+        <title>Itens Lost - CyraCRIS</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    </head>
+    <body class="bg-light">
+        <div class="container py-4">
+            <h2 class="mb-4 text-primary">
+                <i class="bi bi-exclamation-triangle"></i> Itens não localizados (Lost)
+            </h2>
+
+            <form method="get" class="row g-2 mb-3">
+                <div class="col-md-4">
+                    <input type="text" name="name" value="{{ name }}" class="form-control" placeholder="Filtrar por nome">
+                </div>
+                <div class="col-md-3">
+                    <input type="text" name="ltype" value="{{ ltype }}" class="form-control" placeholder="Filtrar por tipo">
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                </div>
+            </form>
+
+            {% if data and data|length > 0 %}
+            <table class="table table-striped table-hover table-bordered shadow-sm">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Nome</th>
+                        <th>Tipo</th>
+                        <th>Data de Criação</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in data %}
+                        <tr>
+                            <td>{{ row[0] }}</td>
+                            <td>{{ row[1] }}</td>
+                            <td>{{ row[2] }}</td>
+                            <td>{{ row[3] }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+                <div class="alert alert-warning">
+                    <i class="bi bi-info-circle"></i> Nenhum item encontrado.
+                </div>
+            {% endif %}
+        </div>
+    </body>
+    </html>
+    """
+
+    return render_template_string(html, data=data, name=name, ltype=ltype)
 
 
 
