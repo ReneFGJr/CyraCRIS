@@ -13,7 +13,7 @@ def showLost(name: str = "", ltype: str = ""):
     if ltype != "":
         query += " AND l_type = '{}'".format(ltype.replace("'", "´"))
 
-    query += " ORDER BY created_at DESC"
+    query += " ORDER BY l_name, created_at DESC"
 
     rows = database.query(query)
     return rows
