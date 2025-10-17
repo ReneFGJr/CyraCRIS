@@ -50,6 +50,7 @@ def register(nome):
         return "Erro"
 
     nome = IES.strip("'").strip(" ")
+    print("IES: ",nome)
 
     dt = rdfLiteral.findExact(nome, 1)
 
