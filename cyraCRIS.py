@@ -37,19 +37,8 @@ if __name__ == "__main__":
         sys.exit(1)
 
     if (args[0] == "import"):
-        if (args[1] == 'capes'):
-            file_path = "data/terceiros/br-capes-colsucup-prog-2023-2025-03-31.csv"
-            mod_import_orgunit.import_orgunit(file_path)
-
-        elif (args[1] == 'emec'):
-            print("Importando Lattes v0.25.08.15")
-            file_path = "data/terceiros/portal-e-mec-graduacao.csv"
-            mod_import_orgunit.import_orgunit_emec(file_path)
-
-        elif (args[1] == 'lattes'):
-            print("Importando Lattes v0.25.08.19")
-            file_path = "data/terceiros/br-cnpq-lattes.csv"
-            mod_import_orgunit.import_orgunit_lattes(file_path)
+        if (args[1] == 'lost'):
+            mod_import_orgunit.import_lost("universidade")
 
 
     ####################### Recupera Elemento

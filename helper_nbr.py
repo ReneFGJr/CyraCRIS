@@ -162,6 +162,7 @@ def nbr_corporate(n: Optional[str], rows=None) -> str:
     s = s.replace('S.a', 'S.A.')
 
     s = s.replace('Usp', 'Universidade de São Paulo')
+    s = s.replace('do para', 'do Pará')
     return s
 
 def nbr_title(n,rows=[]):

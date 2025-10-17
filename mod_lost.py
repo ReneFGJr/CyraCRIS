@@ -1,5 +1,9 @@
 import database
 
+def removeID(id):
+    query = "delete from lost where id_l = "+str(id)
+    database.query(query)
+
 def showLost(name: str = "", ltype: str = ""):
     """
     Retorna os registros da tabela 'lost'.
