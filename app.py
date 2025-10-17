@@ -1,6 +1,6 @@
 # app.py
 from pathlib import Path
-from flask import Flask, Response, send_file, render_template, request, jsonify, render_template_string
+from flask import Flask, Response, send_file, render_template, request, jsonify, render_template_string, redirect, url_for
 from flask_cors import CORS, cross_origin
 import cyraCRIS, orgUnit
 import rdf, functions
@@ -59,10 +59,19 @@ def orgunit_selecionar():
     #return jsonify({"status": 200, "message": "API is running","data":ids,"org_id":org_id}), 200
 
 
+@app.get("/orgunit/ulink/<org_id>")
+def ulink(org_id: str):
+    data = rdfConcept.getID(org_id)
+    ID = data[0][1]
+    rdfConcept.ulink(org_id)
+    return redirect(f"/orgunit/v/{ID}")
+    
+
 @app.get("/orgunit/v/<org_id>")
 def viewer(org_id: str):
     org_id = functions.sonumero(org_id)
     data = rdfConcept.getConcept(org_id)
+    
     sx = render_template("header.html", data=data, format_id=orgUnit.format)
     sx += render_template("OrgUnit.html", data=data, format_id=orgUnit.format)
 

@@ -67,14 +67,15 @@ def getData(ID):
     query += "WHERE d_r2 = '{}'".format(ID)
     query += " AND d_literal = 0 "
     row3 = database.query(query)
-
-    cp = str(ID) + " as c1, 0 as c2, 'altLabel' as c_class, n_name, n_lang"
+    cp = str(ID) + " as c1, id_cc as c2, 'altLabel' as c_class, n_name, n_lang"
     query = "SELECT "+cp+" FROM rdf_concept "
     query += " inner join rdf_literal ON cc_pref_term = id_n "
     query += " WHERE cc_use = '{}'".format(ID)
     row4 = database.query(query)
 
     row = row1 + row2 + row3 + row4
+
+
 
     if (row == []):
         return 0

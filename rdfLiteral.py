@@ -53,7 +53,6 @@ def findLike(name, Class=0, remissive=False):
     if Class > 0:
         query += " AND (cc_class = {}".format(Class)+")"
     query += " ORDER BY n_name ASC"
-    print(query)
     rows = database.query(query)
 
     if rows == []:

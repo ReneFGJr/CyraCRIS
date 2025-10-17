@@ -11,7 +11,6 @@ def getConcept(ID):
 
     query = "select cc_use from rdf_concept where id_cc = '{}'".format(ID)
     row = database.query(query)
-    print(row)
     if (row[0][0] > 0):
         return getConcept(row[0][0])
 
@@ -22,6 +21,7 @@ def getConcept(ID):
     query += "where id_cc = '{}'".format(ID)
 
     row = database.query(query)
+
     if (row == []):
         return row
 
@@ -39,7 +39,6 @@ def getConcept(ID):
         'ID': orgUnitID,
         'status': '200',
         'concept': {
-        'ID': row[0][0],
         'class': row[0][1],
         'origin': row[0][2],
         'name': row[0][3],
@@ -51,9 +50,21 @@ def getConcept(ID):
     }
     return dd
 
+def ulink(Origin):
+    query = "update rdf_concept set cc_use = 0 where id_cc = '{}'".format(Origin)
+    row = database.update(query)
+    return 0
+
+def getID(Origin):
+    if (Origin != ''):
+        query = "select id_cc, cc_use from rdf_concept where id_cc = '{}'".format(Origin)
+        row = database.query(query)
+        return row  
+    return []
+
 def getOrigin(Origin):
     if (Origin != ''):
-        query = "select id_cc from rdf_concept where cc_origin = '{}'".format(Origin)
+        query = "select id_cc, cc_use from rdf_concept where cc_origin = '{}'".format(Origin)
         row = database.query(query)
         if (row != []):
             return row[0][0]
