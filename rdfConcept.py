@@ -1,6 +1,7 @@
 import database
 import rdfClass, rdfData
 import sys, orgUnit
+import datetime
 
 def findConcept(name,Class):
     ClassID = rdfClass.getClass(Class)
@@ -71,14 +72,15 @@ def registerPrefLabel(concept_1, literal):
 
 def register(Class, Origin = '', prefTerm = 0):
     IDClass = rdfClass.getClass(Class)
+    date = datetime.now().strftime('%Y-%m-%d') 
     if IDClass != 0:
         ######################## Verifica pela Origin
         idC = getOrigin(Origin)
 
         if (idC == 0):
             ######################## Verifica se não existe um conceito já registrado.
-            insert = "INSERT INTO rdf_concept (cc_class, cc_use, c_equivalent, cc_pref_term, cc_origin) VALUES "
-            insert += "({},0,0,{},'{}')".format(IDClass, prefTerm, Origin)
+            insert = "INSERT INTO rdf_concept (cc_class, cc_use, c_equivalent, cc_pref_term, cc_origin, cc_update) VALUES "
+            insert += "({},0,0,{},'{}','{}')".format(IDClass, prefTerm, Origin, date)
             database.insert(insert)
             idC = getOrigin(Origin)
 
