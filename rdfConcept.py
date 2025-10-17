@@ -1,7 +1,7 @@
 import database
 import rdfClass, rdfData
 import sys, orgUnit
-import datetime
+from datetime import datetime
 
 def findConcept(name,Class):
     ClassID = rdfClass.getClass(Class)
@@ -72,7 +72,8 @@ def registerPrefLabel(concept_1, literal):
 
 def register(Class, Origin = '', prefTerm = 0):
     IDClass = rdfClass.getClass(Class)
-    date = datetime.now().strftime('%Y-%m-%d') 
+    date = datetime.now().strftime('%Y-%m-%d')  # OK agora
+
     if IDClass != 0:
         ######################## Verifica pela Origin
         idC = getOrigin(Origin)
