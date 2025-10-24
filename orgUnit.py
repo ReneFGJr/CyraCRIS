@@ -7,9 +7,6 @@ def orgunits_json(width: int = 8):
     query += "INNER JOIN rdf_literal as l1 ON cc_pref_term = l1.id_n "
     query += "WHERE cc_class = 1 "
     query += "ORDER BY n_name ASC"
-
-    print(query)
-    sys.exit()
     rows = database.query(query)
 
     for i in range(len(rows)):
