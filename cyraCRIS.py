@@ -53,7 +53,7 @@ if __name__ == "__main__":
         mod_rtasks.ror()
     elif (args[0] == 'exportOrgUnits'):
         print("Exportando OrgUnits...")
-        orgUnit.orgunits_json()
+        orgUnit.orgunitsRDF()
     ####################### Recupera Elemento
     elif (args[0] == "c"):
         json_rdf = rdf.c(args[1])

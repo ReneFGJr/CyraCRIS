@@ -2,6 +2,9 @@ import database, sys
 
 Classes = {}
 
+def format(org_id: str) -> str:
+    return org_id
+
 def getClass(ClassName):
     if ClassName in Classes:
         return Classes[ClassName]

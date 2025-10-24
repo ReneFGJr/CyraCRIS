@@ -2,6 +2,116 @@ import database, sys, helper_nbr
 import rdfLiteral, rdfConcept, rdfClass, rdfData
 import functions
 
+import json, os
+
+def orgunitsRDF(width: int = 8):
+    # ===== 1. Consulta: organizações (prefLabel) =====
+    query = """
+    SELECT n_name, id_cc, cc_use 
+    FROM rdf_concept 
+    INNER JOIN rdf_literal AS l1 ON cc_pref_term = l1.id_n 
+    WHERE cc_class = 1 AND cc_use = 0 
+    ORDER BY n_name ASC
+    """
+    rows = database.query(query)
+
+    orgs = {}
+
+    for row in rows:
+        name, IDorg, use = row
+        IDorg = format(IDorg)
+        orgs[IDorg] = {
+            "@id": f"{IDorg}",
+            "@type": "brcris:OrgUnit",
+            "skos:prefLabel": name,
+            "properties": []
+        }
+
+    # ===== 2. Consulta: altLabels =====
+    query = """
+    SELECT n_name, cc_use 
+    FROM rdf_concept 
+    INNER JOIN rdf_literal AS l1 ON cc_pref_term = l1.id_n 
+    WHERE cc_class = 1 AND cc_use <> 0 
+    ORDER BY n_name ASC
+    """
+    rows2 = database.query(query)
+
+    for row in rows2:
+        alt_name, IDalt = row
+        IDalt = format(IDalt)
+
+        IDalt = str(IDalt).zfill(width)
+
+        if IDalt in orgs:
+            orgs[IDalt]["properties"].append({"skos:altLabel": alt_name})
+        else:
+            print(f"[WARN] altLabel sem prefLabel: {IDalt} - {alt_name}")
+
+    # ===== 3. Consulta: propriedades adicionais =====
+    query = """
+    SELECT d_r1, c_class, n_name, n_lang
+    FROM rdf_data
+    INNER JOIN rdf_concept ON d_r1 = id_cc
+    INNER JOIN rdf_class ON d_p = id_c
+    INNER JOIN rdf_literal ON d_literal = id_n
+    WHERE d_r1 <> 0
+    ORDER BY n_name ASC
+    """
+    rows3 = database.query(query)
+
+    for row in rows3:
+        IDprop, Class, Name, Lang = row
+        IDprop = format(IDprop)
+
+        if IDprop in orgs:
+            orgs[IDprop]["properties"].append({Class: Name})
+
+    # ===== 4. Monta grafo JSON-LD =====
+    graph = []
+    for org in orgs.values():
+        node = {
+            "@id": str(org["@id"]),
+            "@type": org["@type"],
+            "skos:prefLabel": org["skos:prefLabel"],
+        }
+
+        # Adiciona altLabels e propriedades extras
+        for prop in org["properties"]:
+            for k, v in prop.items():
+                if k not in node:
+                    node[k] = []
+                node[k].append(v)
+
+        graph.append(node)
+
+# ===== 5. Define contexto JSON-LD =====
+    rdf_json = {
+        "@context": {
+            "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+            "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+            "skos": "http://www.w3.org/2004/02/skos/core#",
+            "brcris": "https://brcris.ibict.br/ontology/orgunit/"
+        },
+        "@graph": graph
+    }
+
+    # ===== 6. Salva em arquivo org.js =====
+
+#    output_file = os.path.join('', "org.js")
+
+#    # Adiciona prefixo para ser usado diretamente em JS
+#    with open(output_file, "w", encoding="utf-8") as f:
+#        f.write("const orgData = ")
+#        json.dump(rdf_json, f, ensure_ascii=False, indent=2)
+#        f.write(";\n\nexport default orgData;")
+
+#    print(f"✅ Arquivo RDF JSON-LD salvo em: {output_file}")
+
+    return rdf_json
+
+
+
 def orgunits_json(width: int = 8):
     query = "SELECT n_name, id_cc, cc_use FROM `rdf_concept` "
     query += "INNER JOIN rdf_literal as l1 ON cc_pref_term = l1.id_n "
@@ -22,7 +132,6 @@ def orgunits_json(width: int = 8):
             code = str(id_cc)
 
         rows[i] = {"code": code, "name": name}
-    print(rows)
     return rows
 
 def orgunits(width: int = 8):

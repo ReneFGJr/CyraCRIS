@@ -104,10 +104,19 @@ def orgunits():
 
 @app.get("/dump")
 def dump():
-    # Implementar a lógica para o endpoint /dump
+    # @descrition: Exporta dados de unidades organizacionais em JSON (nome e código)
+    # @return: JSON com a lista de unidades para conversão (DE) e (ID)
     data = orgUnit.orgunits_json()
 
     return jsonify(data), 200
+
+@app.get("/orgUnitRDF")
+def orgUnitRDF():
+    # @descrition: Exporta dados de unidades organizacionais em RDF/JSON-LD
+    # @return: JSON-LD com os dados RDF das unidades organizacionais
+    orgunitsRDF = orgUnit.orgunits()
+    return jsonify(orgunitsRDF), 200
+    
 
 # Ex.: GET /orgunit/12345678
 @app.get("/orgunit/id/<org_id>")
