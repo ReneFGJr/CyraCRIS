@@ -107,7 +107,7 @@ def dump():
     # Implementar a lógica para o endpoint /dump
     data = orgUnit.orgunits_json()
 
-    return jsonify({"status": 200, "message": "Dump realizado com sucesso"}), 200
+    return jsonify(data), 200
 
 # Ex.: GET /orgunit/12345678
 @app.get("/orgunit/id/<org_id>")
