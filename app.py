@@ -114,7 +114,7 @@ def dump():
 def orgUnitRDF():
     # @descrition: Exporta dados de unidades organizacionais em RDF/JSON-LD
     # @return: JSON-LD com os dados RDF das unidades organizacionais
-    orgunitsRDF = orgUnit.orgunits()
+    orgunitsRDF = orgUnit.orgunitsRDF()
     return jsonify(orgunitsRDF), 200
     
 
