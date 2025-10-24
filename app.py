@@ -108,7 +108,7 @@ def show(org_id: str):
     org_id = functions.sonumero(org_id)
     data = rdf.c(org_id)  # ajuste conforme sua função
     if not data:
-        return jsonify({"status": 404, "message": "Not Found", "id": org_id}), 404
+        return jsonify({"status": 404, "message": "Not Found - ID", "id": org_id}), 404
     return data
 
 # Ex.: GET /orgunit/search?q=UFRGS

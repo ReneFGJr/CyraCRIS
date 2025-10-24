@@ -39,6 +39,8 @@ if __name__ == "__main__":
     if (args[0] == "import"):
         if (args[1] == 'lost'):
             mod_import_orgunit.import_lost("universidade")
+            mod_import_orgunit.import_lost("facultade")
+            mod_import_orgunit.import_lost("universitario")
 
 
     ####################### Recupera Elemento
