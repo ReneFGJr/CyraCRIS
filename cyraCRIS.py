@@ -41,7 +41,7 @@ if __name__ == "__main__":
             mod_import_orgunit.import_lost("universidade")
             mod_import_orgunit.import_lost("facultade")
             mod_import_orgunit.import_lost("universitario")
-            mod_import_orgunit.import_lost("universInstituto Federal")             
+            mod_import_orgunit.import_lost("instituto federal")             
 
 
     ####################### Recupera Elemento
