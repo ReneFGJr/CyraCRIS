@@ -236,7 +236,13 @@ def trata(texto: str) -> str:
         "Estadudal": "Estadual",
         "Municipald": "Municipal",
         "Municipla": "Municipal",
-        "Municipalld": "Municipal",        
+        "Municipalld": "Municipal",  
+        "Teconolgia": "Tecnologia",
+        "Tecnoligia": "Tecnologia",
+        "Tecnolgia": "Tecnologia",
+        "Tenologia": "Tecnologia",
+        "Tecnogia": "Tecnologia",
+        "Saldago": "Salgado",    
         #"do para": "do Pará"
     }
 
