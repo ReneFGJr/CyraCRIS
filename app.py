@@ -8,6 +8,7 @@ import rdfConcept
 import rdfLiteral
 from flasgger import Swagger
 import mod_lost
+import re
 
 # Se seu arquivo HTML está em "html/multi_api.html",
 # torne "html" a pasta de templates:
@@ -136,6 +137,8 @@ def search():
     if not q:
         return jsonify({"status": 400, "message": "Missing query param 'q'"}), 400
 
+    q = trata(q)
+    print(q)
     result = cyraCRIS.search(q)  # sua função deve devolver dict/list serializável
     # Caso sua search já retorne um dict com status/message/items, só repasse:
     return json_response(result, 200)
@@ -216,7 +219,32 @@ def lost():
 
     return render_template_string(html, data=data, name=name, ltype=ltype)
 
+def trata(texto: str) -> str:
+    substituicoes = {
+        "Federalda": "Federal da",
+        "Federalde": "Federal de",
+        "Federeal": "Federal",
+        "Federla": "Federal",
+        "Fedral": "Federal",
+        "Fedeal": "Federal",
+        "Faderal": "Federal",        
+        "Estadla": "Estadual",
+        "Estaduald": "Estadual",
+        "Estdual": "Estadual",
+        "Estaudual": "Estadual",
+        "Estadula": "Estadual",
+        "Estadudal": "Estadual",
+        "Municipald": "Municipal",
+        "Municipla": "Municipal",
+        "Municipalld": "Municipal",        
+        #"do para": "do Pará"
+    }
 
+    for errado, certo in substituicoes.items():
+        # Substitui de forma case-insensitive e preserva o resto do texto
+        texto = re.sub(rf"\b{errado}\b", certo, texto, flags=re.IGNORECASE)
+
+    return texto    
 
 #if __name__ == "__main__":
 #    app.run(debug=True)
