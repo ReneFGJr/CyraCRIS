@@ -15,7 +15,7 @@ def orgunits_json(width: int = 8):
         cc_use = rows[i][2]
 
         if (cc_use != 0):
-            print(rows)
+            print(rows[i])
             sys.exit()
 
         try:
