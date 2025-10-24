@@ -15,9 +15,7 @@ def orgunits_json(width: int = 8):
         cc_use = rows[i][2]
 
         if (cc_use != 0):
-            print(rows[i])
-            sys.exit()
-
+            id_cc = cc_use
         try:
             code = format(f"{int(id_cc):0{width}d}")
         except (TypeError, ValueError):
