@@ -51,6 +51,9 @@ if __name__ == "__main__":
         print("Database Zerada")
     elif (args[0] == 'ror'):
         mod_rtasks.ror()
+    elif (args[0] == 'exportOrgUnits'):
+        print("Exportando OrgUnits...")
+        orgUnit.orgunits_json()
     ####################### Recupera Elemento
     elif (args[0] == "c"):
         json_rdf = rdf.c(args[1])

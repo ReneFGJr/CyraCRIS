@@ -2,6 +2,34 @@ import database, sys, helper_nbr
 import rdfLiteral, rdfConcept, rdfClass, rdfData
 import functions
 
+def orgunits_json(width: int = 8):
+    query = "SELECT n_name, id_cc, cc_use FROM `rdf_concept` "
+    query += "INNER JOIN rdf_literal as l1 ON cc_pref_term = l1.id_n "
+    query += "WHERE cc_class = 1 "
+    query += "ORDER BY n_name ASC"
+
+    print(query)
+    sys.exit()
+    rows = database.query(query)
+
+    for i in range(len(rows)):
+        name = rows[i][0]
+        id_cc = rows[i][1]
+        cc_use = rows[i][2]
+
+        if (cc_use != 0):
+            print(rows)
+            sys.exit()
+
+        try:
+            code = format(f"{int(id_cc):0{width}d}")
+        except (TypeError, ValueError):
+            code = str(id_cc)
+
+        rows[i] = {"code": code, "name": name}
+    print(rows)
+    return rows
+
 def orgunits(width: int = 8):
     #dataAll = rdfData.getDataAll()
     #return dataAll
