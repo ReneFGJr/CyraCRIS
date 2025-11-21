@@ -176,6 +176,10 @@ function enviarArquivoSeOk($data)
 }
 
 
+function get($key, $default = null)
+{
+    return isset($_GET[$key]) ? $_GET[$key] : $default;
+}
 /*********************************************************
  * EXECUÇÃO PRINCIPAL
  *********************************************************/
