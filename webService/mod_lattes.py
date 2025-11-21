@@ -1,41 +1,41 @@
-import requests
+from zeep import Client
+import base64
 import os
+import time
 
-def baixar_lattes(id_lattes, destino="dados/xml"):
+def get_file(id_lattes, destino="_lattes"):
     """
-    Baixa o currículo Lattes usando a API do ExtratorLattes.
-    
-    Parâmetros:
-        id_lattes (str): Número do ID Lattes (ex: '0004072613292475')
-        destino (str): Diretório onde o arquivo ZIP será salvo.
+    Baixa o currículo Lattes via WebService SOAP do CNPq.
+    Equivalente ao código PHP fornecido.
+    """
 
-    Retorna:
-        str: Caminho completo do arquivo ZIP salvo.
-    """
-    
-    # URL da API do ExtratorLattes (GET)
-    url = f"https://api.extratorlattes.com.br/v1/curriculo/{id_lattes}"
-    
-    # Garante que o diretório existe
+    # Nome e diretório do arquivo
+    filename = f"lattes{id_lattes}.zip"
     os.makedirs(destino, exist_ok=True)
-    
-    # Caminho completo para salvar
-    zip_path = os.path.join(destino, f"{id_lattes}.zip")
-    
-    print(f"📡 Baixando Lattes {id_lattes} ...")
-    
-    # Requisição GET
-    response = requests.get(url, stream=True)
-    
-    # Verifica retorno
-    if response.status_code != 200:
-        raise Exception(f"Erro ao acessar API: HTTP {response.status_code}")
-    
-    # Salva o ZIP
-    with open(zip_path, "wb") as f:
-        for bloco in response.iter_content(chunk_size=8192):
-            if bloco:
-                f.write(bloco)
+    filepath = os.path.join(destino, filename)
 
-    print(f"✅ Download concluído: {zip_path}")
-    return zip_path
+    # URL WSDL oficial do CNPq
+    wsdl = "http://servicosweb.cnpq.br/srvcurriculo/WSCurriculo?wsdl"
+
+    print(f"📡 Acessando WebService SOAP do CNPq para {id_lattes}...")
+
+    # Cria o cliente SOAP
+    client = Client(wsdl=wsdl)
+
+    # Chamada SOAP (equivalente ao __call do PHP)
+    response = client.service.getCurriculoCompactado(id=id_lattes)
+
+    # A resposta vem em BASE64 -> precisa decodificar
+    try:
+        binario = base64.b64decode(response)
+    except Exception as e:
+        raise Exception(f"Erro ao decodificar base64: {e}")
+
+    # Grava o ZIP
+    with open(filepath, "wb") as f:
+        f.write(binario)
+
+    time.sleep(0.5)
+
+    print(f"✅ Arquivo salvo em: {filepath}")
+    return filepath
