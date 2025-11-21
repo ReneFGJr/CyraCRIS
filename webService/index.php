@@ -40,5 +40,7 @@ function getFile($id)
 
 
 $id_lattes = "0016615895456187";
+echo "OK";
+exit;
 $arquivo = getFile($id_lattes);
 echo "OK";
