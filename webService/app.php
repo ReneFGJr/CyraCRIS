@@ -19,6 +19,6 @@
         }
 
 
-$id_lattes = "0016615895456187"
-$arquivo = get_file($id_lattes)
+$id_lattes = "0016615895456187";
+$arquivo = get_file($id_lattes);
 
