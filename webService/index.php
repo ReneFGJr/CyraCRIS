@@ -179,8 +179,12 @@ function enviarArquivoSeOk($data)
 /*********************************************************
  * EXECUÇÃO PRINCIPAL
  *********************************************************/
-$id_lattes = "0016615895456187";
-
+$id_lattes = get("q");
+if (!$id_lattes) {
+    http_response_code(400);
+    echo "Parâmetro 'q' (ID Lattes) é obrigatório.";
+    exit;
+}
 $result = getFile($id_lattes);
 
 // Envia o arquivo imediatamente
