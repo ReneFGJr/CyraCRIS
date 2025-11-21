@@ -8,7 +8,7 @@ function auth()
 {
     $ip = $_SERVER['REMOTE_ADDR'];
 
-    if (substr($ip, 0, 6) == '143.154') { return true; }
+    if (substr($ip, 0, 6) == '143.54') { return true; }
     if (substr($ip, 0, 4) == '127.') { return true; }
 
     $dt['erro'] = '500';
