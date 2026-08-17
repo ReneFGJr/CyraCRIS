@@ -1,0 +1,122 @@
+ERROR - 2026-08-17 01:25:28 --> Specified key was too long; max key length is 1000 bytes
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('CREATE TABLE `linhas_pesquisa` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`programa_id` BIGINT(20) UNSIGNED NOT NULL,
+	`nome` VARCHAR(255) NOT NULL,
+	`area_concentracao` VARCHAR(255) NULL,
+	`inicio` DATE NULL,
+	`created_at` DATETIME NULL,
+	`updated_at` DATETIME NULL,
+	CONSTRAINT `pk_linhas_pesquisa` PRIMARY KEY(`id`),
+	KEY `programa_id` (`programa_id`),
+	UNIQUE KEY `programa_id_nome` (`programa_id`, `nome`)
+) DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('CREATE TABLE `linhas_pesquisa` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`programa_id` BIGINT(20) UNSIGNED NOT NULL,
+	`nome` VARCHAR(255) NOT NULL,
+	`area_concentracao` VARCHAR(255) NULL,
+	`inicio` DATE NULL,
+	`created_at` DATETIME NULL,
+	`updated_at` DATETIME NULL,
+	CONSTRAINT `pk_linhas_pesquisa` PRIMARY KEY(`id`),
+	KEY `programa_id` (`programa_id`),
+	UNIQUE KEY `programa_id_nome` (`programa_id`, `nome`)
+) DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci')
+ 3 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('CREATE TABLE `linhas_pesquisa` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`programa_id` BIGINT(20) UNSIGNED NOT NULL,
+	`nome` VARCHAR(255) NOT NULL,
+	`area_concentracao` VARCHAR(255) NULL,
+	`inicio` DATE NULL,
+	`created_at` DATETIME NULL,
+	`updated_at` DATETIME NULL,
+	CONSTRAINT `pk_linhas_pesquisa` PRIMARY KEY(`id`),
+	KEY `programa_id` (`programa_id`),
+	UNIQUE KEY `programa_id_nome` (`programa_id`, `nome`)
+) DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci')
+ 4 SYSTEMPATH\Database\Forge.php(570): CodeIgniter\Database\BaseConnection->query('CREATE TABLE `linhas_pesquisa` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`programa_id` BIGINT(20) UNSIGNED NOT NULL,
+	`nome` VARCHAR(255) NOT NULL,
+	`area_concentracao` VARCHAR(255) NULL,
+	`inicio` DATE NULL,
+	`created_at` DATETIME NULL,
+	`updated_at` DATETIME NULL,
+	CONSTRAINT `pk_linhas_pesquisa` PRIMARY KEY(`id`),
+	KEY `programa_id` (`programa_id`),
+	UNIQUE KEY `programa_id_nome` (`programa_id`, `nome`)
+) DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci')
+ 5 APPPATH\Database\Migrations\20260816010000_CreateLinhasEDocentes.php(51): CodeIgniter\Database\Forge->createTable('linhas_pesquisa')
+ 6 SYSTEMPATH\Database\MigrationRunner.php(1014): App\Database\Migrations\CreateLinhasEDocentes->up()
+ 7 SYSTEMPATH\Database\MigrationRunner.php(202): CodeIgniter\Database\MigrationRunner->migrate('up', Object(stdClass))
+ 8 SYSTEMPATH\Commands\Database\Migrate.php(89): CodeIgniter\Database\MigrationRunner->latest(null)
+ 9 SYSTEMPATH\CLI\SignalTrait.php(245): CodeIgniter\Commands\Database\Migrate::CodeIgniter\Commands\Database\{closure}()
+10 SYSTEMPATH\Commands\Database\Migrate.php(88): CodeIgniter\Commands\Database\Migrate->withSignalsBlocked(Object(Closure))
+11 SYSTEMPATH\CLI\Commands.php(72): CodeIgniter\Commands\Database\Migrate->run([...])
+12 SYSTEMPATH\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('migrate', [...])
+13 SYSTEMPATH\Boot.php(444): CodeIgniter\CLI\Console->run()
+14 SYSTEMPATH\Boot.php(166): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+15 ROOTPATH\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+ERROR - 2026-08-17 01:25:31 --> Specified key was too long; max key length is 1000 bytes
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('CREATE TABLE `linhas_pesquisa` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`programa_id` BIGINT(20) UNSIGNED NOT NULL,
+	`nome` VARCHAR(255) NOT NULL,
+	`area_concentracao` VARCHAR(255) NULL,
+	`inicio` DATE NULL,
+	`created_at` DATETIME NULL,
+	`updated_at` DATETIME NULL,
+	CONSTRAINT `pk_linhas_pesquisa` PRIMARY KEY(`id`),
+	KEY `programa_id` (`programa_id`),
+	UNIQUE KEY `programa_id_nome` (`programa_id`, `nome`)
+) DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('CREATE TABLE `linhas_pesquisa` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`programa_id` BIGINT(20) UNSIGNED NOT NULL,
+	`nome` VARCHAR(255) NOT NULL,
+	`area_concentracao` VARCHAR(255) NULL,
+	`inicio` DATE NULL,
+	`created_at` DATETIME NULL,
+	`updated_at` DATETIME NULL,
+	CONSTRAINT `pk_linhas_pesquisa` PRIMARY KEY(`id`),
+	KEY `programa_id` (`programa_id`),
+	UNIQUE KEY `programa_id_nome` (`programa_id`, `nome`)
+) DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci')
+ 3 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('CREATE TABLE `linhas_pesquisa` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`programa_id` BIGINT(20) UNSIGNED NOT NULL,
+	`nome` VARCHAR(255) NOT NULL,
+	`area_concentracao` VARCHAR(255) NULL,
+	`inicio` DATE NULL,
+	`created_at` DATETIME NULL,
+	`updated_at` DATETIME NULL,
+	CONSTRAINT `pk_linhas_pesquisa` PRIMARY KEY(`id`),
+	KEY `programa_id` (`programa_id`),
+	UNIQUE KEY `programa_id_nome` (`programa_id`, `nome`)
+) DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci')
+ 4 SYSTEMPATH\Database\Forge.php(570): CodeIgniter\Database\BaseConnection->query('CREATE TABLE `linhas_pesquisa` (
+	`id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+	`programa_id` BIGINT(20) UNSIGNED NOT NULL,
+	`nome` VARCHAR(255) NOT NULL,
+	`area_concentracao` VARCHAR(255) NULL,
+	`inicio` DATE NULL,
+	`created_at` DATETIME NULL,
+	`updated_at` DATETIME NULL,
+	CONSTRAINT `pk_linhas_pesquisa` PRIMARY KEY(`id`),
+	KEY `programa_id` (`programa_id`),
+	UNIQUE KEY `programa_id_nome` (`programa_id`, `nome`)
+) DEFAULT CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci')
+ 5 APPPATH\Database\Migrations\20260816010000_CreateLinhasEDocentes.php(51): CodeIgniter\Database\Forge->createTable('linhas_pesquisa')
+ 6 SYSTEMPATH\Database\MigrationRunner.php(1014): App\Database\Migrations\CreateLinhasEDocentes->up()
+ 7 SYSTEMPATH\Database\MigrationRunner.php(202): CodeIgniter\Database\MigrationRunner->migrate('up', Object(stdClass))
+ 8 SYSTEMPATH\Commands\Database\Migrate.php(89): CodeIgniter\Database\MigrationRunner->latest(null)
+ 9 SYSTEMPATH\CLI\SignalTrait.php(245): CodeIgniter\Commands\Database\Migrate::CodeIgniter\Commands\Database\{closure}()
+10 SYSTEMPATH\Commands\Database\Migrate.php(88): CodeIgniter\Commands\Database\Migrate->withSignalsBlocked(Object(Closure))
+11 SYSTEMPATH\CLI\Commands.php(72): CodeIgniter\Commands\Database\Migrate->run([...])
+12 SYSTEMPATH\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('migrate', [...])
+13 SYSTEMPATH\Boot.php(444): CodeIgniter\CLI\Console->run()
+14 SYSTEMPATH\Boot.php(166): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+15 ROOTPATH\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
