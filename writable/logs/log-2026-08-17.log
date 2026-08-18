@@ -120,3 +120,618 @@ in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
 13 SYSTEMPATH\Boot.php(444): CodeIgniter\CLI\Console->run()
 14 SYSTEMPATH\Boot.php(166): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
 15 ROOTPATH\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+ERROR - 2026-08-17 09:41:45 --> Illegal mix of collations (utf8mb4_general_ci,IMPLICIT) and (utf8mb4_0900_ai_ci,IMPLICIT) for operation '='
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)')
+ 3 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)')
+ 4 APPPATH\Database\Migrations\20260817030000_ConvertIndividuoInstituicaoToInteger.php(11): CodeIgniter\Database\BaseConnection->query('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)')
+ 5 SYSTEMPATH\Database\MigrationRunner.php(1014): App\Database\Migrations\ConvertIndividuoInstituicaoToInteger->up()
+ 6 SYSTEMPATH\Database\MigrationRunner.php(202): CodeIgniter\Database\MigrationRunner->migrate('up', Object(stdClass))
+ 7 SYSTEMPATH\Commands\Database\Migrate.php(89): CodeIgniter\Database\MigrationRunner->latest(null)
+ 8 SYSTEMPATH\CLI\SignalTrait.php(245): CodeIgniter\Commands\Database\Migrate::CodeIgniter\Commands\Database\{closure}()
+ 9 SYSTEMPATH\Commands\Database\Migrate.php(88): CodeIgniter\Commands\Database\Migrate->withSignalsBlocked(Object(Closure))
+10 SYSTEMPATH\CLI\Commands.php(72): CodeIgniter\Commands\Database\Migrate->run([...])
+11 SYSTEMPATH\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('migrate', [...])
+12 SYSTEMPATH\Boot.php(444): CodeIgniter\CLI\Console->run()
+13 SYSTEMPATH\Boot.php(166): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+14 ROOTPATH\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+ERROR - 2026-08-17 09:41:47 --> Illegal mix of collations (utf8mb4_general_ci,IMPLICIT) and (utf8mb4_0900_ai_ci,IMPLICIT) for operation '='
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)')
+ 3 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)')
+ 4 APPPATH\Database\Migrations\20260817030000_ConvertIndividuoInstituicaoToInteger.php(11): CodeIgniter\Database\BaseConnection->query('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)')
+ 5 SYSTEMPATH\Database\MigrationRunner.php(1014): App\Database\Migrations\ConvertIndividuoInstituicaoToInteger->up()
+ 6 SYSTEMPATH\Database\MigrationRunner.php(202): CodeIgniter\Database\MigrationRunner->migrate('up', Object(stdClass))
+ 7 SYSTEMPATH\Commands\Database\Migrate.php(89): CodeIgniter\Database\MigrationRunner->latest(null)
+ 8 SYSTEMPATH\CLI\SignalTrait.php(245): CodeIgniter\Commands\Database\Migrate::CodeIgniter\Commands\Database\{closure}()
+ 9 SYSTEMPATH\Commands\Database\Migrate.php(88): CodeIgniter\Commands\Database\Migrate->withSignalsBlocked(Object(Closure))
+10 SYSTEMPATH\CLI\Commands.php(72): CodeIgniter\Commands\Database\Migrate->run([...])
+11 SYSTEMPATH\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('migrate', [...])
+12 SYSTEMPATH\Boot.php(444): CodeIgniter\CLI\Console->run()
+13 SYSTEMPATH\Boot.php(166): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+14 ROOTPATH\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+ERROR - 2026-08-17 09:41:48 --> Illegal mix of collations (utf8mb4_general_ci,IMPLICIT) and (utf8mb4_0900_ai_ci,IMPLICIT) for operation '='
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)')
+ 3 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)')
+ 4 APPPATH\Database\Migrations\20260817030000_ConvertIndividuoInstituicaoToInteger.php(11): CodeIgniter\Database\BaseConnection->query('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)')
+ 5 SYSTEMPATH\Database\MigrationRunner.php(1014): App\Database\Migrations\ConvertIndividuoInstituicaoToInteger->up()
+ 6 SYSTEMPATH\Database\MigrationRunner.php(202): CodeIgniter\Database\MigrationRunner->migrate('up', Object(stdClass))
+ 7 SYSTEMPATH\Commands\Database\Migrate.php(89): CodeIgniter\Database\MigrationRunner->latest(null)
+ 8 SYSTEMPATH\CLI\SignalTrait.php(245): CodeIgniter\Commands\Database\Migrate::CodeIgniter\Commands\Database\{closure}()
+ 9 SYSTEMPATH\Commands\Database\Migrate.php(88): CodeIgniter\Commands\Database\Migrate->withSignalsBlocked(Object(Closure))
+10 SYSTEMPATH\CLI\Commands.php(72): CodeIgniter\Commands\Database\Migrate->run([...])
+11 SYSTEMPATH\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('migrate', [...])
+12 SYSTEMPATH\Boot.php(444): CodeIgniter\CLI\Console->run()
+13 SYSTEMPATH\Boot.php(166): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+14 ROOTPATH\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+ERROR - 2026-08-17 09:41:55 --> Illegal mix of collations (utf8mb4_general_ci,IMPLICIT) and (utf8mb4_0900_ai_ci,IMPLICIT) for operation '='
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)')
+ 3 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)')
+ 4 APPPATH\Database\Migrations\20260817030000_ConvertIndividuoInstituicaoToInteger.php(11): CodeIgniter\Database\BaseConnection->query('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)')
+ 5 SYSTEMPATH\Database\MigrationRunner.php(1014): App\Database\Migrations\ConvertIndividuoInstituicaoToInteger->up()
+ 6 SYSTEMPATH\Database\MigrationRunner.php(202): CodeIgniter\Database\MigrationRunner->migrate('up', Object(stdClass))
+ 7 SYSTEMPATH\Commands\Database\Migrate.php(89): CodeIgniter\Database\MigrationRunner->latest(null)
+ 8 SYSTEMPATH\CLI\SignalTrait.php(245): CodeIgniter\Commands\Database\Migrate::CodeIgniter\Commands\Database\{closure}()
+ 9 SYSTEMPATH\Commands\Database\Migrate.php(88): CodeIgniter\Commands\Database\Migrate->withSignalsBlocked(Object(Closure))
+10 SYSTEMPATH\CLI\Commands.php(72): CodeIgniter\Commands\Database\Migrate->run([...])
+11 SYSTEMPATH\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('migrate', [...])
+12 SYSTEMPATH\Boot.php(444): CodeIgniter\CLI\Console->run()
+13 SYSTEMPATH\Boot.php(166): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+14 ROOTPATH\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+ERROR - 2026-08-17 09:41:57 --> Illegal mix of collations (utf8mb4_general_ci,IMPLICIT) and (utf8mb4_0900_ai_ci,IMPLICIT) for operation '='
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)')
+ 3 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)')
+ 4 APPPATH\Database\Migrations\20260817030000_ConvertIndividuoInstituicaoToInteger.php(11): CodeIgniter\Database\BaseConnection->query('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)')
+ 5 SYSTEMPATH\Database\MigrationRunner.php(1014): App\Database\Migrations\ConvertIndividuoInstituicaoToInteger->up()
+ 6 SYSTEMPATH\Database\MigrationRunner.php(202): CodeIgniter\Database\MigrationRunner->migrate('up', Object(stdClass))
+ 7 SYSTEMPATH\Commands\Database\Migrate.php(89): CodeIgniter\Database\MigrationRunner->latest(null)
+ 8 SYSTEMPATH\CLI\SignalTrait.php(245): CodeIgniter\Commands\Database\Migrate::CodeIgniter\Commands\Database\{closure}()
+ 9 SYSTEMPATH\Commands\Database\Migrate.php(88): CodeIgniter\Commands\Database\Migrate->withSignalsBlocked(Object(Closure))
+10 SYSTEMPATH\CLI\Commands.php(72): CodeIgniter\Commands\Database\Migrate->run([...])
+11 SYSTEMPATH\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('migrate', [...])
+12 SYSTEMPATH\Boot.php(444): CodeIgniter\CLI\Console->run()
+13 SYSTEMPATH\Boot.php(166): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+14 ROOTPATH\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+ERROR - 2026-08-17 09:42:42 --> Illegal mix of collations (utf8mb4_general_ci,IMPLICIT) and (utf8mb4_0900_ai_ci,IMPLICIT) for operation '='
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)')
+ 3 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)')
+ 4 APPPATH\Database\Migrations\20260817030000_ConvertIndividuoInstituicaoToInteger.php(11): CodeIgniter\Database\BaseConnection->query('UPDATE `individuo` i
+             INNER JOIN `instituicao` inst
+                ON i.`instituicao` = CAST(inst.`id` AS CHAR)
+                OR i.`instituicao` = inst.`nome`
+                OR i.`instituicao` = inst.`sigla`
+             SET i.`instituicao` = CAST(inst.`id` AS CHAR)')
+ 5 SYSTEMPATH\Database\MigrationRunner.php(1014): App\Database\Migrations\ConvertIndividuoInstituicaoToInteger->up()
+ 6 SYSTEMPATH\Database\MigrationRunner.php(202): CodeIgniter\Database\MigrationRunner->migrate('up', Object(stdClass))
+ 7 SYSTEMPATH\Commands\Database\Migrate.php(89): CodeIgniter\Database\MigrationRunner->latest(null)
+ 8 SYSTEMPATH\CLI\SignalTrait.php(245): CodeIgniter\Commands\Database\Migrate::CodeIgniter\Commands\Database\{closure}()
+ 9 SYSTEMPATH\Commands\Database\Migrate.php(88): CodeIgniter\Commands\Database\Migrate->withSignalsBlocked(Object(Closure))
+10 SYSTEMPATH\CLI\Commands.php(72): CodeIgniter\Commands\Database\Migrate->run([...])
+11 SYSTEMPATH\CLI\Console.php(47): CodeIgniter\CLI\Commands->run('migrate', [...])
+12 SYSTEMPATH\Boot.php(444): CodeIgniter\CLI\Console->run()
+13 SYSTEMPATH\Boot.php(166): CodeIgniter\Boot::runCommand(Object(CodeIgniter\CLI\Console))
+14 ROOTPATH\spark(87): CodeIgniter\Boot::bootSpark(Object(Config\Paths))
+DEBUG - 2026-08-17 18:37:18 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 18:37:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 18:38:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 18:39:57 --> CSRF token verified.
+DEBUG - 2026-08-17 18:39:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 18:39:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 18:40:54 --> CSRF token verified.
+DEBUG - 2026-08-17 18:40:54 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 18:40:55 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 18:41:42 --> CSRF token verified.
+DEBUG - 2026-08-17 18:41:42 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 18:41:42 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 18:43:19 --> CSRF token verified.
+DEBUG - 2026-08-17 18:43:19 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 18:43:20 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 18:43:55 --> CSRF token verified.
+DEBUG - 2026-08-17 18:43:55 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 18:43:55 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 18:44:48 --> CSRF token verified.
+DEBUG - 2026-08-17 18:44:48 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 18:44:48 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 18:45:23 --> CSRF token verified.
+DEBUG - 2026-08-17 18:45:23 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 18:45:23 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 18:46:04 --> CSRF token verified.
+DEBUG - 2026-08-17 18:46:04 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 18:46:04 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 18:47:14 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 18:48:18 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2026-08-17 18:48:25 --> CodeIgniter\HTTP\Exceptions\BadRequestException: The URI you submitted has disallowed characters: "docent;5"
+[Method: GET, Route: docent;5]
+in SYSTEMPATH\Router\Router.php on line 766.
+ 1 SYSTEMPATH\Router\Router.php(217): CodeIgniter\Router\Router->checkDisallowedChars('docent;5')
+ 2 SYSTEMPATH\CodeIgniter.php(852): CodeIgniter\Router\Router->handle('docent;5')
+ 3 SYSTEMPATH\CodeIgniter.php(464): CodeIgniter\CodeIgniter->tryToRouteIt(Object(CodeIgniter\Router\RouteCollection))
+ 4 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 5 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 6 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 7 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-08-17 18:49:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 18:49:56 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 18:49:59 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:42:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:42:02 --> CSRF token verified.
+ERROR - 2026-08-17 19:42:02 --> Falha ao atualizar o docente 2: 60 : SSL certificate problem: unable to get local issuer certificate
+DEBUG - 2026-08-17 19:42:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:42:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:42:09 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:42:13 --> CSRF token verified.
+ERROR - 2026-08-17 19:42:13 --> Falha ao atualizar o docente 2: 60 : SSL certificate problem: unable to get local issuer certificate
+DEBUG - 2026-08-17 19:42:13 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:42:14 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:42:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:42:40 --> CSRF token verified.
+INFO - 2026-08-17 19:42:41 --> Lattes 4635807083312321 atualizado pelo arquivo 4635807083312321.xml.
+DEBUG - 2026-08-17 19:42:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:42:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:43:22 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:43:22 --> CSRF token verified.
+INFO - 2026-08-17 19:43:23 --> Lattes 4635807083312321 atualizado pelo arquivo 4635807083312321.xml.
+DEBUG - 2026-08-17 19:43:23 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:43:23 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:43:56 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:43:56 --> CSRF token verified.
+INFO - 2026-08-17 19:43:57 --> Lattes 4635807083312321 atualizado pelo arquivo 4635807083312321.xml.
+DEBUG - 2026-08-17 19:43:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:43:58 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:44:22 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:44:23 --> CSRF token verified.
+INFO - 2026-08-17 19:44:24 --> Lattes 4635807083312321 atualizado pelo arquivo 4635807083312321.xml.
+DEBUG - 2026-08-17 19:44:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:44:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:44:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:44:31 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:44:34 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:44:37 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:44:43 --> CSRF token verified.
+INFO - 2026-08-17 19:44:44 --> Lattes 5900345665779424 atualizado pelo arquivo 5900345665779424.xml.
+DEBUG - 2026-08-17 19:44:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:44:45 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:44:48 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:47:12 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:47:16 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:47:19 --> CSRF token verified.
+INFO - 2026-08-17 19:47:21 --> Lattes 5627209208288722 atualizado pelo arquivo 5627209208288722.xml.
+DEBUG - 2026-08-17 19:47:21 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:47:21 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:47:29 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:47:33 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:47:38 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:47:41 --> CSRF token verified.
+INFO - 2026-08-17 19:47:42 --> Lattes 0339496971217162 atualizado pelo arquivo 0339496971217162.xml.
+DEBUG - 2026-08-17 19:47:42 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:47:43 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:47:45 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:47:50 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:47:52 --> CSRF token verified.
+INFO - 2026-08-17 19:47:53 --> Lattes 0339496971217162 atualizado pelo arquivo 0339496971217162.xml.
+DEBUG - 2026-08-17 19:47:53 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:47:54 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:48:01 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:48:05 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:48:09 --> CSRF token verified.
+INFO - 2026-08-17 19:48:11 --> Lattes 1734997653639992 atualizado pelo arquivo 1734997653639992.xml.
+DEBUG - 2026-08-17 19:48:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:48:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:48:16 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:48:21 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:48:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:48:27 --> CSRF token verified.
+INFO - 2026-08-17 19:48:30 --> Lattes 3995942647359410 atualizado pelo arquivo 3995942647359410.xml.
+DEBUG - 2026-08-17 19:48:30 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:48:30 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:48:32 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:48:36 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:48:38 --> CSRF token verified.
+INFO - 2026-08-17 19:48:40 --> Lattes 5243732207004083 atualizado pelo arquivo 5243732207004083.xml.
+DEBUG - 2026-08-17 19:48:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:48:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:48:43 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:48:48 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:51:24 --> CSRF token verified.
+DEBUG - 2026-08-17 19:51:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:51:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:52:26 --> CSRF token verified.
+DEBUG - 2026-08-17 19:52:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:52:27 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:52:57 --> CSRF token verified.
+DEBUG - 2026-08-17 19:52:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:52:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:53:27 --> CSRF token verified.
+DEBUG - 2026-08-17 19:53:27 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:53:27 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:54:31 --> CSRF token verified.
+DEBUG - 2026-08-17 19:54:31 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:54:31 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:55:02 --> CSRF token verified.
+DEBUG - 2026-08-17 19:55:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:55:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:55:31 --> CSRF token verified.
+DEBUG - 2026-08-17 19:55:31 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:55:31 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:55:57 --> CSRF token verified.
+DEBUG - 2026-08-17 19:55:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:55:58 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:56:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:56:05 --> CSRF token verified.
+INFO - 2026-08-17 19:56:06 --> Lattes 0229801641242896 atualizado pelo arquivo 0229801641242896.xml.
+DEBUG - 2026-08-17 19:56:06 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:56:06 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:56:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:56:15 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:56:19 --> CSRF token verified.
+INFO - 2026-08-17 19:56:20 --> Lattes 0569672544113959 atualizado pelo arquivo 0569672544113959.xml.
+DEBUG - 2026-08-17 19:56:20 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:56:20 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:56:23 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:56:27 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:56:29 --> CSRF token verified.
+INFO - 2026-08-17 19:56:30 --> Lattes 1304688580274983 atualizado pelo arquivo 1304688580274983.xml.
+DEBUG - 2026-08-17 19:56:30 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:56:31 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:56:33 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:56:36 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:56:38 --> CSRF token verified.
+INFO - 2026-08-17 19:56:39 --> Lattes 1458850189170755 atualizado pelo arquivo 1458850189170755.xml.
+DEBUG - 2026-08-17 19:56:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:56:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:56:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:56:46 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:56:47 --> CSRF token verified.
+INFO - 2026-08-17 19:56:49 --> Lattes 4834791532698069 atualizado pelo arquivo 4834791532698069.xml.
+DEBUG - 2026-08-17 19:56:49 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:56:49 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:56:51 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:56:55 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:56:57 --> CSRF token verified.
+INFO - 2026-08-17 19:56:58 --> Lattes 5118387541734094 atualizado pelo arquivo 5118387541734094.xml.
+DEBUG - 2026-08-17 19:56:58 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:56:58 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:57:00 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:57:03 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:57:06 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 19:57:08 --> CSRF token verified.
+INFO - 2026-08-17 19:57:09 --> Lattes 4182663628298542 atualizado pelo arquivo 4182663628298542.xml.
+DEBUG - 2026-08-17 19:57:09 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:57:09 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:57:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:57:15 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:57:52 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:58:00 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:58:05 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 19:58:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:04:09 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 20:04:09 --> CSRF token verified.
+INFO - 2026-08-17 20:04:11 --> Lattes 4635807083312321 atualizado pelo arquivo 4635807083312321.xml.
+DEBUG - 2026-08-17 20:04:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:04:12 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:04:25 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:05:03 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 20:05:05 --> CSRF token verified.
+INFO - 2026-08-17 20:05:06 --> Lattes 5900345665779424 atualizado pelo arquivo 5900345665779424.xml.
+DEBUG - 2026-08-17 20:05:06 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:05:07 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:06:59 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:07:02 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:07:07 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 20:07:09 --> CSRF token verified.
+INFO - 2026-08-17 20:07:11 --> Lattes 1734997653639992 atualizado pelo arquivo 1734997653639992.xml.
+DEBUG - 2026-08-17 20:07:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:07:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:07:33 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:07:47 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 20:07:49 --> CSRF token verified.
+INFO - 2026-08-17 20:07:51 --> Lattes 0569672544113959 atualizado pelo arquivo 0569672544113959.xml.
+DEBUG - 2026-08-17 20:07:51 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:07:51 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:08:39 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:08:52 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:10:00 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:10:06 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:10:10 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 20:10:12 --> CSRF token verified.
+INFO - 2026-08-17 20:10:13 --> Lattes 0339496971217162 atualizado pelo arquivo 0339496971217162.xml.
+DEBUG - 2026-08-17 20:10:13 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:10:14 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:13:31 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:13:46 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:13:48 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:13:58 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+CRITICAL - 2026-08-17 20:15:41 --> CodeIgniter\View\Exceptions\ViewException: Invalid file: "docent/show.php"
+[Method: GET, Route: docent/7]
+in SYSTEMPATH\Exceptions\FrameworkException.php on line 39.
+ 1 SYSTEMPATH\View\View.php(228): CodeIgniter\Exceptions\FrameworkException::forInvalidFile('docent/show.php')
+ 2 SYSTEMPATH\Common.php(1268): CodeIgniter\View\View->render('docent/show', [], true)
+ 3 APPPATH\Controllers\Docent.php(67): view('docent/show', [...])
+ 4 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Docent->show(7)
+ 5 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Docent))
+ 6 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-17 20:15:43 --> CodeIgniter\View\Exceptions\ViewException: Invalid file: "docent/show.php"
+[Method: GET, Route: docent/7]
+in SYSTEMPATH\Exceptions\FrameworkException.php on line 39.
+ 1 SYSTEMPATH\View\View.php(228): CodeIgniter\Exceptions\FrameworkException::forInvalidFile('docent/show.php')
+ 2 SYSTEMPATH\Common.php(1268): CodeIgniter\View\View->render('docent/show', [], true)
+ 3 APPPATH\Controllers\Docent.php(67): view('docent/show', [...])
+ 4 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Docent->show(7)
+ 5 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Docent))
+ 6 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 7 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 8 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 9 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-08-17 20:16:09 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:16:09 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+ERROR - 2026-08-17 20:19:59 --> Table 'cyracris.producoes' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('SELECT *
+FROM `producoes`
+WHERE `pesquisador_id` = 7
+ORDER BY `ano` DESC, `titulo` ASC', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('SELECT *
+FROM `producoes`
+WHERE `pesquisador_id` = 7
+ORDER BY `ano` DESC, `titulo` ASC')
+ 3 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT *
+FROM `producoes`
+WHERE `pesquisador_id` = 7
+ORDER BY `ano` DESC, `titulo` ASC')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1659): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `producoes`
+WHERE `pesquisador_id` = :pesquisador_id:
+ORDER BY `ano` DESC, `titulo` ASC', [...], false)
+ 5 APPPATH\Controllers\Docent.php(68): CodeIgniter\Database\BaseBuilder->get()
+ 6 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Docent->show(7)
+ 7 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Docent))
+ 8 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-17 20:19:59 --> CodeIgniter\Database\Exceptions\DatabaseException: Table 'cyracris.producoes' doesn't exist
+[Method: GET, Route: docent/7]
+in SYSTEMPATH\Database\BaseConnection.php on line 863.
+ 1 SYSTEMPATH\Database\BaseBuilder.php(1659): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `producoes`
+WHERE `pesquisador_id` = :pesquisador_id:
+ORDER BY `ano` DESC, `titulo` ASC', [...], false)
+ 2 APPPATH\Controllers\Docent.php(68): CodeIgniter\Database\BaseBuilder->get()
+ 3 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Docent->show(7)
+ 4 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Docent))
+ 5 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 6 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 7 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+ 8 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-17 20:19:59 --> [Caused by] CodeIgniter\Database\Exceptions\DatabaseException: Table 'cyracris.producoes' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 310.
+ 1 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('SELECT *
+FROM `producoes`
+WHERE `pesquisador_id` = 7
+ORDER BY `ano` DESC, `titulo` ASC')
+ 2 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT *
+FROM `producoes`
+WHERE `pesquisador_id` = 7
+ORDER BY `ano` DESC, `titulo` ASC')
+ 3 SYSTEMPATH\Database\BaseBuilder.php(1659): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `producoes`
+WHERE `pesquisador_id` = :pesquisador_id:
+ORDER BY `ano` DESC, `titulo` ASC', [...], false)
+ 4 APPPATH\Controllers\Docent.php(68): CodeIgniter\Database\BaseBuilder->get()
+ 5 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Docent->show(7)
+ 6 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Docent))
+ 7 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 8 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+ 9 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+10 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+CRITICAL - 2026-08-17 20:19:59 --> [Caused by] mysqli_sql_exception: Table 'cyracris.producoes' doesn't exist
+in SYSTEMPATH\Database\MySQLi\Connection.php on line 300.
+ 1 SYSTEMPATH\Database\MySQLi\Connection.php(300): mysqli->query('SELECT *
+FROM `producoes`
+WHERE `pesquisador_id` = 7
+ORDER BY `ano` DESC, `titulo` ASC', 0)
+ 2 SYSTEMPATH\Database\BaseConnection.php(908): CodeIgniter\Database\MySQLi\Connection->execute('SELECT *
+FROM `producoes`
+WHERE `pesquisador_id` = 7
+ORDER BY `ano` DESC, `titulo` ASC')
+ 3 SYSTEMPATH\Database\BaseConnection.php(825): CodeIgniter\Database\BaseConnection->simpleQuery('SELECT *
+FROM `producoes`
+WHERE `pesquisador_id` = 7
+ORDER BY `ano` DESC, `titulo` ASC')
+ 4 SYSTEMPATH\Database\BaseBuilder.php(1659): CodeIgniter\Database\BaseConnection->query('SELECT *
+FROM `producoes`
+WHERE `pesquisador_id` = :pesquisador_id:
+ORDER BY `ano` DESC, `titulo` ASC', [...], false)
+ 5 APPPATH\Controllers\Docent.php(68): CodeIgniter\Database\BaseBuilder->get()
+ 6 SYSTEMPATH\CodeIgniter.php(974): App\Controllers\Docent->show(7)
+ 7 SYSTEMPATH\CodeIgniter.php(520): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Docent))
+ 8 SYSTEMPATH\CodeIgniter.php(363): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+ 9 SYSTEMPATH\Boot.php(417): CodeIgniter\CodeIgniter->run()
+10 SYSTEMPATH\Boot.php(68): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+11 FCPATH\index.php(59): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+DEBUG - 2026-08-17 20:20:15 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:21:30 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:22:13 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:28:40 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:31:21 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:32:00 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:33:05 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:33:08 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:33:12 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:33:17 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 20:33:35 --> CSRF token verified.
+INFO - 2026-08-17 20:33:36 --> Lattes 5900345665779424 atualizado pelo arquivo 5900345665779424.xml.
+DEBUG - 2026-08-17 20:33:36 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:33:37 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:34:52 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:34:57 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:35:07 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 20:35:10 --> CSRF token verified.
+INFO - 2026-08-17 20:35:11 --> Lattes 3995942647359410 atualizado pelo arquivo 3995942647359410.xml.
+DEBUG - 2026-08-17 20:35:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:35:11 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:36:27 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:36:33 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:36:37 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 20:36:40 --> CSRF token verified.
+INFO - 2026-08-17 20:36:42 --> Lattes 4635807083312321 atualizado pelo arquivo 4635807083312321.xml.
+DEBUG - 2026-08-17 20:36:42 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:36:42 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:36:59 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:37:45 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 20:37:59 --> CSRF token verified.
+INFO - 2026-08-17 20:38:00 --> Lattes 2722854164609444 atualizado pelo arquivo 2722854164609444.xml.
+DEBUG - 2026-08-17 20:38:00 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:38:00 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:38:23 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:38:26 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:38:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:38:44 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:38:52 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:39:06 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:39:22 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:39:36 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 20:39:43 --> CSRF token verified.
+INFO - 2026-08-17 20:39:45 --> Lattes 1855408048696664 atualizado pelo arquivo 1855408048696664.xml.
+DEBUG - 2026-08-17 20:39:45 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:39:45 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:40:25 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:40:41 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+INFO - 2026-08-17 20:40:45 --> CSRF token verified.
+INFO - 2026-08-17 20:40:47 --> Lattes 1512627358317603 atualizado pelo arquivo 1512627358317603.xml.
+DEBUG - 2026-08-17 20:40:47 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:40:47 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:41:58 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:42:24 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:42:45 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:42:56 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:43:34 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
+DEBUG - 2026-08-17 20:43:35 --> Session: Class initialized using 'CodeIgniter\Session\Handlers\FileHandler' driver.
