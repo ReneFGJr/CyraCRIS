@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Services\LattesProductionImporter;
+use App\Services\LattesProjectImporter;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\RedirectResponse;
 use DateTimeImmutable;
@@ -77,6 +78,10 @@ class Docent extends BaseController
 
         $redeIndividual = $this->montarRedeIndividual($docente, $producoes);
 
+        $projetos = $db->table('projetos')->where('pesquisador_id', $id)
+            ->orderBy('situacao', 'DESC')->orderBy('ano_inicio', 'DESC')->orderBy('titulo', 'ASC')
+            ->get()->getResultArray();
+
         return view('docent/show', [
             'docente'      => $docente,
             'instituicoes' => $instituicoes,
@@ -84,6 +89,7 @@ class Docent extends BaseController
             'orientacoes'  => $orientacoes,
             'orientadores' => $orientadores,
             'producoes'    => $producoes,
+            'projetos'     => $projetos,
             'redeIndividual' => $redeIndividual,
             'coletaLattesHabilitada' => filter_var(env('lattes.collectionEnabled', false), FILTER_VALIDATE_BOOL),
         ]);
@@ -170,6 +176,7 @@ class Docent extends BaseController
             $this->atualizarInstituicao($id, $dados['instituicao']);
             $this->atualizarOrientacoes($id, $xml);
             (new LattesProductionImporter())->importar($id, $xml);
+            (new LattesProjectImporter())->importar($id, $xml);
             $db->transComplete();
 
             if (! $db->transStatus()) {

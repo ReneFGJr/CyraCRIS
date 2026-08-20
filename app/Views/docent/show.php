@@ -5,6 +5,7 @@
 /** @var array<int, array<string, mixed>> $orientacoes */
 /** @var array<int, array<string, mixed>> $orientadores */
 /** @var array<int, array<string, mixed>> $producoes */
+/** @var array<int, array<string, mixed>> $projetos */
 /** @var array{nodes: array<int, array<string, mixed>>, links: array<int, array<string, mixed>>} $redeIndividual */
 /** @var bool $coletaLattesHabilitada */
 $genero = match ((int) ($docente['genero'] ?? 0)) { 1 => 'Masculino', 2 => 'Feminino', default => 'Não informado' };
@@ -31,6 +32,8 @@ $producoesPorAba = [
     'tecnica' => array_filter($producoes, static fn (array $item): bool => $item['categoria'] === 'TECNICA'),
     'artistica' => array_filter($producoes, static fn (array $item): bool => $item['categoria'] === 'ARTISTICA'),
 ];
+$projetosEmAndamento = array_filter($projetos, static fn (array $item): bool => $item['situacao'] === 'EM_ANDAMENTO');
+$projetosConcluidos = array_filter($projetos, static fn (array $item): bool => $item['situacao'] === 'CONCLUIDO');
 ?>
 <?= view('layout/header', ['title' => $docente['nome'], 'description' => 'Perfil acadêmico de ' . $docente['nome'] . '.']) ?>
 <?= view('layout/navbar') ?>
@@ -53,7 +56,7 @@ $producoesPorAba = [
     <header class="mb-4"><div class="d-flex align-items-center gap-3"><i class="bi bi-person-circle display-4 cyra-accent"></i><div><span class="badge text-bg-info rounded-0 mb-2">Perfil #<?= (int) $docente['id'] ?></span><h1 class="cyra-heading text-white mb-0"><?= esc($docente['nome']) ?></h1></div></div></header>
 
     <ul class="nav nav-tabs flex-nowrap overflow-x-auto border-secondary" id="perfil-tabs" role="tablist">
-        <?php foreach ([['resumo','speedometer2','Resumo geral'],['dados','person-vcard','Dados do docente'],['vinculos','building','Instituições e linhas'],['orientacoes','mortarboard','Orientações / Orientadores'],['rede','share','Rede'],['producao','collection','Produção']] as $indice => [$idAba,$icone,$rotulo]) : ?>
+        <?php foreach ([['resumo','speedometer2','Resumo geral'],['dados','person-vcard','Dados do docente'],['vinculos','building','Instituições e linhas'],['orientacoes','mortarboard','Orientações / Orientadores'],['projetos','kanban','Projetos'],['rede','share','Rede'],['producao','collection','Produção']] as $indice => [$idAba,$icone,$rotulo]) : ?>
             <li class="nav-item" role="presentation"><button class="nav-link text-nowrap rounded-0 <?= $indice === 0 ? 'active' : '' ?>" id="<?= $idAba ?>-tab" data-bs-toggle="tab" data-bs-target="#<?= $idAba ?>" type="button" role="tab" aria-controls="<?= $idAba ?>" aria-selected="<?= $indice === 0 ? 'true' : 'false' ?>"><i class="bi bi-<?= $icone ?> me-1"></i><?= esc($rotulo) ?></button></li>
         <?php endforeach; ?>
     </ul>
@@ -123,6 +126,28 @@ $producoesPorAba = [
             <?php if ($orientacoes === []) : ?><p class="cyra-muted">Nenhum estudante orientado.</p><?php else : ?><div class="table-responsive mb-5"><table class="table table-dark table-hover align-middle mb-0"><thead><tr><th>Estudante</th><th>Tipo</th><th>Status</th><th>Início</th><th>Final</th><th>Título</th></tr></thead><tbody><?php foreach ($orientacoes as $item) : ?><tr><td><a class="cyra-accent" href="<?= site_url('docent/' . $item['estudante_id']) ?>"><?= esc($item['estudante_nome']) ?></a></td><td class="text-white"><?= esc($item['tipo']) ?></td><td><span class="badge rounded-0 <?= (int) $item['status'] === 1 ? 'text-bg-success' : 'text-bg-warning' ?>"><?= (int) $item['status'] === 1 ? 'Concluída' : 'Em andamento' ?></span></td><td class="cyra-muted"><?= esc($item['ano_inicio'] ?? '-') ?></td><td class="cyra-muted"><?= esc($item['ano_final'] ?? '-') ?></td><td class="cyra-muted"><?= esc($item['titulo'] ?: '-') ?></td></tr><?php endforeach; ?></tbody></table></div><?php endif; ?>
             <h2 class="h5 text-white mb-3">Orientadores deste estudante</h2>
             <?php if ($orientadores === []) : ?><p class="cyra-muted mb-0">Nenhum orientador registrado para este indivíduo.</p><?php else : ?><div class="table-responsive"><table class="table table-dark table-hover align-middle mb-0"><thead><tr><th>Orientador</th><th>Tipo</th><th>Status</th><th>Período</th><th>Título</th></tr></thead><tbody><?php foreach ($orientadores as $item) : ?><tr><td><a class="cyra-accent" href="<?= site_url('docent/' . $item['orientador_id']) ?>"><?= esc($item['orientador_nome']) ?></a></td><td class="text-white"><?= esc($item['tipo']) ?></td><td class="cyra-muted"><?= (int) $item['status'] === 1 ? 'Concluída' : 'Em andamento' ?></td><td class="cyra-muted"><?= esc($item['ano_inicio'] ?? '-') ?> – <?= esc($item['ano_final'] ?? '-') ?></td><td class="cyra-muted"><?= esc($item['titulo'] ?: '-') ?></td></tr><?php endforeach; ?></tbody></table></div><?php endif; ?>
+        </section>
+
+        <section class="tab-pane fade" id="projetos" role="tabpanel" aria-labelledby="projetos-tab" tabindex="0">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
+                <h2 class="h5 text-white mb-0"><i class="bi bi-kanban me-2 cyra-accent"></i>Projetos</h2>
+                <span class="small cyra-muted"><?= count($projetos) ?> no total</span>
+            </div>
+            <?php foreach ([['Em andamento', $projetosEmAndamento, 'warning'], ['Concluídos', $projetosConcluidos, 'success']] as [$tituloGrupo, $itens, $cor]) : ?>
+                <h3 class="h6 text-white mt-4 mb-3"><?= esc($tituloGrupo) ?> <span class="badge text-bg-<?= $cor ?> rounded-0 ms-1"><?= count($itens) ?></span></h3>
+                <?php if ($itens === []) : ?>
+                    <p class="cyra-muted">Nenhum projeto <?= $tituloGrupo === 'Em andamento' ? 'em andamento' : 'concluído' ?>.</p>
+                <?php else : ?>
+                    <div class="table-responsive"><table class="table table-dark table-hover align-middle mb-0"><thead><tr><th>Período</th><th>Projeto</th><th>Natureza</th><th>Integrantes</th></tr></thead><tbody>
+                    <?php foreach ($itens as $projeto) : ?><tr>
+                        <td class="cyra-muted text-nowrap"><?= esc($projeto['ano_inicio'] ?? '-') ?> – <?= esc($projeto['ano_fim'] ?? ($projeto['situacao'] === 'EM_ANDAMENTO' ? 'Atual' : '-')) ?></td>
+                        <td class="text-white"><strong><?= esc($projeto['titulo']) ?></strong><?php if (! empty($projeto['descricao'])) : ?><small class="d-block cyra-muted mt-1"><?= esc($projeto['descricao']) ?></small><?php endif; ?></td>
+                        <td class="cyra-muted"><?= esc($projeto['natureza'] ?? '-') ?></td>
+                        <td class="cyra-muted small"><?= esc($projeto['integrantes'] ?? '-') ?></td>
+                    </tr><?php endforeach; ?>
+                    </tbody></table></div>
+                <?php endif; ?>
+            <?php endforeach; ?>
         </section>
 
         <section class="tab-pane fade" id="rede" role="tabpanel" aria-labelledby="rede-tab" tabindex="0">
