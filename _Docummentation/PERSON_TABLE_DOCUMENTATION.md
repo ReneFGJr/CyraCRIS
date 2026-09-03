@@ -9,6 +9,7 @@ Cria a tabela `person` com as seguintes colunas:
 - `id` (BIGINT, auto_increment, primary key)
 - `name` (VARCHAR 255, required)
 - `email` (VARCHAR 255, unique, nullable)
+- cracha (VARCHAR 50, nullable)
 - `lattes_url` (VARCHAR 500, nullable)
 - `lattes_id` (VARCHAR 100, nullable)
 - `cpf` (VARCHAR 20, nullable)

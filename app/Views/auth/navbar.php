@@ -1,5 +1,9 @@
 <?php if (session()->get('auth_logged_in') === true) : ?>
     <li class="nav-item">
+        <a class="nav-link cyra-link" href="<?= site_url('admin') ?>">
+            <i class="bi bi-speedometer2 me-1"></i>Admin
+        </a>
+    </li>    <li class="nav-item">
         <a class="btn btn-outline-info rounded-0 px-4" href="<?= site_url('profile') ?>">
             <i class="bi bi-person-circle me-2"></i><?= esc((string) session()->get('auth_givename')) ?>
         </a>

@@ -78,12 +78,12 @@
                 </a>
             </div>
             <div class="col-12 col-md-6 col-xl-4">
-                <div class="admin-card p-4" aria-label="Mais recursos em breve">
-                    <div class="admin-icon mb-4"><i class="bi bi-grid"></i></div>
-                    <h3 class="h5 text-white">Mais recursos</h3>
-                    <p class="cyra-muted mb-4">Novas ferramentas administrativas poderão ser adicionadas neste espaço.</p>
-                    <span class="mt-auto cyra-muted">Em breve</span>
-                </div>
+                <a class="admin-card p-4" href="<?= site_url('admin/person/') ?>">
+                    <div class="admin-icon mb-4"><i class="bi bi-people"></i></div>
+                    <h3 class="h5 text-white">Administrar pessoas</h3>
+                    <p class="cyra-muted mb-4">Consulte e importe registros da tabela Person.</p>
+                    <span class="mt-auto cyra-accent">Acessar <i class="bi bi-arrow-right ms-2"></i></span>
+                </a>
             </div>
         </div>
     </section>
