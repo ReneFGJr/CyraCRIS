@@ -20,7 +20,6 @@ $alunosConcluidos = array_values(array_filter($alunos, static fn (array $aluno):
     'title' => $programa['nome'],
     'description' => 'Detalhes do programa de pós-graduação ' . $programa['nome'] . '.',
 ]) ?>
-<?= view('layout/navbar') ?>
 
 <style>
     .ppg-hero { position: relative; overflow: hidden; border: 1px solid rgba(23, 189, 197, .3); background: linear-gradient(125deg, rgba(18, 102, 177, .34), rgba(5, 19, 40, .72)); }

@@ -6,7 +6,6 @@ $rows = $programas ?? [];
     'title' => 'Programas de Pós-Graduação',
     'description' => 'Programas de pós-graduação cadastrados no CyraCRIS.',
 ]) ?>
-<?= view('layout/navbar') ?>
 
 <main class="container py-5">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">

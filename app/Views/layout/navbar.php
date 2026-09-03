@@ -1,5 +1,6 @@
+<?php $containerClass = ($fluid ?? false) ? 'container-fluid px-3 px-md-4 px-xxl-5' : 'container'; ?>
 <nav class="navbar navbar-expand-lg navbar-dark cyra-navbar border-bottom border-light border-opacity-10" aria-label="Navegação principal">
-    <div class="container py-2">
+    <div class="<?= $containerClass ?> py-2">
         <a class="navbar-brand cyra-brand" href="<?= base_url() ?>" aria-label="CyraCRIS - início">
             <img class="cyra-logo" src="<?= base_url('assets/logo/logo_cyracris.png') ?>" alt="CyraCRIS">
         </a>
@@ -11,6 +12,7 @@
                 <li class="nav-item"><a class="nav-link cyra-link" href="#sobre">Sobre o sistema</a></li>
                 <li class="nav-item"><a class="nav-link cyra-link" href="<?= site_url('ppg') ?>"><i class="bi bi-mortarboard me-1"></i>Programas PPG</a></li>
                 <li class="nav-item ms-lg-2"><a class="btn btn-outline-info rounded-0 px-4" href="mailto:contato@cyracris.com.br"><i class="bi bi-envelope me-2"></i>Contato</a></li>
+                <?= view('auth/navbar') ?>
             </ul>
         </div>
     </div>

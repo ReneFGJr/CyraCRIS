@@ -47,3 +47,4 @@ $description = $description ?? 'Current Research Information System para program
 </head>
 <body>
 <div class="cyra-page d-flex flex-column">
+<?= view('layout/navbar', ['fluid' => $fluid ?? false]) ?>

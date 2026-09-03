@@ -36,7 +36,6 @@ $projetosEmAndamento = array_filter($projetos, static fn (array $item): bool => 
 $projetosConcluidos = array_filter($projetos, static fn (array $item): bool => $item['situacao'] === 'CONCLUIDO');
 ?>
 <?= view('layout/header', ['title' => $docente['nome'], 'description' => 'Perfil acadêmico de ' . $docente['nome'] . '.']) ?>
-<?= view('layout/navbar') ?>
 
 <style>
     #rede-individual { width: 100%; min-height: 36rem; border: 1px solid rgba(151, 205, 225, .14); background: radial-gradient(circle at center, rgba(18, 102, 177, .18), rgba(5, 19, 40, .86)); }
