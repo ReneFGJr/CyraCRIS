@@ -18,13 +18,53 @@
         </a>
     </header>
 
+    <form class="cyra-panel p-3 p-lg-4 mb-4" method="get" action="<?= site_url('admin/person') ?>" role="search">
+        <div class="row g-3 align-items-end">
+            <div class="col-12 col-lg-7">
+                <label class="form-label text-white" for="person-search">Buscar pessoa</label>
+                <div class="input-group">
+                    <span class="input-group-text rounded-0"><i class="bi bi-search"></i></span>
+                    <input class="form-control rounded-0" id="person-search" name="q" type="search"
+                           value="<?= esc($query) ?>" placeholder="Digite nome, e-mail, ID Lattes ou crachá">
+                </div>
+            </div>
+            <div class="col-12 col-sm-7 col-lg-3">
+                <label class="form-label text-white" for="person-search-field">Filtrar por</label>
+                <select class="form-select rounded-0" id="person-search-field" name="field">
+                    <?php foreach ($searchableFields as $value => $label) : ?>
+                        <option value="<?= esc($value) ?>" <?= $field === $value ? 'selected' : '' ?>><?= esc($label) ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <div class="col-12 col-sm-5 col-lg-2 d-flex gap-2">
+                <button class="btn btn-info rounded-0 flex-grow-1" type="submit">Buscar</button>
+                <?php if ($query !== '') : ?>
+                    <a class="btn btn-outline-light rounded-0" href="<?= site_url('admin/person') ?>"
+                       title="Limpar busca" aria-label="Limpar busca"><i class="bi bi-x-lg"></i></a>
+                <?php endif; ?>
+            </div>
+        </div>
+    </form>
+
     <?php if ($persons === []) : ?>
         <div class="cyra-panel p-5 text-center">
             <i class="bi bi-person-x display-4 cyra-accent"></i>
-            <h2 class="h4 text-white mt-3">Nenhuma pessoa cadastrada</h2>
-            <p class="cyra-muted mb-0">Use o botão “Importar dados” para adicionar os primeiros registros.</p>
+            <?php if ($query !== '') : ?>
+                <h2 class="h4 text-white mt-3">Nenhuma pessoa encontrada</h2>
+                <p class="cyra-muted mb-3">Tente outro termo ou pesquise em todos os campos.</p>
+                <a class="btn btn-outline-info rounded-0" href="<?= site_url('admin/person') ?>">Limpar busca</a>
+            <?php else : ?>
+                <h2 class="h4 text-white mt-3">Nenhuma pessoa cadastrada</h2>
+                <p class="cyra-muted mb-0">Use o botão “Importar dados” para adicionar os primeiros registros.</p>
+            <?php endif; ?>
         </div>
     <?php else : ?>
+        <?php if ($query !== '') : ?>
+            <p class="cyra-muted mb-3">
+                <?= (int) $total ?> <?= (int) $total === 1 ? 'resultado encontrado' : 'resultados encontrados' ?>
+                para <strong class="text-white">“<?= esc($query) ?>”</strong>.
+            </p>
+        <?php endif; ?>
         <div class="table-responsive cyra-panel">
             <table class="table table-dark table-hover align-middle mb-0">
                 <thead>

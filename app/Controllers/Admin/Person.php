@@ -14,14 +14,55 @@ class Person extends BaseController
             return $redirect;
         }
 
-        $model = new PersonModel();
+        $query = trim((string) $this->request->getGet('q'));
+        $field = (string) $this->request->getGet('field');
+
+        $searchableFields = [
+            'all'       => 'Todos os campos',
+            'name'      => 'Nome',
+            'email'     => 'E-mail',
+            'lattes_id' => 'ID Lattes',
+            'cracha'    => 'Crachá',
+        ];
+
+        if (! array_key_exists($field, $searchableFields)) {
+            $field = 'all';
+        }
+
+        $model      = $this->applySearch(new PersonModel(), $query, $field);
+        $countModel = $this->applySearch(new PersonModel(), $query, $field);
+        $persons    = $model->orderBy('name', 'ASC')->paginate(25, 'persons');
+        $pager      = $model->pager;
+        $pager->only(['q', 'field']);
 
         return view('admin/person/index', [
-            'title'   => 'Administrar pessoas',
-            'persons' => $model->orderBy('name', 'ASC')->paginate(25, 'persons'),
-            'pager'   => $model->pager,
-            'total'   => $model->countAllResults(),
+            'title'            => 'Administrar pessoas',
+            'persons'          => $persons,
+            'pager'            => $pager,
+            'total'            => $countModel->countAllResults(),
+            'query'            => $query,
+            'field'            => $field,
+            'searchableFields' => $searchableFields,
         ]);
+    }
+
+    private function applySearch(PersonModel $model, string $query, string $field): PersonModel
+    {
+        if ($query === '') {
+            return $model;
+        }
+
+        if ($field !== 'all') {
+            return $model->like($field, $query);
+        }
+
+        return $model
+            ->groupStart()
+            ->like('name', $query)
+            ->orLike('email', $query)
+            ->orLike('lattes_id', $query)
+            ->orLike('cracha', $query)
+            ->groupEnd();
     }
 
     public function inport(): string|RedirectResponse

@@ -16,14 +16,27 @@ $diasSemAtualizacao = $lattesAtualizadoEm instanceof DateTimeImmutable
     ? max(0, (int) $lattesAtualizadoEm->setTime(0, 0)->diff(new DateTimeImmutable('today'))->format('%r%a'))
     : null;
 $orientacoesPorTipo = [];
-foreach (['Pos-doc', 'Doutorado', 'Mestrado', 'Iniciação científica', 'TCC (Graduação)', 'Especialização', 'Outras'] as $tipo) {
+$ordemTiposOrientacao = ['Pós-doc', 'Doutorado', 'Mestrado', 'Especialização', 'TCC (Graduação)', 'Iniciação científica', 'Outras'];
+foreach ($ordemTiposOrientacao as $tipo) {
     $orientacoesPorTipo[$tipo] = ['total' => 0, 'andamento' => 0, 'concluidas' => 0];
 }
 foreach ($orientacoes as $orientacao) {
     $tipo = (string) $orientacao['tipo'];
-    $orientacoesPorTipo[$tipo] ??= ['total' => 0, 'andamento' => 0, 'concluidas' => 0];
-    $orientacoesPorTipo[$tipo]['total']++;
-    $orientacoesPorTipo[$tipo][(int) $orientacao['status'] === 1 ? 'concluidas' : 'andamento']++;
+    $tipo = $tipo === 'Pos-doc' ? 'Pós-doc' : $tipo;
+    $tipoGrupo = in_array($tipo, array_slice($ordemTiposOrientacao, 0, -1), true) ? $tipo : 'Outras';
+    $orientacoesPorTipo[$tipoGrupo]['total']++;
+    $orientacoesPorTipo[$tipoGrupo][(int) $orientacao['status'] === 1 ? 'concluidas' : 'andamento']++;
+}
+$orientacoesAgrupadas = [
+    'andamento'  => array_fill_keys($ordemTiposOrientacao, []),
+    'concluidas' => array_fill_keys($ordemTiposOrientacao, []),
+];
+foreach ($orientacoes as $orientacao) {
+    $statusGrupo = (int) $orientacao['status'] === 1 ? 'concluidas' : 'andamento';
+    $tipo = (string) $orientacao['tipo'];
+    $tipo = $tipo === 'Pos-doc' ? 'Pós-doc' : $tipo;
+    $tipoGrupo = in_array($tipo, array_slice($ordemTiposOrientacao, 0, -1), true) ? $tipo : 'Outras';
+    $orientacoesAgrupadas[$statusGrupo][$tipoGrupo][] = $orientacao;
 }
 $producoesPorAba = [
     'artigos' => array_filter($producoes, static fn (array $item): bool => $item['grupo'] === 'ARTIGO'),
@@ -87,6 +100,7 @@ $projetosConcluidos = array_filter($projetos, static fn (array $item): bool => $
                 </div>
                 <div class="row g-2">
                     <?php foreach ($orientacoesPorTipo as $tipo => $quantidades) : ?>
+                        <?php if ((int) $quantidades['total'] === 0) { continue; } ?>
                         <div class="col-sm-6 col-lg-4 col-xl">
                             <div class="border border-light border-opacity-10 p-3 h-100">
                                 <span class="small text-white fw-semibold"><?= esc($tipo) ?></span>
@@ -122,7 +136,41 @@ $projetosConcluidos = array_filter($projetos, static fn (array $item): bool => $
 
         <section class="tab-pane fade" id="orientacoes" role="tabpanel" aria-labelledby="orientacoes-tab" tabindex="0">
             <h2 class="h5 text-white mb-3">Orientados</h2>
-            <?php if ($orientacoes === []) : ?><p class="cyra-muted">Nenhum estudante orientado.</p><?php else : ?><div class="table-responsive mb-5"><table class="table table-dark table-hover align-middle mb-0"><thead><tr><th>Estudante</th><th>Tipo</th><th>Status</th><th>Início</th><th>Final</th><th>Título</th></tr></thead><tbody><?php foreach ($orientacoes as $item) : ?><tr><td><a class="cyra-accent" href="<?= site_url('docent/' . $item['estudante_id']) ?>"><?= esc($item['estudante_nome']) ?></a></td><td class="text-white"><?= esc($item['tipo']) ?></td><td><span class="badge rounded-0 <?= (int) $item['status'] === 1 ? 'text-bg-success' : 'text-bg-warning' ?>"><?= (int) $item['status'] === 1 ? 'Concluída' : 'Em andamento' ?></span></td><td class="cyra-muted"><?= esc($item['ano_inicio'] ?? '-') ?></td><td class="cyra-muted"><?= esc($item['ano_final'] ?? '-') ?></td><td class="cyra-muted"><?= esc($item['titulo'] ?: '-') ?></td></tr><?php endforeach; ?></tbody></table></div><?php endif; ?>
+            <?php if ($orientacoes === []) : ?>
+                <p class="cyra-muted">Nenhum estudante orientado.</p>
+            <?php else : ?>
+                <?php foreach ([['andamento', 'Em andamento', 'warning'], ['concluidas', 'Concluídas', 'success']] as [$statusGrupo, $statusTitulo, $statusCor]) : ?>
+                    <div class="d-flex align-items-center gap-2 mt-4 mb-3">
+                        <h3 class="h5 text-white mb-0"><?= esc($statusTitulo) ?></h3>
+                        <span class="badge text-bg-<?= $statusCor ?> rounded-0"><?= array_sum(array_map('count', $orientacoesAgrupadas[$statusGrupo])) ?></span>
+                    </div>
+                    <?php foreach ($ordemTiposOrientacao as $tipoGrupo) : ?>
+                        <?php $itensOrientacao = $orientacoesAgrupadas[$statusGrupo][$tipoGrupo]; ?>
+                        <?php if ($itensOrientacao === []) { continue; } ?>
+                        <h4 class="h6 text-white mt-4 mb-2">
+                            <?= esc($tipoGrupo) ?>
+                            <span class="badge text-bg-dark rounded-0 ms-1"><?= count($itensOrientacao) ?></span>
+                        </h4>
+                        <div class="table-responsive mb-3">
+                                <table class="table table-dark table-hover align-middle mb-0">
+                                    <thead><tr><th>Estudante</th><th>Tipo</th><th>Início</th><th>Final</th><th>Título</th></tr></thead>
+                                    <tbody>
+                                        <?php foreach ($itensOrientacao as $item) : ?>
+                                            <tr>
+                                                <td><a class="cyra-accent" href="<?= site_url('docent/' . $item['estudante_id']) ?>"><?= esc($item['estudante_nome']) ?></a></td>
+                                                <td class="text-white"><?= esc($item['tipo']) ?></td>
+                                                <td class="cyra-muted"><?= esc($item['ano_inicio'] ?? '-') ?></td>
+                                                <td class="cyra-muted"><?= esc($item['ano_final'] ?? '-') ?></td>
+                                                <td class="cyra-muted"><?= esc($item['titulo'] ?: '-') ?></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endforeach; ?>
+                <div class="mb-5"></div>
+            <?php endif; ?>
             <h2 class="h5 text-white mb-3">Orientadores deste estudante</h2>
             <?php if ($orientadores === []) : ?><p class="cyra-muted mb-0">Nenhum orientador registrado para este indivíduo.</p><?php else : ?><div class="table-responsive"><table class="table table-dark table-hover align-middle mb-0"><thead><tr><th>Orientador</th><th>Tipo</th><th>Status</th><th>Período</th><th>Título</th></tr></thead><tbody><?php foreach ($orientadores as $item) : ?><tr><td><a class="cyra-accent" href="<?= site_url('docent/' . $item['orientador_id']) ?>"><?= esc($item['orientador_nome']) ?></a></td><td class="text-white"><?= esc($item['tipo']) ?></td><td class="cyra-muted"><?= (int) $item['status'] === 1 ? 'Concluída' : 'Em andamento' ?></td><td class="cyra-muted"><?= esc($item['ano_inicio'] ?? '-') ?> – <?= esc($item['ano_final'] ?? '-') ?></td><td class="cyra-muted"><?= esc($item['titulo'] ?: '-') ?></td></tr><?php endforeach; ?></tbody></table></div><?php endif; ?>
         </section>

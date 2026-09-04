@@ -502,7 +502,7 @@ class Docent extends BaseController
 
         return match (true) {
             str_contains($valor, 'POS-DOUTORADO'),
-            str_contains($valor, 'POS_DOUTORADO') => 'Pos-doc',
+            str_contains($valor, 'POS_DOUTORADO') => 'Pós-doc',
             str_contains($valor, 'DOUTORADO') => 'Doutorado',
             str_contains($valor, 'MESTRADO') => 'Mestrado',
             str_contains($valor, 'INICIACAO-CIENTIFICA'),
