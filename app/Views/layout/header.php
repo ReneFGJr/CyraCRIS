@@ -9,6 +9,7 @@ $description = $description ?? 'Current Research Information System para program
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#071a36">
     <meta name="description" content="<?= esc($description, 'attr') ?>">
+    <link rel="icon" href="<?= base_url('favicon.ico') ?>?v=<?= filemtime(FCPATH . 'favicon.ico') ?>" type="image/png">
     <title><?= esc($title) ?> | CyraCRIS</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
@@ -34,7 +35,7 @@ $description = $description ?? 'Current Research Information System para program
         }
 
         .cyra-navbar { background: rgba(6, 19, 40, .84); backdrop-filter: blur(14px); }
-        .cyra-brand { display: inline-flex; align-items: center; padding: 5px 12px; border-radius: 3px; background: #f4fbff; }
+        .cyra-brand { display: inline-flex; align-items: center; padding: 0; background: transparent; }
         .cyra-logo { display: block; width: min(210px, 48vw); height: auto; }
         .cyra-link { color: var(--cyra-muted); }
         .cyra-link:hover, .cyra-link:focus { color: var(--cyra-cyan); }

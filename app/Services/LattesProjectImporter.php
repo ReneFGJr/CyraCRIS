@@ -35,7 +35,6 @@ class LattesProjectImporter
             ];
         }
         $db = db_connect();
-        $db->table('projetos')->where('pesquisador_id', $pesquisadorId)->delete();
         if ($registros !== []) $db->table('projetos')->insertBatch(array_values($registros));
         return count($registros);
     }

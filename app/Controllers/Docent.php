@@ -112,10 +112,22 @@ class Docent extends BaseController
         }
 
         $db = db_connect();
-        $docente = $db->table('individuo')->where('id', $id)->get()->getRowArray();
+        $cadastroAcessado = $db->table('individuo')->where('id', $id)->get()->getRowArray();
+
+        if ($cadastroAcessado === null) {
+            throw PageNotFoundException::forPageNotFound('Docente não encontrado.');
+        }
+
+        $idAcessado = $id;
+        $useId = (int) ($cadastroAcessado['use'] ?? 0);
+        $id = $useId !== 0 ? $useId : $idAcessado;
+        $docente = $id === $idAcessado
+            ? $cadastroAcessado
+            : $db->table('individuo')->where('id', $id)->get()->getRowArray();
 
         if ($docente === null) {
-            throw PageNotFoundException::forPageNotFound('Docente não encontrado.');
+            return redirect()->to(site_url('person/' . $idAcessado))
+                ->with('erro', 'O cadastro principal indicado pelo campo use não existe.');
         }
 
         $lattesId = trim((string) ($docente['lattes_id'] ?? ''));
@@ -179,6 +191,7 @@ class Docent extends BaseController
             }
 
             $db->transStart();
+            $this->limparDadosAcademicos(array_values(array_unique([$idAcessado, $id])));
             $db->table('individuo')->where('id', $id)->update(array_merge($dados['docente'], [
                 'updated_at' => date('Y-m-d H:i:s'),
             ]));
@@ -209,6 +222,21 @@ class Docent extends BaseController
                 unlink($arquivoTemporario);
             }
         }
+    }
+
+    /** @param list<int> $individuoIds */
+    private function limparDadosAcademicos(array $individuoIds): void
+    {
+        $db = db_connect();
+
+        $db->table('orientacoes')
+            ->groupStart()
+            ->whereIn('orientador_id', $individuoIds)
+            ->orWhereIn('estudante_id', $individuoIds)
+            ->groupEnd()
+            ->delete();
+        $db->table('producoes')->whereIn('pesquisador_id', $individuoIds)->delete();
+        $db->table('projetos')->whereIn('pesquisador_id', $individuoIds)->delete();
     }
 
     public function edit(int $id): string|RedirectResponse
@@ -552,13 +580,18 @@ class Docent extends BaseController
     private function localizarOuCriarEstudante(string $nome, ?string $lattesId): int
     {
         $db = db_connect();
-        $builder = $db->table('individuo')->select('id');
-        $estudante = $lattesId !== null
-            ? $builder->where('lattes_id', $lattesId)->get()->getRowArray()
-            : $builder->where('nome', $nome)->get()->getRowArray();
+        $estudante = $db->table('individuo')
+            ->select('id, use')
+            ->like('nome', trim($nome), 'none', null, true)
+            ->orderBy('use', 'ASC')
+            ->orderBy('id', 'ASC')
+            ->get()
+            ->getRowArray();
 
         if ($estudante !== null) {
-            return (int) $estudante['id'];
+            $useId = (int) ($estudante['use'] ?? 0);
+
+            return $useId !== 0 ? $useId : (int) $estudante['id'];
         }
 
         $agora = date('Y-m-d H:i:s');

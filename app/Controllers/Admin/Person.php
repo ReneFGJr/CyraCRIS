@@ -60,18 +60,32 @@ class Person extends BaseController
         }
 
         if ($field !== 'all') {
-            return $model->like($field, $query);
+            return $field === 'nome'
+                ? $this->applyNameSearch($model, $query)
+                : $model->like($field, $query, 'both', null, true);
         }
 
+        $model->groupStart()->groupStart();
+        $this->applyNameSearch($model, $query)->groupEnd();
+
         return $model
-            ->groupStart()
-            ->like('nome', $query)
-            ->orLike('email', $query)
-            ->orLike('lattes_id', $query)
-            ->orLike('orcid', $query)
-            ->orLike('cpf', $query)
-            ->orLike('cracha', $query)
+            ->orLike('email', $query, 'both', null, true)
+            ->orLike('lattes_id', $query, 'both', null, true)
+            ->orLike('orcid', $query, 'both', null, true)
+            ->orLike('cpf', $query, 'both', null, true)
+            ->orLike('cracha', $query, 'both', null, true)
             ->groupEnd();
+    }
+
+    private function applyNameSearch(PersonModel $model, string $query): PersonModel
+    {
+        $words = preg_split('/\\s+/u', trim($query), -1, PREG_SPLIT_NO_EMPTY) ?: [];
+
+        foreach ($words as $word) {
+            $model->like('nome', $word, 'both', null, true);
+        }
+
+        return $model;
     }
 
     public function inport(): string|RedirectResponse

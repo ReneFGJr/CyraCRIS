@@ -4,6 +4,7 @@ use CodeIgniter\Router\RouteCollection;
 
 /** @var RouteCollection $routes */
 $routes->get('/', 'Home::index');
+$routes->get('abour', 'Home::about');
 $routes->get('login', 'Auth::login');
 $routes->get('profile', 'Auth::profile');
 $routes->get('admin', 'Admin::index');

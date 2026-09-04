@@ -9,7 +9,7 @@
         </button>
         <div class="collapse navbar-collapse" id="mainNavigation">
             <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-3">
-                <li class="nav-item"><a class="nav-link cyra-link" href="#sobre">Sobre o sistema</a></li>
+                <li class="nav-item"><a class="nav-link cyra-link" href="<?= site_url('abour') ?>">Sobre o sistema</a></li>
                 <li class="nav-item"><a class="nav-link cyra-link" href="<?= site_url('ppg') ?>"><i class="bi bi-mortarboard me-1"></i>Programas PPG</a></li>
                 <li class="nav-item ms-lg-2"><a class="btn btn-outline-info rounded-0 px-4" href="mailto:contato@cyracris.com.br"><i class="bi bi-envelope me-2"></i>Contato</a></li>
                 <?= view('auth/navbar') ?>

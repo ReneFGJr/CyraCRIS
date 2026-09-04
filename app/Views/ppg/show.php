@@ -15,19 +15,42 @@ $totalDocentes = count($idsDocentes);
 $totalAreas = count(array_unique(array_filter(array_column($linhas, 'area_concentracao'))));
 $alunosAtivos = array_values(array_filter($alunos, static fn (array $aluno): bool => (int) $aluno['status'] === 0));
 $alunosConcluidos = array_values(array_filter($alunos, static fn (array $aluno): bool => (int) $aluno['status'] === 1));
+$mestrandosAtivos = count(array_filter($alunosAtivos, static fn (array $aluno): bool => $aluno['tipo'] === 'Mestrado'));
+$doutorandosAtivos = count(array_filter($alunosAtivos, static fn (array $aluno): bool => $aluno['tipo'] === 'Doutorado'));
+$tiposDocente = [
+    'PERMANENTE'  => ['Permanentes', 'primary'],
+    'COLABORADOR' => ['Colaboradores', 'info'],
+    'VISITANTE'   => ['Visitantes', 'warning'],
+];
+$docentesUnicosPorTipo = array_fill_keys(array_keys($tiposDocente), []);
+foreach ($docentesPorLinha as $docentesDaLinha) {
+    foreach ($docentesDaLinha as $docente) {
+        $vinculo = mb_strtoupper(trim((string) $docente['tipo_vinculo']));
+        $grupo = str_contains($vinculo, 'VISIT')
+            ? 'VISITANTE'
+            : (str_contains($vinculo, 'COLAB') ? 'COLABORADOR' : 'PERMANENTE');
+        $docentesUnicosPorTipo[$grupo][(int) $docente['id']] = true;
+    }
+}
+$totaisDocentesPorTipo = array_map('count', $docentesUnicosPorTipo);
 ?>
 <?= view('layout/header', [
     'title' => $programa['nome'],
     'description' => 'Detalhes do programa de pós-graduação ' . $programa['nome'] . '.',
+    'fluid' => true,
 ]) ?>
 
 <style>
     .ppg-hero { position: relative; overflow: hidden; border: 1px solid rgba(23, 189, 197, .3); background: linear-gradient(125deg, rgba(18, 102, 177, .34), rgba(5, 19, 40, .72)); }
     .ppg-hero::after { position: absolute; right: -4rem; bottom: -7rem; width: 20rem; height: 20rem; content: ""; border: 1px solid rgba(23, 189, 197, .25); border-radius: 50%; box-shadow: 0 0 0 3rem rgba(23, 189, 197, .04), 0 0 0 6rem rgba(23, 189, 197, .025); }
     .ppg-hero-content { position: relative; z-index: 1; }
-    .ppg-stat { min-height: 8rem; border: 1px solid rgba(151, 205, 225, .17); background: linear-gradient(145deg, rgba(5, 19, 40, .6), rgba(18, 102, 177, .12)); transition: transform .2s ease, border-color .2s ease; }
-    .ppg-stat:hover { transform: translateY(-2px); border-color: rgba(23, 189, 197, .55); }
-    .ppg-stat-value { font-family: Georgia, "Times New Roman", serif; font-size: 2rem; line-height: 1; }
+    .ppg-stat { position: relative; overflow: hidden; min-height: 13rem; border: 1px solid rgba(23, 189, 197, .28); background: radial-gradient(circle at 100% 0, rgba(23, 189, 197, .13), transparent 9rem), linear-gradient(145deg, rgba(5, 19, 40, .72), rgba(18, 102, 177, .14)); box-shadow: 0 .75rem 2rem rgba(0, 0, 0, .12); transition: transform .2s ease, border-color .2s ease; }
+    .ppg-stat:hover { transform: translateY(-3px); border-color: rgba(23, 189, 197, .65); }
+    .ppg-stat-icon { display: grid; width: 3rem; height: 3rem; place-items: center; border: 1px solid rgba(23, 189, 197, .3); color: var(--cyra-cyan); background: rgba(23, 189, 197, .08); }
+    .ppg-stat-label { display: block; min-height: 2.5rem; line-height: 1.25; }
+    .ppg-stat-breakdown { display: block; color: var(--cyra-cyan); font: 700 1.15rem Georgia, serif; letter-spacing: .04em; }
+    .ppg-stat-legend { display: block; color: var(--cyra-muted); font-size: .68rem; line-height: 1.35; }
+    .ppg-stat-value { font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.2rem, 3vw, 3.15rem); line-height: 1; letter-spacing: -.03em; }
     .ppg-card { border-top: 3px solid rgba(23, 189, 197, .55); }
     .ppg-quick-link { border-color: rgba(151, 205, 225, .25); color: var(--cyra-muted); }
     .ppg-quick-link:hover { color: #fff; border-color: var(--cyra-cyan); background: rgba(23, 189, 197, .1); }
@@ -55,7 +78,7 @@ $alunosConcluidos = array_values(array_filter($alunos, static fn (array $aluno):
     #rede-academica { width: 100%; min-height: 34rem; border: 1px solid rgba(151, 205, 225, .14); background: radial-gradient(circle at center, rgba(18, 102, 177, .14), rgba(5, 19, 40, .8)); }
 </style>
 
-<main class="container py-5">
+<main class="container-fluid px-3 px-md-4 px-xxl-5 py-5">
     <a class="btn btn-sm btn-outline-info rounded-0 mb-4" href="<?= site_url('ppg') ?>">
         <i class="bi bi-arrow-left me-2"></i>Voltar para programas
     </a>
@@ -82,12 +105,24 @@ $alunosConcluidos = array_values(array_filter($alunos, static fn (array $aluno):
 
     <div class="row g-3 mb-4">
         <?php foreach ([
-            ['diagram-3', count($linhas), 'Linhas de pesquisa'],
-            ['people', $totalDocentes, 'Docentes vinculados'],
-            ['bullseye', $totalAreas, 'Áreas de concentração'],
-            ['award', count($listas['graus']), 'Graus acadêmicos'],
-        ] as [$icone, $valor, $rotulo]) : ?>
-            <div class="col-6 col-lg-3"><div class="ppg-stat p-3 p-md-4"><i class="bi bi-<?= $icone ?> fs-4 cyra-accent"></i><strong class="ppg-stat-value d-block text-white mt-3"><?= (int) $valor ?></strong><span class="small cyra-muted"><?= esc($rotulo) ?></span></div></div>
+            ['diagram-3', $totalAreas . ' / ' . count($linhas), 'Estrutura de pesquisa', null, 'Áreas / Linhas'],
+            ['people', $totalDocentes, 'Docentes vinculados', implode(' / ', [
+                $totaisDocentesPorTipo['PERMANENTE'],
+                $totaisDocentesPorTipo['COLABORADOR'],
+                $totaisDocentesPorTipo['VISITANTE'],
+            ]), 'Permanentes / Colaboradores / Visitantes'],
+            ['award', count($listas['graus']), 'Graus acadêmicos', null, 'Modalidades oferecidas'],
+            ['person-workspace', $mestrandosAtivos . ' / ' . $doutorandosAtivos, 'Estudantes ativos', null, 'Mestrado / Doutorado'],
+        ] as [$icone, $valor, $rotulo, $detalhe, $legenda]) : ?>
+            <div class="col-12 col-sm-6 col-xl-3">
+                <article class="ppg-stat p-4 h-100">
+                    <span class="ppg-stat-icon"><i class="bi bi-<?= $icone ?> fs-4"></i></span>
+                    <strong class="ppg-stat-value d-block text-white mt-4 mb-2"><?= esc((string) $valor) ?></strong>
+                    <span class="ppg-stat-label small text-white"><?= esc($rotulo) ?></span>
+                    <?php if (! empty($detalhe)) : ?><span class="ppg-stat-breakdown mt-2"><?= esc($detalhe) ?></span><?php endif; ?>
+                    <small class="ppg-stat-legend mt-1"><?= esc($legenda) ?></small>
+                </article>
+            </div>
         <?php endforeach; ?>
     </div>
 
@@ -210,26 +245,49 @@ $alunosConcluidos = array_values(array_filter($alunos, static fn (array $aluno):
                                     <?php if ($docentes === []) : ?>
                                         <div class="text-center py-4"><i class="bi bi-person-dash display-6 cyra-muted"></i><p class="cyra-muted mt-2 mb-0">Nenhum docente vinculado a esta linha.</p></div>
                                     <?php else : ?>
-                                        <div class="row g-3">
-                                            <?php foreach ($docentes as $docente) : ?>
-                                                <div class="col-md-6 col-xl-4">
-                                                    <div class="ppg-teacher-card p-3">
-                                                        <div class="d-flex gap-3">
-                                                            <span class="ppg-avatar" aria-hidden="true"><?= esc(mb_strtoupper(mb_substr((string) $docente['nome'], 0, 1))) ?></span>
-                                                            <div class="min-w-0">
-                                                                <a class="text-white fw-semibold text-decoration-none" href="<?= site_url('person/' . $docente['id']) ?>"><?= esc($docente['nome']) ?> <i class="bi bi-arrow-up-right small cyra-accent"></i></a>
-                                                                <small class="d-block cyra-muted mt-1"><?= esc($docente['tipo_vinculo']) ?> · <?= esc(match ((int) ($docente['genero'] ?? 0)) { 1 => 'Masculino', 2 => 'Feminino', default => 'Gênero não informado' }) ?></small>
-                                                            </div>
-                                                        </div>
-                                                        <?php if (! empty($docente['instituicoes'])) : ?><p class="small cyra-muted mt-3 mb-2"><i class="bi bi-building me-1 cyra-accent"></i><?= esc($docente['instituicoes']) ?></p><?php endif; ?>
-                                                        <div class="d-flex flex-wrap gap-1 mt-3">
-                                                            <?php if (! empty($docente['lattes_id'])) : ?><span class="ppg-meta"><i class="bi bi-journal-text me-1"></i>Lattes <?= esc($docente['lattes_id']) ?></span><?php endif; ?>
-                                                            <?php if (! empty($docente['orcid'])) : ?><span class="ppg-meta"><i class="bi bi-person-badge me-1"></i><?= esc($docente['orcid']) ?></span><?php endif; ?>
-                                                        </div>
-                                                    </div>
+                                        <?php
+                                        $docentesAgrupados = array_fill_keys(array_keys($tiposDocente), []);
+                                        foreach ($docentes as $docente) {
+                                            $vinculo = mb_strtoupper(trim((string) $docente['tipo_vinculo']));
+                                            $grupo = str_contains($vinculo, 'VISIT')
+                                                ? 'VISITANTE'
+                                                : (str_contains($vinculo, 'COLAB') ? 'COLABORADOR' : 'PERMANENTE');
+                                            $docentesAgrupados[$grupo][] = $docente;
+                                        }
+                                        ?>
+                                        <?php foreach ($tiposDocente as $tipoDocente => [$rotuloTipo, $corTipo]) : ?>
+                                            <?php $docentesGrupo = $docentesAgrupados[$tipoDocente]; ?>
+                                            <section class="<?= $tipoDocente !== 'PERMANENTE' ? 'mt-4' : '' ?>">
+                                                <div class="d-flex align-items-center gap-2 mb-3">
+                                                    <h4 class="h6 text-white mb-0"><?= esc($rotuloTipo) ?></h4>
+                                                    <span class="badge text-bg-<?= esc($corTipo, 'attr') ?> rounded-0"><?= count($docentesGrupo) ?></span>
                                                 </div>
-                                            <?php endforeach; ?>
-                                        </div>
+                                                <?php if ($docentesGrupo === []) : ?>
+                                                    <p class="small cyra-muted mb-0">Nenhum docente neste grupo.</p>
+                                                <?php else : ?>
+                                                    <div class="row g-3">
+                                                        <?php foreach ($docentesGrupo as $docente) : ?>
+                                                            <div class="col-md-6 col-xl-4">
+                                                                <div class="ppg-teacher-card p-3">
+                                                                    <div class="d-flex gap-3">
+                                                                        <span class="ppg-avatar" aria-hidden="true"><?= esc(mb_strtoupper(mb_substr((string) $docente['nome'], 0, 1))) ?></span>
+                                                                        <div class="min-w-0">
+                                                                            <a class="text-white fw-semibold text-decoration-none" href="<?= site_url('person/' . $docente['id']) ?>"><?= esc($docente['nome']) ?> <i class="bi bi-arrow-up-right small cyra-accent"></i></a>
+                                                                            <small class="d-block cyra-muted mt-1"><?= esc($rotuloTipo) ?> · <?= esc(match ((int) ($docente['genero'] ?? 0)) { 1 => 'Masculino', 2 => 'Feminino', default => 'Gênero não informado' }) ?></small>
+                                                                        </div>
+                                                                    </div>
+                                                                    <?php if (! empty($docente['instituicoes'])) : ?><p class="small cyra-muted mt-3 mb-2"><i class="bi bi-building me-1 cyra-accent"></i><?= esc($docente['instituicoes']) ?></p><?php endif; ?>
+                                                                    <div class="d-flex flex-wrap gap-1 mt-3">
+                                                                        <?php if (! empty($docente['lattes_id'])) : ?><span class="ppg-meta"><i class="bi bi-journal-text me-1"></i>Lattes <?= esc($docente['lattes_id']) ?></span><?php endif; ?>
+                                                                        <?php if (! empty($docente['orcid'])) : ?><span class="ppg-meta"><i class="bi bi-person-badge me-1"></i><?= esc($docente['orcid']) ?></span><?php endif; ?>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </section>
+                                        <?php endforeach; ?>
                                     <?php endif; ?>
                                 </div>
                             </article>
@@ -286,4 +344,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<?= view('layout/footer') ?>
+<?= view('layout/footer', ['fluid' => true]) ?>

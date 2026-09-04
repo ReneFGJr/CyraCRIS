@@ -58,6 +58,7 @@ $projetosConcluidos = array_filter($projetos, static fn (array $item): bool => $
     .perfil-name-icon { display: inline-flex; align-items: center; justify-content: center; color: #fff; text-decoration: none; }
     .perfil-name-icon:hover, .perfil-name-icon:focus { color: var(--cyra-cyan); }
     .perfil-name-icon.is-empty { color: #fff; opacity: .45; }
+    .orientation-person-column { width: 25%; min-width: 16rem; }
 </style>
 
 <main class="container py-5">
@@ -223,11 +224,11 @@ $projetosConcluidos = array_filter($projetos, static fn (array $item): bool => $
                         </h4>
                         <div class="table-responsive mb-3">
                                 <table class="table table-dark table-hover align-middle mb-0">
-                                    <thead><tr><th>Estudante</th><th>Tipo</th><th>Início</th><th>Final</th><th>Título</th></tr></thead>
+                                    <thead><tr><th class="orientation-person-column">Estudante</th><th>Tipo</th><th>Início</th><th>Final</th><th>Título</th></tr></thead>
                                     <tbody>
                                         <?php foreach ($itensOrientacao as $item) : ?>
                                             <tr>
-                                                <td><a class="cyra-accent" href="<?= site_url('person/' . $item['estudante_id']) ?>"><?= esc($item['estudante_nome']) ?></a></td>
+                                                <td class="orientation-person-column"><a class="cyra-accent" href="<?= site_url('person/' . $item['estudante_id']) ?>"><?= esc($item['estudante_nome']) ?></a></td>
                                                 <td class="text-white"><?= esc($item['tipo']) ?></td>
                                                 <td class="cyra-muted"><?= esc($item['ano_inicio'] ?? '-') ?></td>
                                                 <td class="cyra-muted"><?= esc($item['ano_final'] ?? '-') ?></td>
@@ -242,7 +243,7 @@ $projetosConcluidos = array_filter($projetos, static fn (array $item): bool => $
                 <div class="mb-5"></div>
             <?php endif; ?>
             <h2 class="h5 text-white mb-3">Orientadores deste estudante</h2>
-            <?php if ($orientadores === []) : ?><p class="cyra-muted mb-0">Nenhum orientador registrado para este indivíduo.</p><?php else : ?><div class="table-responsive"><table class="table table-dark table-hover align-middle mb-0"><thead><tr><th>Orientador</th><th>Tipo</th><th>Status</th><th>Período</th><th>Título</th></tr></thead><tbody><?php foreach ($orientadores as $item) : ?><tr><td><a class="cyra-accent" href="<?= site_url('person/' . $item['orientador_id']) ?>"><?= esc($item['orientador_nome']) ?></a></td><td class="text-white"><?= esc($item['tipo']) ?></td><td class="cyra-muted"><?= (int) $item['status'] === 1 ? 'Concluída' : 'Em andamento' ?></td><td class="cyra-muted"><?= esc($item['ano_inicio'] ?? '-') ?> – <?= esc($item['ano_final'] ?? '-') ?></td><td class="cyra-muted"><?= esc($item['titulo'] ?: '-') ?></td></tr><?php endforeach; ?></tbody></table></div><?php endif; ?>
+            <?php if ($orientadores === []) : ?><p class="cyra-muted mb-0">Nenhum orientador registrado para este indivíduo.</p><?php else : ?><div class="table-responsive"><table class="table table-dark table-hover align-middle mb-0"><thead><tr><th class="orientation-person-column">Orientador</th><th>Tipo</th><th>Status</th><th>Período</th><th>Título</th></tr></thead><tbody><?php foreach ($orientadores as $item) : ?><tr><td class="orientation-person-column"><a class="cyra-accent" href="<?= site_url('person/' . $item['orientador_id']) ?>"><?= esc($item['orientador_nome']) ?></a></td><td class="text-white"><?= esc($item['tipo']) ?></td><td class="cyra-muted"><?= (int) $item['status'] === 1 ? 'Concluída' : 'Em andamento' ?></td><td class="cyra-muted"><?= esc($item['ano_inicio'] ?? '-') ?> – <?= esc($item['ano_final'] ?? '-') ?></td><td class="cyra-muted"><?= esc($item['titulo'] ?: '-') ?></td></tr><?php endforeach; ?></tbody></table></div><?php endif; ?>
         </section>
 
         <section class="tab-pane fade" id="projetos" role="tabpanel" aria-labelledby="projetos-tab" tabindex="0">

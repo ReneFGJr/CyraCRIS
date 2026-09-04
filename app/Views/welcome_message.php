@@ -18,6 +18,7 @@
 
 		<div class="col-lg-5" id="recursos">
 			<div class="cyra-panel p-4 p-md-5">
+				<img class="img-fluid d-block mx-auto mb-4" src="<?= base_url('assets/logo/logo_cyracris_full.png') ?>" alt="CyraCRIS" style="max-height: 120px;">
 				<p class="text-uppercase small cyra-muted mb-4">Um sistema para cada etapa</p>
 				<div class="border-top border-light border-opacity-10 py-3 d-flex gap-3">
 					<i class="bi bi-database-check fs-4 cyra-accent"></i>

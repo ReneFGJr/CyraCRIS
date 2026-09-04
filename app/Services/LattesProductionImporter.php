@@ -53,7 +53,6 @@ class LattesProductionImporter
             }
         }
 
-        $db->table('producoes')->where('pesquisador_id', $pesquisadorId)->delete();
         if ($registros !== []) {
             $db->table('producoes')->insertBatch(array_values($registros));
         }
