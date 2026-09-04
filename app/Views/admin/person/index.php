@@ -1,8 +1,15 @@
 <?= view('layout/header', [
     'title'       => $title ?? 'Administrar pessoas',
-    'description' => 'Administração da tabela Person.',
+    'description' => 'Administração da tabela individuo.',
     'fluid'       => true,
 ]) ?>
+
+<style>
+    .person-row-grouped,
+    .person-row-grouped td,
+    .person-row-grouped .text-white,
+    .person-row-grouped .cyra-muted { color: #617386 !important; }
+</style>
 
 <main class="container-fluid px-3 px-md-4 px-xxl-5 py-4 py-lg-5">
     <header class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-4 mb-4">
@@ -11,7 +18,7 @@
                 <i class="bi bi-people me-2"></i>Administração
             </p>
             <h1 class="display-6 cyra-heading text-white mb-2">Pessoas</h1>
-            <p class="cyra-muted mb-0"><?= (int) $total ?> registros cadastrados na tabela Person.</p>
+            <p class="cyra-muted mb-0"><?= (int) $total ?> registros cadastrados na tabela individuo.</p>
         </div>
         <a class="btn btn-info rounded-0 px-4" href="<?= site_url('admin/person/inport') ?>">
             <i class="bi bi-upload me-2"></i>Importar dados
@@ -25,7 +32,7 @@
                 <div class="input-group">
                     <span class="input-group-text rounded-0"><i class="bi bi-search"></i></span>
                     <input class="form-control rounded-0" id="person-search" name="q" type="search"
-                           value="<?= esc($query) ?>" placeholder="Digite nome, e-mail, ID Lattes ou crachá">
+                           value="<?= esc($query) ?>" placeholder="Digite nome, e-mail, ID Lattes, ORCID, CPF ou crachá">
                 </div>
             </div>
             <div class="col-12 col-sm-7 col-lg-3">
@@ -73,25 +80,54 @@
                         <th class="py-3" scope="col">Nome</th>
                         <th class="py-3" scope="col">ID Lattes</th>
                         <th class="py-3" scope="col">E-mail</th>
+                        <th class="py-3" scope="col">ORCID</th>
+                        <th class="py-3" scope="col">CPF</th>
                         <th class="py-3" scope="col">Crachá</th>
                         <th class="px-4 py-3" scope="col">Cadastro</th>
+                        <th class="px-4 py-3 text-end" scope="col">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php foreach ($persons as $person) : ?>
-                        <tr>
-                            <td class="px-4 cyra-muted"><?= (int) $person['id'] ?></td>
-                            <td class="fw-semibold text-white"><?= esc($person['name']) ?></td>
+                        <?php
+                        $isGrouped = (int) ($person['use'] ?? 0) !== 0;
+                        $targetId = $isGrouped ? (int) $person['use'] : (int) $person['id'];
+                        ?>
+                        <tr class="<?= $isGrouped ? 'person-row-grouped fst-italic' : '' ?>">
+                            <td class="px-4 cyra-muted">
+                                <?= (int) $person['id'] ?>
+                                <?php if ($isGrouped) : ?>
+                                    <i class="bi bi-arrow-right mx-1" aria-hidden="true"></i><?= $targetId ?>
+                                    <span class="visually-hidden">agrupado com o cadastro <?= $targetId ?></span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="fw-semibold text-white"><?= esc($person['nome']) ?></td>
                             <td><?= esc($person['lattes_id'] ?: '—') ?></td>
                             <td><?= esc($person['email'] ?: '—') ?></td>
+                            <td><?= esc($person['orcid'] ?: '—') ?></td>
+                            <td><?= esc($person['cpf'] ?: '—') ?></td>
                             <td><?= esc($person['cracha'] ?: '—') ?></td>
                             <td class="px-4 cyra-muted"><?= esc($person['created_at'] ?: '—') ?></td>
+                            <td class="px-4 text-end text-nowrap">
+                                <?php if (! $isGrouped) : ?>
+                                    <a class="btn btn-sm btn-outline-info rounded-0"
+                                       href="<?= site_url('person/' . $targetId) ?>"
+                                       title="Visualizar pessoa" aria-label="Visualizar <?= esc($person['nome']) ?>">
+                                        <i class="bi bi-eye" aria-hidden="true"></i>
+                                    </a>
+                                    <a class="btn btn-sm btn-outline-light rounded-0 ms-1"
+                                       href="<?= site_url('person/edit/' . $targetId) ?>"
+                                       title="Editar pessoa" aria-label="Editar <?= esc($person['nome']) ?>">
+                                        <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                                    </a>
+                                <?php endif; ?>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
         </div>
-        <div class="mt-4"><?= $pager->links('persons', 'default_full') ?></div>
+        <div class="mt-4"><?= $pager->links('persons', 'cyra_full') ?></div>
     <?php endif; ?>
 </main>
 

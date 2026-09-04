@@ -82,6 +82,14 @@ class Docent extends BaseController
             ->orderBy('situacao', 'DESC')->orderBy('ano_inicio', 'DESC')->orderBy('titulo', 'ASC')
             ->get()->getResultArray();
 
+        $remissivas = $db->table('individuo')
+            ->select('id, nome, lattes_id, orcid')
+            ->where('use', $id)
+            ->where('id !=', $id)
+            ->orderBy('nome', 'ASC')
+            ->get()
+            ->getResultArray();
+
         return view('docent/show', [
             'docente'      => $docente,
             'instituicoes' => $instituicoes,
@@ -90,6 +98,7 @@ class Docent extends BaseController
             'orientadores' => $orientadores,
             'producoes'    => $producoes,
             'projetos'     => $projetos,
+            'remissivas'   => $remissivas,
             'redeIndividual' => $redeIndividual,
             'coletaLattesHabilitada' => filter_var(env('lattes.collectionEnabled', false), FILTER_VALIDATE_BOOL),
         ]);
@@ -98,7 +107,7 @@ class Docent extends BaseController
     public function atualizar(int $id): RedirectResponse
     {
         if (! filter_var(env('lattes.collectionEnabled', false), FILTER_VALIDATE_BOOL)) {
-            return redirect()->to(site_url('docent/' . $id))
+            return redirect()->to(site_url('person/' . $id))
                 ->with('erro', 'A coleta de dados do Lattes está temporariamente desabilitada.');
         }
 
@@ -112,7 +121,7 @@ class Docent extends BaseController
         $lattesId = trim((string) ($docente['lattes_id'] ?? ''));
 
         if (preg_match('/^\d{16}$/', $lattesId) !== 1) {
-            return redirect()->to(site_url('docent/' . $id))
+            return redirect()->to(site_url('person/' . $id))
                 ->with('erro', 'O docente não possui um ID Lattes válido para atualização.');
         }
 
@@ -188,12 +197,12 @@ class Docent extends BaseController
                 'arquivo'  => $nomeArquivoXml,
             ]);
 
-            return redirect()->to(site_url('docent/' . $id))
-                ->with('sucesso', 'Dados do docente atualizados pelo currículo Lattes.');
+            return redirect()->to(site_url('person/' . $id))
+                ->with('sucesso', 'Informações pessoais e acadêmicas atualizadas pelo currículo Lattes.');
         } catch (Throwable $e) {
             log_message('error', 'Falha ao atualizar o docente {id}: {erro}', ['id' => $id, 'erro' => $e->getMessage()]);
 
-            return redirect()->to(site_url('docent/' . $id))
+            return redirect()->to(site_url('person/' . $id))
                 ->with('erro', 'Não foi possível atualizar o docente: ' . $e->getMessage());
         } finally {
             if ($arquivoTemporario !== null && is_file($arquivoTemporario)) {
@@ -202,8 +211,32 @@ class Docent extends BaseController
         }
     }
 
+    public function edit(int $id): string|RedirectResponse
+    {
+        if (session()->get('auth_logged_in') !== true) {
+            return redirect()->to(site_url('login'))
+                ->with('error', 'Faça login para editar os dados da pessoa.');
+        }
+
+        $person = db_connect()->table('individuo')->where('id', $id)->get()->getRowArray();
+
+        if ($person === null) {
+            throw PageNotFoundException::forPageNotFound('Pessoa não encontrada.');
+        }
+
+        return view('person/edit', [
+            'title'  => 'Editar pessoa',
+            'person' => $person,
+        ]);
+    }
+
     public function editar(int $id): RedirectResponse
     {
+        if (session()->get('auth_logged_in') !== true) {
+            return redirect()->to(site_url('login'))
+                ->with('error', 'Faça login para editar os dados da pessoa.');
+        }
+
         $db = db_connect();
 
         if ($db->table('individuo')->where('id', $id)->countAllResults() === 0) {
@@ -213,6 +246,8 @@ class Docent extends BaseController
         $nome = trim((string) $this->request->getPost('nome'));
         $genero = (int) $this->request->getPost('genero');
         $email = trim((string) $this->request->getPost('email'));
+        $cpf = trim((string) $this->request->getPost('cpf'));
+        $cracha = trim((string) $this->request->getPost('cracha'));
         $lattesId = trim((string) $this->request->getPost('lattes_id'));
         $orcid = trim((string) $this->request->getPost('orcid'));
         $vinculos = $this->request->getPost('vinculos');
@@ -228,6 +263,12 @@ class Docent extends BaseController
         if ($email !== '' && filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
             $erros[] = 'Informe um e-mail válido.';
         }
+        if (mb_strlen($cpf) > 14) {
+            $erros[] = 'O CPF deve ter no máximo 14 caracteres.';
+        }
+        if (mb_strlen($cracha) > 50) {
+            $erros[] = 'O crachá deve ter no máximo 50 caracteres.';
+        }
         if ($lattesId !== '' && preg_match('/^\d{16}$/', $lattesId) !== 1) {
             $erros[] = 'O ID Lattes deve conter 16 dígitos.';
         }
@@ -242,7 +283,11 @@ class Docent extends BaseController
         }
 
         if ($erros !== []) {
-            return redirect()->to(site_url('docent/' . $id))
+            $errorTarget = $this->request->getPost('return_to') === 'edit'
+                ? site_url('person/edit/' . $id)
+                : site_url('person/' . $id);
+
+            return redirect()->to($errorTarget)
                 ->with('erro', implode(' ', $erros))
                 ->withInput();
         }
@@ -252,6 +297,8 @@ class Docent extends BaseController
             'nome'       => $nome,
             'genero'     => $genero,
             'email'      => $email !== '' ? $email : null,
+            'cpf'        => $cpf !== '' ? $cpf : null,
+            'cracha'     => $cracha !== '' ? $cracha : null,
             'lattes_id'  => $lattesId !== '' ? $lattesId : null,
             'orcid'      => $orcid !== '' ? strtoupper($orcid) : null,
             'updated_at' => date('Y-m-d H:i:s'),
@@ -269,10 +316,39 @@ class Docent extends BaseController
         $db->transComplete();
 
         if (! $db->transStatus()) {
-            return redirect()->to(site_url('docent/' . $id))->with('erro', 'Não foi possível salvar as alterações.');
+            return redirect()->to(site_url('person/' . $id))->with('erro', 'Não foi possível salvar as alterações.');
         }
 
-        return redirect()->to(site_url('docent/' . $id))->with('sucesso', 'Dados do docente atualizados manualmente.');
+        return redirect()->to(site_url('person/' . $id))->with('sucesso', 'Informações pessoais e acadêmicas atualizadas manualmente.');
+    }
+
+    public function deleteReference(int $id, int $referenceId): RedirectResponse
+    {
+        if (session()->get('auth_logged_in') !== true) {
+            return redirect()->to(site_url('login'))
+                ->with('error', 'Faça login para excluir uma remissiva.');
+        }
+
+        $db = db_connect();
+        $reference = $db->table('individuo')
+            ->select('id, nome, use')
+            ->where('id', $referenceId)
+            ->where('use', $id)
+            ->get()
+            ->getRowArray();
+
+        if ($reference === null) {
+            return redirect()->to(site_url('person/' . $id))
+                ->with('erro', 'A remissiva informada não foi encontrada.');
+        }
+
+        if ($db->table('individuo')->where('id', $referenceId)->update(['use' => 0]) === false) {
+            return redirect()->to(site_url('person/' . $id))
+                ->with('erro', 'Não foi possível excluir a remissiva.');
+        }
+
+        return redirect()->to(site_url('person/' . $id))
+            ->with('sucesso', 'Remissiva de ' . $reference['nome'] . ' excluída com sucesso.');
     }
 
     /** @return array{0: SimpleXMLElement, 1: string} */

@@ -85,6 +85,22 @@
                     <span class="mt-auto cyra-accent">Acessar <i class="bi bi-arrow-right ms-2"></i></span>
                 </a>
             </div>
+            <div class="col-12 col-md-6 col-xl-4">
+                <a class="admin-card p-4" href="<?= site_url('admin/rdf/class') ?>">
+                    <div class="admin-icon mb-4"><i class="bi bi-diagram-3"></i></div>
+                    <h3 class="h5 text-white">Classes RDF</h3>
+                    <p class="cyra-muted mb-4">Cadastre e edite as classes da tabela rdf_class.</p>
+                    <span class="mt-auto cyra-accent">Acessar <i class="bi bi-arrow-right ms-2"></i></span>
+                </a>
+            </div>
+            <div class="col-12 col-md-6 col-xl-4">
+                <a class="admin-card p-4" href="<?= site_url('admin/report') ?>">
+                    <div class="admin-icon mb-4"><i class="bi bi-file-earmark-bar-graph"></i></div>
+                    <h3 class="h5 text-white">Relatórios do sistema</h3>
+                    <p class="cyra-muted mb-4">Gere e consulte relatórios com os dados do sistema.</p>
+                    <span class="mt-auto cyra-accent">Acessar <i class="bi bi-arrow-right ms-2"></i></span>
+                </a>
+            </div>
         </div>
     </section>
 </main>

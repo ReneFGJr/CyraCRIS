@@ -42,6 +42,11 @@ $description = $description ?? 'Current Research Information System para program
         .cyra-accent { color: var(--cyra-cyan); }
         .cyra-muted { color: var(--cyra-muted); }
         .cyra-panel { border: 1px solid rgba(151, 205, 225, .2); background: rgba(5, 19, 40, .42); }
+        .cyra-pagination { --bs-pagination-border-radius: 0; gap: .35rem; }
+        .cyra-pagination .page-link { min-width: 2.5rem; border: 1px solid rgba(151, 205, 225, .3); color: var(--cyra-ice); background: rgba(5, 19, 40, .65); text-align: center; }
+        .cyra-pagination .page-link:hover, .cyra-pagination .page-link:focus { border-color: var(--cyra-cyan); color: var(--cyra-navy); background: var(--cyra-cyan); box-shadow: none; }
+        .cyra-pagination .active > .page-link { border-color: var(--cyra-cyan); color: var(--cyra-navy); background: var(--cyra-cyan); font-weight: 700; }
+        .cyra-pagination .disabled > .page-link { border-color: rgba(151, 205, 225, .12); color: var(--cyra-muted); background: rgba(5, 19, 40, .25); opacity: .45; }
         .cyra-footer { border-top: 1px solid rgba(151, 205, 225, .18); background: rgba(3, 12, 27, .3); }
     </style>
 </head>

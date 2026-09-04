@@ -6,9 +6,11 @@
 /** @var array<int, array<string, mixed>> $orientadores */
 /** @var array<int, array<string, mixed>> $producoes */
 /** @var array<int, array<string, mixed>> $projetos */
+/** @var array<int, array<string, mixed>> $remissivas */
 /** @var array{nodes: array<int, array<string, mixed>>, links: array<int, array<string, mixed>>} $redeIndividual */
 /** @var bool $coletaLattesHabilitada */
 $genero = match ((int) ($docente['genero'] ?? 0)) { 1 => 'Masculino', 2 => 'Feminino', default => 'Não informado' };
+$generoIcone = match ((int) ($docente['genero'] ?? 0)) { 1 => 'gender-male', 2 => 'gender-female', default => 'gender-ambiguous' };
 $totalConcluidas = count(array_filter($orientacoes, static fn (array $item): bool => (int) $item['status'] === 1));
 $totalAndamento = count($orientacoes) - $totalConcluidas;
 $lattesAtualizadoEm = ! empty($docente['lattes_updated_at']) ? new DateTimeImmutable((string) $docente['lattes_updated_at']) : null;
@@ -52,23 +54,58 @@ $projetosConcluidos = array_filter($projetos, static fn (array $item): bool => $
 
 <style>
     #rede-individual { width: 100%; min-height: 36rem; border: 1px solid rgba(151, 205, 225, .14); background: radial-gradient(circle at center, rgba(18, 102, 177, .18), rgba(5, 19, 40, .86)); }
+    .perfil-name-icons { margin-left: auto; font-family: "Trebuchet MS", "Segoe UI", sans-serif; font-size: 1.25rem; }
+    .perfil-name-icon { display: inline-flex; align-items: center; justify-content: center; color: #fff; text-decoration: none; }
+    .perfil-name-icon:hover, .perfil-name-icon:focus { color: var(--cyra-cyan); }
+    .perfil-name-icon.is-empty { color: #fff; opacity: .45; }
 </style>
 
 <main class="container py-5">
     <div class="d-flex flex-wrap justify-content-between gap-2 mb-4">
         <a class="btn btn-sm btn-outline-info rounded-0" href="javascript:history.back()"><i class="bi bi-arrow-left me-2"></i>Voltar</a>
         <div class="d-flex flex-wrap gap-2">
-            <button class="btn btn-sm btn-outline-light rounded-0" type="button" data-bs-toggle="modal" data-bs-target="#editar-docente"><i class="bi bi-pencil-square me-2"></i>Editar dados</button>
-            <form method="post" action="<?= site_url('docent/' . $docente['id'] . '/atualizar') ?>"><?= csrf_field() ?><button class="btn btn-sm btn-info rounded-0" type="submit" <?= ! $coletaLattesHabilitada ? 'disabled' : '' ?> title="<?= ! $coletaLattesHabilitada ? 'Coleta Lattes temporariamente desabilitada' : 'Atualizar dados pelo Lattes' ?>"><i class="bi bi-arrow-clockwise me-2"></i><?= $coletaLattesHabilitada ? 'Atualizar dados do docente' : 'Coleta Lattes desabilitada' ?></button></form>
+            <?php if (session()->get('auth_logged_in') === true) : ?>
+                <button class="btn btn-sm btn-outline-light rounded-0" type="button" data-bs-toggle="modal" data-bs-target="#editar-docente"><i class="bi bi-pencil-square me-2"></i>Editar dados</button>
+            <?php endif; ?>
+            <form method="post" action="<?= site_url('person/' . $docente['id'] . '/atualizar') ?>"><?= csrf_field() ?><button class="btn btn-sm btn-info rounded-0" type="submit" <?= ! $coletaLattesHabilitada ? 'disabled' : '' ?> title="<?= ! $coletaLattesHabilitada ? 'Coleta Lattes temporariamente desabilitada' : 'Atualizar dados pelo Lattes' ?>"><i class="bi bi-arrow-clockwise me-2"></i><?= $coletaLattesHabilitada ? 'Atualizar informações acadêmicas' : 'Coleta Lattes desabilitada' ?></button></form>
         </div>
     </div>
     <?php if (session('sucesso')) : ?><div class="alert alert-success rounded-0" role="alert"><?= esc(session('sucesso')) ?></div><?php endif; ?>
     <?php if (session('erro')) : ?><div class="alert alert-danger rounded-0" role="alert"><?= esc(session('erro')) ?></div><?php endif; ?>
 
-    <header class="mb-4"><div class="d-flex align-items-center gap-3"><i class="bi bi-person-circle display-4 cyra-accent"></i><div><span class="badge text-bg-info rounded-0 mb-2">Perfil #<?= (int) $docente['id'] ?></span><h1 class="cyra-heading text-white mb-0"><?= esc($docente['nome']) ?></h1></div></div></header>
+    <header class="mb-4">
+        <div class="d-flex align-items-center gap-3">
+            <i class="bi bi-person-circle display-4 cyra-accent"></i>
+            <div class="flex-grow-1">
+                <span class="badge text-bg-info rounded-0 mb-2">Perfil #<?= (int) $docente['id'] ?></span>
+                <div class="d-flex flex-wrap align-items-center gap-3">
+                    <h1 class="cyra-heading text-white mb-0"><?= esc($docente['nome']) ?></h1>
+                    <span class="perfil-name-icons d-inline-flex align-items-center gap-2" aria-label="Identificadores da pessoa">
+                        <span class="perfil-name-icon" title="Gênero: <?= esc($genero, 'attr') ?>" aria-label="Gênero: <?= esc($genero, 'attr') ?>">
+                            <i class="bi bi-<?= $generoIcone ?>" aria-hidden="true"></i>
+                        </span>
+                        <?php if (! empty($docente['lattes_id'])) : ?>
+                            <a class="perfil-name-icon" href="http://lattes.cnpq.br/<?= esc($docente['lattes_id'], 'attr') ?>" target="_blank" rel="noopener noreferrer" title="Abrir currículo Lattes" aria-label="Abrir currículo Lattes">
+                                <i class="bi bi-journal-text" aria-hidden="true"></i>
+                            </a>
+                        <?php else : ?>
+                            <span class="perfil-name-icon is-empty" title="Currículo Lattes não informado" aria-label="Currículo Lattes não informado"><i class="bi bi-journal-text" aria-hidden="true"></i></span>
+                        <?php endif; ?>
+                        <?php if (! empty($docente['orcid'])) : ?>
+                            <a class="perfil-name-icon" href="https://orcid.org/<?= esc($docente['orcid'], 'attr') ?>" target="_blank" rel="noopener noreferrer" title="Abrir perfil ORCID" aria-label="Abrir perfil ORCID">
+                                <i class="bi bi-person-badge" aria-hidden="true"></i>
+                            </a>
+                        <?php else : ?>
+                            <span class="perfil-name-icon is-empty" title="ORCID não informado" aria-label="ORCID não informado"><i class="bi bi-person-badge" aria-hidden="true"></i></span>
+                        <?php endif; ?>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </header>
 
     <ul class="nav nav-tabs flex-nowrap overflow-x-auto border-secondary" id="perfil-tabs" role="tablist">
-        <?php foreach ([['resumo','speedometer2','Resumo geral'],['dados','person-vcard','Dados do docente'],['vinculos','building','Instituições e linhas'],['orientacoes','mortarboard','Orientações / Orientadores'],['projetos','kanban','Projetos'],['rede','share','Rede'],['producao','collection','Produção']] as $indice => [$idAba,$icone,$rotulo]) : ?>
+        <?php foreach ([['resumo','speedometer2','Resumo geral'],['dados','person-vcard','Informações'],['vinculos','building','Instituições e linhas'],['orientacoes','mortarboard','Orientações / Orientadores'],['projetos','kanban','Projetos'],['rede','share','Rede'],['producao','collection','Produção']] as $indice => [$idAba,$icone,$rotulo]) : ?>
             <li class="nav-item" role="presentation"><button class="nav-link text-nowrap rounded-0 <?= $indice === 0 ? 'active' : '' ?>" id="<?= $idAba ?>-tab" data-bs-toggle="tab" data-bs-target="#<?= $idAba ?>" type="button" role="tab" aria-controls="<?= $idAba ?>" aria-selected="<?= $indice === 0 ? 'true' : 'false' ?>"><i class="bi bi-<?= $icone ?> me-1"></i><?= esc($rotulo) ?></button></li>
         <?php endforeach; ?>
     </ul>
@@ -118,13 +155,46 @@ $projetosConcluidos = array_filter($projetos, static fn (array $item): bool => $
         </section>
 
         <section class="tab-pane fade" id="dados" role="tabpanel" aria-labelledby="dados-tab" tabindex="0">
-            <h2 class="h5 text-white mb-4">Dados do docente</h2>
+            <h2 class="h5 text-white mb-4">Informações</h2>
             <dl class="row mb-0">
                 <dt class="col-sm-3 cyra-muted">Gênero</dt><dd class="col-sm-9 text-white mb-3"><?= esc($genero) ?></dd>
                 <dt class="col-sm-3 cyra-muted">E-mail</dt><dd class="col-sm-9 mb-3"><?php if (! empty($docente['email'])) : ?><a class="cyra-accent" href="mailto:<?= esc($docente['email'], 'attr') ?>"><?= esc($docente['email']) ?></a><?php else : ?><span class="text-white">Não informado</span><?php endif; ?></dd>
                 <dt class="col-sm-3 cyra-muted">ID Lattes</dt><dd class="col-sm-9 mb-3"><?php if (! empty($docente['lattes_id'])) : ?><a class="cyra-accent" href="http://lattes.cnpq.br/<?= esc($docente['lattes_id'], 'attr') ?>" target="_blank" rel="noopener noreferrer"><?= esc($docente['lattes_id']) ?> <i class="bi bi-box-arrow-up-right ms-1"></i></a><?php else : ?><span class="text-white">Não informado</span><?php endif; ?></dd>
                 <dt class="col-sm-3 cyra-muted">ORCID</dt><dd class="col-sm-9 mb-0"><?php if (! empty($docente['orcid'])) : ?><a class="cyra-accent" href="https://orcid.org/<?= esc($docente['orcid'], 'attr') ?>" target="_blank" rel="noopener noreferrer"><?= esc($docente['orcid']) ?></a><?php else : ?><span class="text-white">Não informado</span><?php endif; ?></dd>
             </dl>
+            <div class="border-top border-secondary mt-4 pt-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                    <h3 class="h6 text-white mb-0"><i class="bi bi-signpost-split me-2 cyra-accent"></i>Remissivas</h3>
+                    <span class="badge text-bg-secondary rounded-0"><?= count($remissivas) ?></span>
+                </div>
+                <?php if ($remissivas === []) : ?>
+                    <p class="cyra-muted mb-0">Nenhuma remissiva registrada para esta pessoa.</p>
+                <?php else : ?>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover align-middle mb-0">
+                            <thead><tr><th>ID</th><th>Nome remetente</th><th>ID Lattes</th><th>ORCID</th><?php if (session()->get('auth_logged_in') === true) : ?><th class="text-end">Ação</th><?php endif; ?></tr></thead>
+                            <tbody>
+                                <?php foreach ($remissivas as $remissiva) : ?>
+                                    <tr>
+                                        <td class="cyra-muted"><?= (int) $remissiva['id'] ?></td>
+                                        <td><a class="text-white" href="<?= site_url('person/' . (int) $remissiva['id']) ?>"><?= esc($remissiva['nome']) ?></a></td>
+                                        <td><?= esc($remissiva['lattes_id'] ?: '—') ?></td>
+                                        <td><?= esc($remissiva['orcid'] ?: '—') ?></td>
+                                        <?php if (session()->get('auth_logged_in') === true) : ?>
+                                            <td class="text-end">
+                                                <form method="post" action="<?= site_url('person/' . (int) $docente['id'] . '/remissivas/' . (int) $remissiva['id'] . '/delete') ?>" onsubmit="return confirm('Excluir esta remissiva? O cadastro da pessoa será mantido.');">
+                                                    <?= csrf_field() ?>
+                                                    <button class="btn btn-sm btn-outline-danger rounded-0" type="submit"><i class="bi bi-x-lg me-1"></i>Excluir</button>
+                                                </form>
+                                            </td>
+                                        <?php endif; ?>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php endif; ?>
+            </div>
         </section>
 
         <section class="tab-pane fade" id="vinculos" role="tabpanel" aria-labelledby="vinculos-tab" tabindex="0">
@@ -157,7 +227,7 @@ $projetosConcluidos = array_filter($projetos, static fn (array $item): bool => $
                                     <tbody>
                                         <?php foreach ($itensOrientacao as $item) : ?>
                                             <tr>
-                                                <td><a class="cyra-accent" href="<?= site_url('docent/' . $item['estudante_id']) ?>"><?= esc($item['estudante_nome']) ?></a></td>
+                                                <td><a class="cyra-accent" href="<?= site_url('person/' . $item['estudante_id']) ?>"><?= esc($item['estudante_nome']) ?></a></td>
                                                 <td class="text-white"><?= esc($item['tipo']) ?></td>
                                                 <td class="cyra-muted"><?= esc($item['ano_inicio'] ?? '-') ?></td>
                                                 <td class="cyra-muted"><?= esc($item['ano_final'] ?? '-') ?></td>
@@ -172,7 +242,7 @@ $projetosConcluidos = array_filter($projetos, static fn (array $item): bool => $
                 <div class="mb-5"></div>
             <?php endif; ?>
             <h2 class="h5 text-white mb-3">Orientadores deste estudante</h2>
-            <?php if ($orientadores === []) : ?><p class="cyra-muted mb-0">Nenhum orientador registrado para este indivíduo.</p><?php else : ?><div class="table-responsive"><table class="table table-dark table-hover align-middle mb-0"><thead><tr><th>Orientador</th><th>Tipo</th><th>Status</th><th>Período</th><th>Título</th></tr></thead><tbody><?php foreach ($orientadores as $item) : ?><tr><td><a class="cyra-accent" href="<?= site_url('docent/' . $item['orientador_id']) ?>"><?= esc($item['orientador_nome']) ?></a></td><td class="text-white"><?= esc($item['tipo']) ?></td><td class="cyra-muted"><?= (int) $item['status'] === 1 ? 'Concluída' : 'Em andamento' ?></td><td class="cyra-muted"><?= esc($item['ano_inicio'] ?? '-') ?> – <?= esc($item['ano_final'] ?? '-') ?></td><td class="cyra-muted"><?= esc($item['titulo'] ?: '-') ?></td></tr><?php endforeach; ?></tbody></table></div><?php endif; ?>
+            <?php if ($orientadores === []) : ?><p class="cyra-muted mb-0">Nenhum orientador registrado para este indivíduo.</p><?php else : ?><div class="table-responsive"><table class="table table-dark table-hover align-middle mb-0"><thead><tr><th>Orientador</th><th>Tipo</th><th>Status</th><th>Período</th><th>Título</th></tr></thead><tbody><?php foreach ($orientadores as $item) : ?><tr><td><a class="cyra-accent" href="<?= site_url('person/' . $item['orientador_id']) ?>"><?= esc($item['orientador_nome']) ?></a></td><td class="text-white"><?= esc($item['tipo']) ?></td><td class="cyra-muted"><?= (int) $item['status'] === 1 ? 'Concluída' : 'Em andamento' ?></td><td class="cyra-muted"><?= esc($item['ano_inicio'] ?? '-') ?> – <?= esc($item['ano_final'] ?? '-') ?></td><td class="cyra-muted"><?= esc($item['titulo'] ?: '-') ?></td></tr><?php endforeach; ?></tbody></table></div><?php endif; ?>
         </section>
 
         <section class="tab-pane fade" id="projetos" role="tabpanel" aria-labelledby="projetos-tab" tabindex="0">
@@ -235,13 +305,15 @@ $projetosConcluidos = array_filter($projetos, static fn (array $item): bool => $
 <div class="modal fade" id="editar-docente" tabindex="-1" aria-labelledby="editar-docente-titulo" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content rounded-0 bg-dark text-white border border-info border-opacity-25">
-            <form method="post" action="<?= site_url('docent/' . $docente['id'] . '/editar') ?>">
+            <form method="post" action="<?= site_url('person/' . $docente['id'] . '/editar') ?>">
                 <?= csrf_field() ?>
-                <div class="modal-header border-secondary"><h2 class="modal-title h5" id="editar-docente-titulo"><i class="bi bi-pencil-square me-2 cyra-accent"></i>Editar dados do docente</h2><button class="btn-close btn-close-white" type="button" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
+                <div class="modal-header border-secondary"><h2 class="modal-title h5" id="editar-docente-titulo"><i class="bi bi-pencil-square me-2 cyra-accent"></i>Editar informações pessoais e acadêmicas</h2><button class="btn-close btn-close-white" type="button" data-bs-dismiss="modal" aria-label="Fechar"></button></div>
                 <div class="modal-body"><div class="row g-3">
                     <div class="col-12"><label class="form-label" for="editar-nome">Nome</label><input class="form-control rounded-0" id="editar-nome" name="nome" type="text" maxlength="255" value="<?= esc(old('nome', $docente['nome']), 'attr') ?>" required></div>
                     <div class="col-md-6"><label class="form-label" for="editar-genero">Gênero</label><select class="form-select rounded-0" id="editar-genero" name="genero" required><?php foreach ([0=>'Não informado',1=>'Masculino',2=>'Feminino'] as $valor => $rotulo) : ?><option value="<?= $valor ?>" <?= (int) old('genero', $docente['genero'] ?? 0) === $valor ? 'selected' : '' ?>><?= esc($rotulo) ?></option><?php endforeach; ?></select></div>
                     <div class="col-md-6"><label class="form-label" for="editar-email">E-mail</label><input class="form-control rounded-0" id="editar-email" name="email" type="email" maxlength="190" value="<?= esc(old('email', $docente['email'] ?? ''), 'attr') ?>"></div>
+                    <div class="col-md-6"><label class="form-label" for="editar-cpf">CPF</label><input class="form-control rounded-0" id="editar-cpf" name="cpf" type="text" maxlength="14" value="<?= esc(old('cpf', $docente['cpf'] ?? ''), 'attr') ?>" placeholder="000.000.000-00"></div>
+                    <div class="col-md-6"><label class="form-label" for="editar-cracha">Crachá</label><input class="form-control rounded-0" id="editar-cracha" name="cracha" type="text" maxlength="50" value="<?= esc(old('cracha', $docente['cracha'] ?? ''), 'attr') ?>"></div>
                     <div class="col-md-6"><label class="form-label" for="editar-lattes">ID Lattes</label><input class="form-control rounded-0" id="editar-lattes" name="lattes_id" type="text" inputmode="numeric" pattern="[0-9]{16}" maxlength="16" value="<?= esc(old('lattes_id', $docente['lattes_id'] ?? ''), 'attr') ?>" placeholder="16 dígitos"></div>
                     <div class="col-md-6"><label class="form-label" for="editar-orcid">ORCID</label><input class="form-control rounded-0" id="editar-orcid" name="orcid" type="text" maxlength="19" pattern="[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9Xx]{4}" value="<?= esc(old('orcid', $docente['orcid'] ?? ''), 'attr') ?>" placeholder="0000-0000-0000-0000"></div>
                     <?php if ($linhas !== []) : ?>
@@ -281,7 +353,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const byId=Object.fromEntries(nodes.map(node=>[node.id,node]));
         data.links.forEach(edge=>{const a=byId[edge.source],b=byId[edge.target];if(!a||!b)return;const line=document.createElementNS(ns,'line');line.setAttribute('x1',a.x);line.setAttribute('y1',a.y);line.setAttribute('x2',b.x);line.setAttribute('y2',b.y);line.setAttribute('stroke','rgba(23,189,197,.48)');line.setAttribute('stroke-width',Math.min(1+edge.peso,7));svg.appendChild(line)});
         const cores={central:'#17bdc5',coautor:'#0dcaf0'};
-        nodes.forEach(node=>{const link=document.createElementNS(ns,'a');link.setAttribute('href',`<?= site_url('docent') ?>/${node.id}`);const circle=document.createElementNS(ns,'circle');circle.setAttribute('cx',node.x);circle.setAttribute('cy',node.y);circle.setAttribute('r',node.grupo==='central'?15:9);circle.setAttribute('fill',cores[node.grupo]||'#aac1d4');const title=document.createElementNS(ns,'title');title.textContent=node.nome;circle.appendChild(title);link.appendChild(circle);const text=document.createElementNS(ns,'text');text.setAttribute('x',node.x+14);text.setAttribute('y',node.y+4);text.setAttribute('fill','#edf7fb');text.setAttribute('font-size','11');text.textContent=node.nome.length>30?node.nome.slice(0,29)+'…':node.nome;link.appendChild(text);svg.appendChild(link)});
+        nodes.forEach(node=>{const link=document.createElementNS(ns,'a');link.setAttribute('href',`<?= site_url('person') ?>/${node.id}`);const circle=document.createElementNS(ns,'circle');circle.setAttribute('cx',node.x);circle.setAttribute('cy',node.y);circle.setAttribute('r',node.grupo==='central'?15:9);circle.setAttribute('fill',cores[node.grupo]||'#aac1d4');const title=document.createElementNS(ns,'title');title.textContent=node.nome;circle.appendChild(title);link.appendChild(circle);const text=document.createElementNS(ns,'text');text.setAttribute('x',node.x+14);text.setAttribute('y',node.y+4);text.setAttribute('fill','#edf7fb');text.setAttribute('font-size','11');text.textContent=node.nome.length>30?node.nome.slice(0,29)+'…':node.nome;link.appendChild(text);svg.appendChild(link)});
     };
     document.getElementById('rede-tab')?.addEventListener('shown.bs.tab', render, {once:true});
 });

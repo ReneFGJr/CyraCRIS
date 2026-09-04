@@ -42,7 +42,7 @@
                     <?= csrf_field() ?>
                     <label class="form-label fw-semibold" for="data">Dados para importação</label>
                     <textarea class="form-control rounded-0 font-monospace" id="data" name="data" rows="16"
-                        placeholder="Nome;IDlattes;email;cracha&#10;Maria Silva;1234567890123456;maria@example.com;171473"
+                        placeholder="Nome;ID Lattes;email;CPF;crachá&#10;Maria Silva;1234567890123456;maria@example.com;123.456.789-00;171473"
                         aria-describedby="data-help" required></textarea>
                     <div class="form-text cyra-muted mt-2" id="data-help">
                         Separe as colunas com ponto e vírgula, tabulação real, o texto /tab ou vírgula. O cabeçalho é opcional.
@@ -60,11 +60,12 @@
                     <li class="list-group-item bg-transparent text-white border-light border-opacity-10">Nome</li>
                     <li class="list-group-item bg-transparent text-white border-light border-opacity-10">IDlattes</li>
                     <li class="list-group-item bg-transparent text-white border-light border-opacity-10">email</li>
-                    <li class="list-group-item bg-transparent text-white border-light border-opacity-10">cracha</li>
+                    <li class="list-group-item bg-transparent text-white border-light border-opacity-10">CPF</li>
+                    <li class="list-group-item bg-transparent text-white border-light border-opacity-10">Crachá</li>
                 </ol>
                 <div class="mt-4 p-3 border border-info border-opacity-25">
                     <div class="small cyra-muted mb-2">Exemplo</div>
-                    <code class="text-info text-break">Maria Silva;1234567890123456;maria@example.com;171473</code>
+                    <code class="text-info text-break">Maria Silva;1234567890123456;maria@example.com;123.456.789-00;171473</code>
                 </div>
             </aside>
         </div>
