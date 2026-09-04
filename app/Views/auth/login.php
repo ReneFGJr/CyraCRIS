@@ -1,11 +1,12 @@
 <?= view('layout/header', [
     'title'       => $title ?? 'Entrar',
     'description' => 'Autenticação no CyraCRIS.',
+    'fluid'       => true,
 ]) ?>
 
-<main class="container py-5">
+<main class="container-fluid px-3 px-md-4 px-xxl-5 py-5">
     <div class="row justify-content-center py-lg-5">
-        <div class="col-md-8 col-lg-5">
+        <div class="col-12">
             <section class="cyra-panel p-4 p-md-5" aria-labelledby="login-title">
                 <p class="text-uppercase fw-bold small cyra-accent mb-3">
                     <i class="bi bi-shield-lock me-2"></i>Área restrita
@@ -40,4 +41,4 @@
     </div>
 </main>
 
-<?= view('layout/footer') ?>
+<?= view('layout/footer', ['fluid' => true]) ?>

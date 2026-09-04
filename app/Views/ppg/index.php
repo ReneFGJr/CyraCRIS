@@ -5,9 +5,10 @@ $rows = $programas ?? [];
 <?= view('layout/header', [
     'title' => 'Programas de Pós-Graduação',
     'description' => 'Programas de pós-graduação cadastrados no CyraCRIS.',
+    'fluid'       => true,
 ]) ?>
 
-<main class="container py-5">
+<main class="container-fluid px-3 px-md-4 px-xxl-5 py-5">
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
         <div>
             <p class="text-uppercase fw-bold small cyra-accent mb-2"><i class="bi bi-mortarboard me-2"></i>Base acadêmica</p>
@@ -62,4 +63,4 @@ $rows = $programas ?? [];
     <?php endif; ?>
 </main>
 
-<?= view('layout/footer') ?>
+<?= view('layout/footer', ['fluid' => true]) ?>
