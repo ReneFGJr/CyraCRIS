@@ -33,6 +33,17 @@ foreach ($docentesPorLinha as $docentesDaLinha) {
     }
 }
 $totaisDocentesPorTipo = array_map('count', $docentesUnicosPorTipo);
+$logoArquivo = basename((string) ($programa['logo'] ?? ''));
+$logoRelativo = '_repository/logoPPG/' . $logoArquivo;
+$logoCaminho = FCPATH . str_replace('/', DIRECTORY_SEPARATOR, $logoRelativo);
+$logoDisponivel = $logoArquivo !== '' && is_file($logoCaminho);
+$administradorLogado = session()->get('auth_logged_in') === true;
+$fotoPessoaDisponivel = static function (array $pessoa): bool {
+    $lattesId = preg_replace('/\D/', '', (string) ($pessoa['lattes_id'] ?? '')) ?? '';
+
+    return strlen($lattesId) === 16
+        && is_file(FCPATH . '_repository' . DIRECTORY_SEPARATOR . 'foto' . DIRECTORY_SEPARATOR . $lattesId . '.jpg');
+};
 ?>
 <?= view('layout/header', [
     'title' => $programa['nome'],
@@ -44,13 +55,16 @@ $totaisDocentesPorTipo = array_map('count', $docentesUnicosPorTipo);
     .ppg-hero { position: relative; overflow: hidden; border: 1px solid rgba(23, 189, 197, .3); background: linear-gradient(125deg, rgba(18, 102, 177, .34), rgba(5, 19, 40, .72)); }
     .ppg-hero::after { position: absolute; right: -4rem; bottom: -7rem; width: 20rem; height: 20rem; content: ""; border: 1px solid rgba(23, 189, 197, .25); border-radius: 50%; box-shadow: 0 0 0 3rem rgba(23, 189, 197, .04), 0 0 0 6rem rgba(23, 189, 197, .025); }
     .ppg-hero-content { position: relative; z-index: 1; }
-    .ppg-stat { position: relative; overflow: hidden; min-height: 13rem; border: 1px solid rgba(23, 189, 197, .28); background: radial-gradient(circle at 100% 0, rgba(23, 189, 197, .13), transparent 9rem), linear-gradient(145deg, rgba(5, 19, 40, .72), rgba(18, 102, 177, .14)); box-shadow: 0 .75rem 2rem rgba(0, 0, 0, .12); transition: transform .2s ease, border-color .2s ease; }
+    .ppg-logo { display: block; width: min(22rem, 100%); min-height: 200px; height: 200px; margin-left: auto; object-fit: contain; object-position: right center; }
+    .ppg-logo-area { min-width: min(22rem, 100%); margin-left: auto; text-align: right; }
+    .ppg-logo-upload { width: min(18rem, 100%); border: 1px dashed rgba(23, 189, 197, .55); background: rgba(5, 19, 40, .45); }
+    .ppg-stat { position: relative; overflow: hidden; min-height: 9.5rem; border: 1px solid rgba(23, 189, 197, .28); background: radial-gradient(circle at 100% 0, rgba(23, 189, 197, .13), transparent 9rem), linear-gradient(145deg, rgba(5, 19, 40, .72), rgba(18, 102, 177, .14)); box-shadow: 0 .75rem 2rem rgba(0, 0, 0, .12); transition: transform .2s ease, border-color .2s ease; }
     .ppg-stat:hover { transform: translateY(-3px); border-color: rgba(23, 189, 197, .65); }
     .ppg-stat-icon { display: grid; width: 3rem; height: 3rem; place-items: center; border: 1px solid rgba(23, 189, 197, .3); color: var(--cyra-cyan); background: rgba(23, 189, 197, .08); }
-    .ppg-stat-label { display: block; min-height: 2.5rem; line-height: 1.25; }
+    .ppg-stat-label { display: block; min-height: 1.25rem; line-height: 1.2; }
     .ppg-stat-breakdown { display: block; color: var(--cyra-cyan); font: 700 1.15rem Georgia, serif; letter-spacing: .04em; }
     .ppg-stat-legend { display: block; color: var(--cyra-muted); font-size: .68rem; line-height: 1.35; }
-    .ppg-stat-value { font-family: Georgia, "Times New Roman", serif; font-size: clamp(2.2rem, 3vw, 3.15rem); line-height: 1; letter-spacing: -.03em; }
+    .ppg-stat-value { font-family: Georgia, "Times New Roman", serif; font-size: clamp(1.9rem, 2.5vw, 2.65rem); line-height: 1; letter-spacing: -.03em; }
     .ppg-card { border-top: 3px solid rgba(23, 189, 197, .55); }
     .ppg-quick-link { border-color: rgba(151, 205, 225, .25); color: var(--cyra-muted); }
     .ppg-quick-link:hover { color: #fff; border-color: var(--cyra-cyan); background: rgba(23, 189, 197, .1); }
@@ -69,6 +83,7 @@ $totaisDocentesPorTipo = array_map('count', $docentesUnicosPorTipo);
     .ppg-teacher-card { height: 100%; border: 1px solid rgba(151, 205, 225, .14); background: rgba(7, 26, 54, .75); transition: border-color .2s ease, transform .2s ease; }
     .ppg-teacher-card:hover { transform: translateY(-2px); border-color: rgba(23, 189, 197, .5); }
     .ppg-avatar { display: grid; width: 2.75rem; height: 2.75rem; place-items: center; flex: 0 0 auto; border-radius: 50%; color: #061328; background: var(--cyra-cyan); font-weight: 700; }
+    .ppg-avatar-photo { width: 2.75rem; height: 2.75rem; flex: 0 0 auto; border: 2px solid rgba(23, 189, 197, .65); border-radius: 50%; object-fit: cover; object-position: center top; box-shadow: 0 .35rem .85rem rgba(0, 0, 0, .3); }
     .ppg-meta { display: inline-flex; align-items: center; padding: .2rem .45rem; border: 1px solid rgba(151, 205, 225, .14); color: var(--cyra-muted); font-size: .72rem; }
     .ppg-add-form { border-top: 1px dashed rgba(23, 189, 197, .3); background: rgba(23, 189, 197, .05); }
     .ppg-tabs .nav-link { color: var(--cyra-muted); border: 0; border-bottom: 3px solid transparent; }
@@ -83,8 +98,9 @@ $totaisDocentesPorTipo = array_map('count', $docentesUnicosPorTipo);
         <i class="bi bi-arrow-left me-2"></i>Voltar para programas
     </a>
 
-    <header class="ppg-hero p-4 p-lg-5 mb-4">
-        <div class="ppg-hero-content col-xl-9">
+    <header class="ppg-hero p-3 p-lg-4 mb-3">
+        <div class="ppg-hero-content d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-4">
+            <div class="flex-grow-1">
             <p class="text-uppercase fw-bold small cyra-accent mb-2"><i class="bi bi-mortarboard me-2"></i>Programa de pós-graduação</p>
             <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
                 <span class="badge text-bg-info rounded-0 px-3 py-2">Nota CAPES <?= esc($programa['nota_capes'] ?? '-') ?></span>
@@ -93,6 +109,21 @@ $totaisDocentesPorTipo = array_map('count', $docentesUnicosPorTipo);
             </div>
             <h1 class="cyra-heading display-6 text-white mb-3"><?= esc($programa['nome']) ?></h1>
             <p class="lead cyra-muted mb-0"><i class="bi bi-building me-2 cyra-accent"></i><?= esc($programa['instituicao_nome'] ?? '-') ?><?php if (! empty($programa['instituicao_sigla'])) : ?> <span class="text-white">(<?= esc($programa['instituicao_sigla']) ?>)</span><?php endif; ?></p>
+            </div>
+            <?php if ($logoDisponivel) : ?>
+                <aside class="ppg-logo-area flex-shrink-0">
+                    <img class="ppg-logo" src="<?= base_url($logoRelativo) ?>?v=<?= filemtime($logoCaminho) ?>" alt="Logo de <?= esc($programa['nome'], 'attr') ?>">
+                </aside>
+            <?php elseif ($administradorLogado) : ?>
+                <aside class="ppg-logo-upload flex-shrink-0 p-3">
+                    <form method="post" action="<?= site_url('ppg/' . (int) $programa['id'] . '/logo') ?>" enctype="multipart/form-data">
+                        <?= csrf_field() ?>
+                        <label class="form-label small text-white" for="logo-ppg">Adicionar logo do programa</label>
+                        <input class="form-control form-control-sm rounded-0 mb-2" id="logo-ppg" name="logo" type="file" accept="image/jpeg,image/png,image/gif,image/webp" required>
+                        <button class="btn btn-info btn-sm rounded-0 w-100" type="submit"><i class="bi bi-upload me-2"></i>Salvar logo</button>
+                    </form>
+                </aside>
+            <?php endif; ?>
         </div>
     </header>
 
@@ -115,9 +146,9 @@ $totaisDocentesPorTipo = array_map('count', $docentesUnicosPorTipo);
             ['person-workspace', $mestrandosAtivos . ' / ' . $doutorandosAtivos, 'Estudantes ativos', null, 'Mestrado / Doutorado'],
         ] as [$icone, $valor, $rotulo, $detalhe, $legenda]) : ?>
             <div class="col-12 col-sm-6 col-xl-3">
-                <article class="ppg-stat p-4 h-100">
+                <article class="ppg-stat p-3 h-100">
                     <span class="ppg-stat-icon"><i class="bi bi-<?= $icone ?> fs-4"></i></span>
-                    <strong class="ppg-stat-value d-block text-white mt-4 mb-2"><?= esc((string) $valor) ?></strong>
+                    <strong class="ppg-stat-value d-block text-white mt-3 mb-2"><?= esc((string) $valor) ?></strong>
                     <span class="ppg-stat-label small text-white"><?= esc($rotulo) ?></span>
                     <?php if (! empty($detalhe)) : ?><span class="ppg-stat-breakdown mt-2"><?= esc($detalhe) ?></span><?php endif; ?>
                     <small class="ppg-stat-legend mt-1"><?= esc($legenda) ?></small>
@@ -267,10 +298,15 @@ $totaisDocentesPorTipo = array_map('count', $docentesUnicosPorTipo);
                                                 <?php else : ?>
                                                     <div class="row g-3">
                                                         <?php foreach ($docentesGrupo as $docente) : ?>
+                                                            <?php $temFotoDocente = $fotoPessoaDisponivel($docente); ?>
                                                             <div class="col-md-6 col-xl-4">
                                                                 <div class="ppg-teacher-card p-3">
                                                                     <div class="d-flex gap-3">
-                                                                        <span class="ppg-avatar" aria-hidden="true"><?= esc(mb_strtoupper(mb_substr((string) $docente['nome'], 0, 1))) ?></span>
+                                                                        <?php if ($temFotoDocente) : ?>
+                                                                            <img class="ppg-avatar-photo" src="<?= site_url('person/' . (int) $docente['id'] . '/foto') ?>" alt="Foto de <?= esc($docente['nome'], 'attr') ?>" loading="lazy">
+                                                                        <?php else : ?>
+                                                                            <span class="ppg-avatar" aria-hidden="true"><?= esc(mb_strtoupper(mb_substr((string) $docente['nome'], 0, 1))) ?></span>
+                                                                        <?php endif; ?>
                                                                         <div class="min-w-0">
                                                                             <a class="text-white fw-semibold text-decoration-none" href="<?= site_url('person/' . $docente['id']) ?>"><?= esc($docente['nome']) ?> <i class="bi bi-arrow-up-right small cyra-accent"></i></a>
                                                                             <small class="d-block cyra-muted mt-1"><?= esc($rotuloTipo) ?> · <?= esc(match ((int) ($docente['genero'] ?? 0)) { 1 => 'Masculino', 2 => 'Feminino', default => 'Gênero não informado' }) ?></small>
@@ -304,7 +340,28 @@ $totaisDocentesPorTipo = array_map('count', $docentesUnicosPorTipo);
                                 <section class="<?= $grupoId === 'concluidos' ? 'mt-5' : '' ?>">
                                     <div class="d-flex align-items-center gap-2 mb-3"><h3 class="h6 text-white mb-0"><i class="bi bi-<?= $icone ?> me-2 <?= $cor ?>"></i><?= esc($tituloGrupo) ?></h3><span class="badge border border-light border-opacity-25 text-light rounded-0"><?= count($alunosGrupo) ?></span></div>
                                     <?php if ($alunosGrupo === []) : ?><p class="cyra-muted small mb-0">Nenhum aluno nesta situação.</p><?php else : ?>
-                                        <div class="row g-3"><?php foreach ($alunosGrupo as $aluno) : ?><div class="col-md-6 col-xl-4"><article class="ppg-student-card p-3 h-100"><div class="d-flex justify-content-between gap-2"><div><a class="text-white fw-semibold text-decoration-none" href="<?= site_url('person/' . $aluno['id']) ?>"><?= esc($aluno['nome']) ?> <i class="bi bi-arrow-up-right small cyra-accent"></i></a><small class="d-block cyra-muted mt-1">Orientador: <a class="cyra-accent" href="<?= site_url('person/' . $aluno['orientador_id']) ?>"><?= esc($aluno['orientador_nome']) ?></a></small></div><span class="badge <?= $aluno['tipo'] === 'Doutorado' ? 'text-bg-info' : 'bg-primary' ?> rounded-0 align-self-start"><?= esc($aluno['tipo']) ?></span></div><div class="d-flex flex-wrap gap-2 mt-3"><span class="ppg-meta <?= $cor ?>"><?= esc($tituloGrupo) ?></span><span class="ppg-meta"><?= esc($aluno['ano_inicio'] ?? '-') ?> – <?= esc($aluno['ano_final'] ?? '-') ?></span></div></article></div><?php endforeach; ?></div>
+                                        <div class="row g-3">
+                                            <?php foreach ($alunosGrupo as $aluno) : ?>
+                                                <?php $temFotoAluno = $fotoPessoaDisponivel($aluno); ?>
+                                                <div class="col-md-6 col-xl-4">
+                                                    <article class="ppg-student-card p-3 h-100">
+                                                        <div class="d-flex justify-content-between gap-2">
+                                                            <div class="d-flex gap-3">
+                                                                <?php if ($temFotoAluno) : ?>
+                                                                    <img class="ppg-avatar-photo" src="<?= site_url('person/' . (int) $aluno['id'] . '/foto') ?>" alt="Foto de <?= esc($aluno['nome'], 'attr') ?>" loading="lazy">
+                                                                <?php endif; ?>
+                                                                <div>
+                                                                    <a class="text-white fw-semibold text-decoration-none" href="<?= site_url('person/' . $aluno['id']) ?>"><?= esc($aluno['nome']) ?> <i class="bi bi-arrow-up-right small cyra-accent"></i></a>
+                                                                    <small class="d-block cyra-muted mt-1">Orientador: <a class="cyra-accent" href="<?= site_url('person/' . $aluno['orientador_id']) ?>"><?= esc($aluno['orientador_nome']) ?></a></small>
+                                                                </div>
+                                                            </div>
+                                                            <span class="badge <?= $aluno['tipo'] === 'Doutorado' ? 'text-bg-info' : 'bg-primary' ?> rounded-0 align-self-start"><?= esc($aluno['tipo']) ?></span>
+                                                        </div>
+                                                        <div class="d-flex flex-wrap gap-2 mt-3"><span class="ppg-meta <?= $cor ?>"><?= esc($tituloGrupo) ?></span><span class="ppg-meta"><?= esc($aluno['ano_inicio'] ?? '-') ?> – <?= esc($aluno['ano_final'] ?? '-') ?></span></div>
+                                                    </article>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
                                     <?php endif; ?>
                                 </section>
                             <?php endforeach; ?>

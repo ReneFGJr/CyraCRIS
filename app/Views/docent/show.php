@@ -22,14 +22,23 @@ $diasSemAtualizacao = $lattesAtualizadoEm instanceof DateTimeImmutable
 $orientacoesPorTipo = [];
 $ordemTiposOrientacao = ['Pós-doc', 'Doutorado', 'Mestrado', 'Especialização', 'TCC (Graduação)', 'Iniciação científica', 'Outras'];
 foreach ($ordemTiposOrientacao as $tipo) {
-    $orientacoesPorTipo[$tipo] = ['total' => 0, 'andamento' => 0, 'concluidas' => 0];
+    $orientacoesPorTipo[$tipo] = [
+        'total' => 0,
+        'ORIENTADOR' => ['total' => 0, 'andamento' => 0, 'concluidas' => 0],
+        'CO_ORIENTADOR' => ['total' => 0, 'andamento' => 0, 'concluidas' => 0],
+    ];
 }
 foreach ($orientacoes as $orientacao) {
     $tipo = (string) $orientacao['tipo'];
     $tipo = $tipo === 'Pos-doc' ? 'Pós-doc' : $tipo;
     $tipoGrupo = in_array($tipo, array_slice($ordemTiposOrientacao, 0, -1), true) ? $tipo : 'Outras';
+    $funcaoGrupo = ($orientacao['tipo_orientacao'] ?? 'ORIENTADOR') === 'CO_ORIENTADOR'
+        ? 'CO_ORIENTADOR'
+        : 'ORIENTADOR';
+    $statusGrupo = (int) $orientacao['status'] === 1 ? 'concluidas' : 'andamento';
     $orientacoesPorTipo[$tipoGrupo]['total']++;
-    $orientacoesPorTipo[$tipoGrupo][(int) $orientacao['status'] === 1 ? 'concluidas' : 'andamento']++;
+    $orientacoesPorTipo[$tipoGrupo][$funcaoGrupo]['total']++;
+    $orientacoesPorTipo[$tipoGrupo][$funcaoGrupo][$statusGrupo]++;
 }
 $orientacoesAgrupadas = [
     'andamento'  => array_fill_keys($ordemTiposOrientacao, []),
@@ -97,8 +106,33 @@ $numeroWhatsapp = static function (string $valor): string {
     .orientation-person-column { width: 25%; min-width: 16rem; }
     .lattes-xml-frame { width: 100%; min-height: 70vh; border: 1px solid rgba(151, 205, 225, .25); background: #fff; }
     .resumo-geral-layout { display: grid; grid-template-columns: minmax(0, 1fr) 10rem; gap: 1.5rem; align-items: start; }
-    .resumo-geral-foto { width: 10rem; aspect-ratio: 4 / 5; object-fit: cover; object-position: center top; border: 1px solid rgba(255, 255, 255, .2); background: rgba(255, 255, 255, .04); }
+    .resumo-geral-foto { width: 10rem; aspect-ratio: 4 / 5; object-fit: cover; object-position: center top; border: 3px solid rgba(23, 189, 197, .72); border-radius: 1.25rem; background: rgba(255, 255, 255, .04); box-shadow: 0 1rem 2.25rem rgba(0, 0, 0, .38), 0 0 0 .3rem rgba(23, 189, 197, .1); transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+    .resumo-geral-foto:hover { transform: translateY(-3px); border-color: rgba(151, 226, 230, .95); box-shadow: 0 1.35rem 2.75rem rgba(0, 0, 0, .46), 0 0 0 .35rem rgba(23, 189, 197, .14); }
     .resumo-geral-foto-vazia { display: flex; align-items: center; justify-content: center; font-size: 4rem; color: rgba(255, 255, 255, .35); }
+    .dados-header { padding-bottom: 1rem; border-bottom: 1px solid rgba(151, 205, 225, .16); }
+    .dados-card { display: flex; min-height: 7.5rem; gap: 1rem; padding: 1.25rem; border: 1px solid rgba(151, 205, 225, .16); background: linear-gradient(145deg, rgba(18, 102, 177, .11), rgba(5, 19, 40, .42)); transition: border-color .2s ease, transform .2s ease; }
+    .dados-card:hover { transform: translateY(-2px); border-color: rgba(23, 189, 197, .48); }
+    .dados-card-icon { display: grid; width: 2.75rem; height: 2.75rem; flex: 0 0 auto; place-items: center; border: 1px solid rgba(23, 189, 197, .36); border-radius: .75rem; color: var(--cyra-cyan); background: rgba(23, 189, 197, .08); font-size: 1.2rem; }
+    .dados-card-label { display: block; margin-bottom: .35rem; color: var(--cyra-muted); font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .dados-card-value { overflow-wrap: anywhere; color: #fff; font-size: 1rem; }
+    .dados-section { padding: 1.25rem; border: 1px solid rgba(151, 205, 225, .16); background: rgba(5, 19, 40, .32); }
+    .dados-table { --bs-table-bg: transparent; }
+    .dados-table thead th { padding-top: .8rem; padding-bottom: .8rem; color: var(--cyra-muted); font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; }
+    .dados-table tbody td { padding-top: .9rem; padding-bottom: .9rem; }
+    .dados-section .table { --bs-table-bg: transparent; }
+    .dados-section .table thead th { padding-top: .8rem; padding-bottom: .8rem; color: var(--cyra-muted); font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; }
+    .dados-section .table tbody td { padding-top: .9rem; padding-bottom: .9rem; }
+    .orientacao-summary { min-height: 6.5rem; padding: 1rem; border: 1px solid rgba(151, 205, 225, .16); background: linear-gradient(145deg, rgba(18, 102, 177, .12), rgba(5, 19, 40, .4)); }
+    .orientacao-summary i { color: var(--cyra-cyan); font-size: 1.2rem; }
+    .orientacao-panel { padding: 1.25rem; border: 1px solid rgba(151, 205, 225, .18); background: rgba(5, 19, 40, .34); }
+    .orientacao-panel + .orientacao-panel { margin-top: 1.5rem; }
+    .orientacao-panel-header { padding-bottom: 1rem; border-bottom: 1px solid rgba(151, 205, 225, .14); }
+    .orientacao-status { margin-top: 1.25rem; padding: 1rem; border-left: 3px solid rgba(23, 189, 197, .45); background: rgba(7, 26, 54, .42); }
+    .orientacao-status.status-warning { border-left-color: var(--bs-warning); }
+    .orientacao-status.status-success { border-left-color: var(--bs-success); }
+    .orientacao-panel .table { --bs-table-bg: transparent; min-width: 58rem; }
+    .orientacao-panel .table thead th { padding: .75rem; color: var(--cyra-muted); font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; }
+    .orientacao-panel .table tbody td { padding: .85rem .75rem; border-color: rgba(151, 205, 225, .1); }
     @media (max-width: 767.98px) {
         .resumo-geral-layout { grid-template-columns: 1fr; }
         .resumo-geral-foto { width: 8rem; grid-row: 1; }
@@ -188,12 +222,19 @@ $numeroWhatsapp = static function (string $valor): string {
                         <div class="col-sm-6 col-lg-4 col-xl">
                             <div class="border border-light border-opacity-10 p-3 h-100">
                                 <span class="small text-white fw-semibold"><?= esc($tipo) ?></span>
-                                <div class="d-flex align-items-baseline gap-2 my-2" aria-label="<?= (int) $quantidades['andamento'] ?> em andamento e <?= (int) $quantidades['concluidas'] ?> concluídas">
-                                    <strong class="h3 text-warning mb-0"><?= (int) $quantidades['andamento'] ?></strong>
-                                    <span class="h4 cyra-muted mb-0">/</span>
-                                    <strong class="h3 mb-0 <?= (int) $quantidades['concluidas'] === 0 ? 'cyra-muted' : 'text-success' ?>"><?= (int) $quantidades['concluidas'] ?></strong>
-                                </div>
-                                <small class="cyra-muted">Em andamento / Concluídas</small>
+                                <?php foreach (['ORIENTADOR' => 'Orientações', 'CO_ORIENTADOR' => 'Coorientações'] as $funcao => $rotuloFuncao) : ?>
+                                    <?php $dadosFuncao = $quantidades[$funcao]; ?>
+                                    <?php if ((int) $dadosFuncao['total'] === 0) { continue; } ?>
+                                    <div class="mt-3 pt-2 border-top border-light border-opacity-10">
+                                        <span class="badge <?= $funcao === 'CO_ORIENTADOR' ? 'text-bg-secondary' : 'text-bg-info' ?> rounded-0"><?= esc($rotuloFuncao) ?></span>
+                                        <div class="d-flex align-items-baseline gap-2 my-2" aria-label="<?= (int) $dadosFuncao['andamento'] ?> em andamento e <?= (int) $dadosFuncao['concluidas'] ?> concluídas">
+                                            <strong class="h4 text-warning mb-0"><?= (int) $dadosFuncao['andamento'] ?></strong>
+                                            <span class="cyra-muted mb-0">/</span>
+                                            <strong class="h4 mb-0 <?= (int) $dadosFuncao['concluidas'] === 0 ? 'cyra-muted' : 'text-success' ?>"><?= (int) $dadosFuncao['concluidas'] ?></strong>
+                                        </div>
+                                        <small class="cyra-muted">Em andamento / Concluídas</small>
+                                    </div>
+                                <?php endforeach; ?>
                             </div>
                         </div>
                     <?php endforeach; ?>
@@ -227,15 +268,18 @@ $numeroWhatsapp = static function (string $valor): string {
         </section>
 
         <section class="tab-pane fade" id="dados" role="tabpanel" aria-labelledby="dados-tab" tabindex="0">
-            <h2 class="h5 text-white mb-4">Informações</h2>
-            <dl class="row mb-0">
-                <dt class="col-sm-3 cyra-muted">Gênero</dt><dd class="col-sm-9 text-white mb-3"><?= esc($genero) ?></dd>
-                <dt class="col-sm-3 cyra-muted">E-mail</dt><dd class="col-sm-9 mb-3"><?php if (! empty($docente['email'])) : ?><a class="cyra-accent" href="mailto:<?= esc($docente['email'], 'attr') ?>"><?= esc($docente['email']) ?></a><?php else : ?><span class="text-white">Não informado</span><?php endif; ?></dd>
-                <dt class="col-sm-3 cyra-muted">ID Lattes</dt><dd class="col-sm-9 mb-3"><?php if (! empty($docente['lattes_id'])) : ?><a class="cyra-accent" href="http://lattes.cnpq.br/<?= esc($docente['lattes_id'], 'attr') ?>" target="_blank" rel="noopener noreferrer"><?= esc($docente['lattes_id']) ?> <i class="bi bi-box-arrow-up-right ms-1"></i></a><?php else : ?><span class="text-white">Não informado</span><?php endif; ?></dd>
-                <dt class="col-sm-3 cyra-muted">ORCID</dt><dd class="col-sm-9 mb-0"><?php if (! empty($docente['orcid'])) : ?><a class="cyra-accent" href="https://orcid.org/<?= esc($docente['orcid'], 'attr') ?>" target="_blank" rel="noopener noreferrer"><?= esc($docente['orcid']) ?></a><?php else : ?><span class="text-white">Não informado</span><?php endif; ?></dd>
-            </dl>
+            <header class="dados-header mb-4">
+                <h2 class="h5 text-white mb-1">Informações pessoais</h2>
+                <p class="small cyra-muted mb-0">Identificação e contatos vinculados a este perfil acadêmico.</p>
+            </header>
+            <div class="row g-3">
+                <div class="col-sm-6 col-xl-3"><article class="dados-card h-100"><span class="dados-card-icon"><i class="bi bi-<?= $generoIcone ?>"></i></span><div><span class="dados-card-label">Gênero</span><span class="dados-card-value"><?= esc($genero) ?></span></div></article></div>
+                <div class="col-sm-6 col-xl-3"><article class="dados-card h-100"><span class="dados-card-icon"><i class="bi bi-envelope"></i></span><div><span class="dados-card-label">E-mail</span><span class="dados-card-value"><?php if (! empty($docente['email'])) : ?><a class="cyra-accent text-decoration-none" href="mailto:<?= esc($docente['email'], 'attr') ?>"><?= esc($docente['email']) ?></a><?php else : ?>Não informado<?php endif; ?></span></div></article></div>
+                <div class="col-sm-6 col-xl-3"><article class="dados-card h-100"><span class="dados-card-icon"><i class="bi bi-journal-text"></i></span><div><span class="dados-card-label">ID Lattes</span><span class="dados-card-value"><?php if (! empty($docente['lattes_id'])) : ?><a class="cyra-accent text-decoration-none" href="http://lattes.cnpq.br/<?= esc($docente['lattes_id'], 'attr') ?>" target="_blank" rel="noopener noreferrer"><?= esc($docente['lattes_id']) ?> <i class="bi bi-box-arrow-up-right ms-1"></i></a><?php else : ?>Não informado<?php endif; ?></span></div></article></div>
+                <div class="col-sm-6 col-xl-3"><article class="dados-card h-100"><span class="dados-card-icon"><i class="bi bi-person-badge"></i></span><div><span class="dados-card-label">ORCID</span><span class="dados-card-value"><?php if (! empty($docente['orcid'])) : ?><a class="cyra-accent text-decoration-none" href="https://orcid.org/<?= esc($docente['orcid'], 'attr') ?>" target="_blank" rel="noopener noreferrer"><?= esc($docente['orcid']) ?></a><?php else : ?>Não informado<?php endif; ?></span></div></article></div>
+            </div>
             <?php if ($administradorLogado) : ?>
-                <section class="border-top border-secondary mt-4 pt-4" aria-labelledby="rdf-data-title">
+                <section class="dados-section mt-4" aria-labelledby="rdf-data-title">
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                         <div><h3 class="h6 text-white mb-1" id="rdf-data-title"><i class="bi bi-diagram-2 me-2 cyra-accent"></i>Dados RDF</h3><p class="small cyra-muted mb-0">Dados vinculados pelo campo d_individuo.</p></div>
                         <button class="btn btn-sm btn-info rounded-0" type="button" data-bs-toggle="collapse" data-bs-target="#adicionar-rdf-data" aria-expanded="false" aria-controls="adicionar-rdf-data" <?= $rdfClasses === [] ? 'disabled' : '' ?> title="Incluir novo dado RDF"><i class="bi bi-plus-lg"></i><span class="visually-hidden">Incluir novo dado RDF</span></button>
@@ -257,7 +301,7 @@ $numeroWhatsapp = static function (string $valor): string {
                     <?php endif; ?>
                 </section>
             <?php endif; ?>
-            <div class="border-top border-secondary mt-4 pt-4">
+            <section class="dados-section mt-4">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                     <h3 class="h6 text-white mb-0"><i class="bi bi-signpost-split me-2 cyra-accent"></i>Remissivas</h3>
                     <span class="badge text-bg-secondary rounded-0"><?= count($remissivas) ?></span>
@@ -289,7 +333,7 @@ $numeroWhatsapp = static function (string $valor): string {
                         </table>
                     </div>
                 <?php endif; ?>
-            </div>
+            </section>
         </section>
 
         <section class="tab-pane fade" id="vinculos" role="tabpanel" aria-labelledby="vinculos-tab" tabindex="0">
@@ -300,12 +344,27 @@ $numeroWhatsapp = static function (string $valor): string {
         </section>
 
         <section class="tab-pane fade" id="orientacoes" role="tabpanel" aria-labelledby="orientacoes-tab" tabindex="0">
-            <h2 class="h5 text-white mb-3">Orientados</h2>
+            <header class="dados-header mb-4">
+                <h2 class="h5 text-white mb-1"><i class="bi bi-mortarboard me-2 cyra-accent"></i>Orientações e orientadores</h2>
+                <p class="small cyra-muted mb-0">Acompanhamento das relações de orientação acadêmica deste perfil.</p>
+            </header>
+            <div class="row g-3 mb-4">
+                <?php foreach ([
+                    ['people', count($orientacoes), 'Pessoas orientadas', 'text-info'],
+                    ['hourglass-split', $totalAndamento, 'Em andamento', 'text-warning'],
+                    ['check-circle', $totalConcluidas, 'Concluídas', 'text-success'],
+                    ['person-check', count($orientadores), 'Orientadores', 'text-info'],
+                ] as [$icone, $quantidade, $rotulo, $cor]) : ?>
+                    <div class="col-6 col-xl-3"><article class="orientacao-summary h-100"><i class="bi bi-<?= $icone ?> <?= $cor ?>"></i><strong class="d-block h3 text-white mt-2 mb-1"><?= (int) $quantidade ?></strong><span class="small cyra-muted"><?= esc($rotulo) ?></span></article></div>
+                <?php endforeach; ?>
+            </div>
+            <section class="orientacao-panel">
+                <div class="orientacao-panel-header"><h3 class="h5 text-white mb-1">Pessoas orientadas</h3><p class="small cyra-muted mb-0">Orientações em que esta pessoa atua como orientadora ou coorientadora.</p></div>
             <?php if ($orientacoes === []) : ?>
                 <p class="cyra-muted">Nenhum estudante orientado.</p>
             <?php else : ?>
                 <?php foreach ([['andamento', 'Em andamento', 'warning'], ['concluidas', 'Concluídas', 'success']] as [$statusGrupo, $statusTitulo, $statusCor]) : ?>
-                    <div class="d-flex align-items-center gap-2 mt-4 mb-3">
+                    <div class="orientacao-status status-<?= esc($statusCor, 'attr') ?> d-flex align-items-center gap-2 mb-3">
                         <h3 class="h5 text-white mb-0"><?= esc($statusTitulo) ?></h3>
                         <span class="badge text-bg-<?= $statusCor ?> rounded-0"><?= array_sum(array_map('count', $orientacoesAgrupadas[$statusGrupo])) ?></span>
                     </div>
@@ -336,10 +395,12 @@ $numeroWhatsapp = static function (string $valor): string {
                         </div>
                     <?php endforeach; ?>
                 <?php endforeach; ?>
-                <div class="mb-5"></div>
             <?php endif; ?>
-            <h2 class="h5 text-white mb-3">Orientadores deste estudante</h2>
-            <?php if ($orientadores === []) : ?><p class="cyra-muted mb-0">Nenhum orientador registrado para este indivíduo.</p><?php else : ?><div class="table-responsive"><table class="table table-dark table-hover align-middle mb-0"><thead><tr><th class="orientation-person-column">Orientador</th><th>Tipo</th><th>Função</th><th>Programa / Instituição</th><th>Status</th><th>Período</th><th>Título</th></tr></thead><tbody><?php foreach ($orientadores as $item) : ?><tr><td class="orientation-person-column"><a class="cyra-accent" href="<?= site_url('person/' . $item['orientador_id']) ?>"><?= esc($item['orientador_nome']) ?></a></td><td class="text-white"><?= esc($item['tipo']) ?></td><td><span class="badge <?= $item['tipo_orientacao'] === 'CO_ORIENTADOR' ? 'text-bg-secondary' : 'text-bg-info' ?> rounded-0"><?= $item['tipo_orientacao'] === 'CO_ORIENTADOR' ? 'Coorientador' : 'Orientador' ?></span></td><td class="cyra-muted small"><?php if (! empty($item['programa_id'])) : ?><a class="cyra-accent" href="<?= site_url('ppg/' . (int) $item['programa_id']) ?>"><?= esc($item['programa_nome']) ?></a><?php else : ?>-<?php endif; ?><?php if (! empty($item['instituicao_nome'])) : ?><span class="d-block"><?= esc($item['instituicao_nome']) ?></span><?php endif; ?></td><td class="cyra-muted"><?= (int) $item['status'] === 1 ? 'Concluída' : 'Em andamento' ?></td><td class="cyra-muted"><?= esc($item['ano_inicio'] ?? '-') ?> – <?= esc($item['ano_final'] ?? '-') ?></td><td class="cyra-muted"><?= esc($item['titulo'] ?: '-') ?></td></tr><?php endforeach; ?></tbody></table></div><?php endif; ?>
+            </section>
+            <section class="orientacao-panel">
+            <div class="orientacao-panel-header mb-3"><h3 class="h5 text-white mb-1">Orientadores desta pessoa</h3><p class="small cyra-muted mb-0">Orientações em que este perfil aparece como estudante.</p></div>
+            <?php if ($orientadores === []) : ?><p class="cyra-muted mb-0">Nenhum orientador registrado para este indivíduo.</p><?php else : ?><div class="table-responsive"><table class="table table-dark table-hover align-middle mb-0"><thead><tr><th class="orientation-person-column">Orientador</th><th>Tipo</th><th>Função</th><th>Programa / Instituição</th><th>Status</th><th>Período</th><th>Título</th></tr></thead><tbody><?php foreach ($orientadores as $item) : ?><tr><td class="orientation-person-column"><a class="cyra-accent" href="<?= site_url('person/' . $item['orientador_id']) ?>"><?= esc($item['orientador_nome']) ?></a></td><td class="text-white"><?= esc($item['tipo']) ?></td><td><span class="badge <?= $item['tipo_orientacao'] === 'CO_ORIENTADOR' ? 'text-bg-secondary' : 'text-bg-info' ?> rounded-0"><?= $item['tipo_orientacao'] === 'CO_ORIENTADOR' ? 'Coorientador' : 'Orientador' ?></span></td><td class="cyra-muted small"><?php if (! empty($item['programa_id'])) : ?><a class="cyra-accent" href="<?= site_url('ppg/' . (int) $item['programa_id']) ?>"><?= esc($item['programa_nome']) ?></a><?php else : ?>-<?php endif; ?><?php if (! empty($item['instituicao_nome'])) : ?><span class="d-block"><?= esc($item['instituicao_nome']) ?></span><?php endif; ?></td><td><span class="badge <?= (int) $item['status'] === 1 ? 'text-bg-success' : 'text-bg-warning' ?> rounded-0"><?= (int) $item['status'] === 1 ? 'Concluída' : 'Em andamento' ?></span></td><td class="cyra-muted text-nowrap"><?= esc($item['ano_inicio'] ?? '-') ?> – <?= esc($item['ano_final'] ?? '-') ?></td><td class="cyra-muted"><?= esc($item['titulo'] ?: '-') ?></td></tr><?php endforeach; ?></tbody></table></div><?php endif; ?>
+            </section>
         </section>
 
         <section class="tab-pane fade" id="projetos" role="tabpanel" aria-labelledby="projetos-tab" tabindex="0">
@@ -394,7 +455,7 @@ $numeroWhatsapp = static function (string $valor): string {
                         <?php endif; ?>
                     </section>
                 <?php endforeach; ?>
-            </div>
+            </section>
         </section>
 
         <section class="tab-pane fade" id="lattes-xml" role="tabpanel" aria-labelledby="lattes-xml-tab" tabindex="0">
