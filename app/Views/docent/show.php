@@ -98,6 +98,7 @@ $numeroWhatsapp = static function (string $valor): string {
 <?= view('layout/header', ['title' => $docente['nome'], 'description' => 'Perfil acadêmico de ' . $docente['nome'] . '.', 'fluid' => true]) ?>
 
 <style>
+    #perfil-tabs-content > .tab-pane:focus { outline: none; }
     #rede-individual { width: 100%; min-height: 36rem; border: 1px solid rgba(151, 205, 225, .14); background: radial-gradient(circle at center, rgba(18, 102, 177, .18), rgba(5, 19, 40, .86)); }
     .perfil-name-icons { margin-left: auto; font-family: "Trebuchet MS", "Segoe UI", sans-serif; font-size: 1.25rem; }
     .perfil-name-icon { display: inline-flex; align-items: center; justify-content: center; color: #fff; text-decoration: none; }
