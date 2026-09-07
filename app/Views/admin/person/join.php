@@ -39,10 +39,16 @@
                 <thead><tr><th class="px-4 py-3">ID</th><th class="py-3">Nome</th><th class="py-3">Similaridade</th><th class="py-3">ID Lattes</th><th class="py-3">ORCID</th><th class="py-3">Agrupado com</th><th class="px-4 py-3 text-end">Ação</th></tr></thead>
                 <tbody>
                     <?php foreach ($matches as $match) : ?>
+                        <?php
+                        $similaridade = (float) $match['similarity'];
+                        $corSimilaridade = $similaridade >= 100
+                            ? 'primary'
+                            : ($similaridade >= 90 ? 'success' : 'secondary');
+                        ?>
                         <tr>
                             <td class="px-4 cyra-muted"><?= (int) $match['id'] ?></td>
                             <td class="fw-semibold text-white"><?= esc($match['nome']) ?></td>
-                            <td><span class="badge text-bg-info rounded-0"><?= number_format((float) $match['similarity'], 2, ',', '.') ?>%</span></td>
+                            <td><span class="badge text-bg-<?= $corSimilaridade ?> rounded-0"><?= number_format($similaridade, 2, ',', '.') ?>%</span></td>
                             <td><?= esc($match['lattes_id'] ?: '—') ?></td>
                             <td><?= esc($match['orcid'] ?: '—') ?></td>
                             <td><?= (int) $match['use'] > 0 ? (int) $match['use'] : '—' ?></td>
