@@ -17,6 +17,17 @@ $alunosAtivos = array_values(array_filter($alunos, static fn (array $aluno): boo
 $alunosConcluidos = array_values(array_filter($alunos, static fn (array $aluno): bool => (int) $aluno['status'] === 1));
 $mestrandosAtivos = count(array_filter($alunosAtivos, static fn (array $aluno): bool => $aluno['tipo'] === 'Mestrado'));
 $doutorandosAtivos = count(array_filter($alunosAtivos, static fn (array $aluno): bool => $aluno['tipo'] === 'Doutorado'));
+$orientacoesPorDocente = [];
+foreach ($alunos as $aluno) {
+    $docenteId = (int) $aluno['orientador_id'];
+    $tipoOrientacao = $aluno['tipo'] === 'Doutorado' ? 'Doutorado' : 'Mestrado';
+    $orientacoesPorDocente[$docenteId] ??= ['Mestrado' => 0, 'Doutorado' => 0];
+    $orientacoesPorDocente[$docenteId][$tipoOrientacao]++;
+}
+$maiorTotalOrientacoes = 0;
+foreach ($orientacoesPorDocente as $totaisOrientacao) {
+    $maiorTotalOrientacoes = max($maiorTotalOrientacoes, $totaisOrientacao['Mestrado'], $totaisOrientacao['Doutorado']);
+}
 $tiposDocente = [
     'PERMANENTE'  => ['Permanentes', 'primary'],
     'COLABORADOR' => ['Colaboradores', 'info'],
@@ -90,6 +101,20 @@ $fotoPessoaDisponivel = static function (array $pessoa): bool {
     .ppg-tabs .nav-link:hover { color: #fff; border-bottom-color: rgba(23, 189, 197, .35); }
     .ppg-tabs .nav-link.active { color: #fff; background: rgba(23, 189, 197, .1); border-bottom-color: var(--cyra-cyan); }
     .ppg-student-card { border: 1px solid rgba(151, 205, 225, .14); background: rgba(7, 26, 54, .7); }
+    .ppg-orientation-chart { border-top: 1px solid rgba(151, 205, 225, .14); }
+    .ppg-chart-line { padding: 1rem; border: 1px solid rgba(151, 205, 225, .12); background: rgba(5, 19, 40, .34); }
+    .ppg-chart-line + .ppg-chart-line { margin-top: 1rem; }
+    .ppg-chart-row { display: grid; grid-template-columns: minmax(12rem, 1.1fr) minmax(18rem, 3fr); gap: 1rem; align-items: center; padding: .65rem 0; border-top: 1px solid rgba(151, 205, 225, .08); }
+    .ppg-chart-bars { display: grid; gap: .4rem; }
+    .ppg-chart-bar-row { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr) 2rem; gap: .6rem; align-items: center; }
+    .ppg-chart-track { height: .8rem; overflow: hidden; background: rgba(151, 205, 225, .1); }
+    .ppg-chart-bar { display: block; min-width: 0; height: 100%; }
+    .ppg-chart-bar.mestrado { background: linear-gradient(90deg, #1266b1, #17bdc5); }
+    .ppg-chart-bar.doutorado { background: linear-gradient(90deg, #7559d9, #b48cff); }
+    @media (max-width: 767.98px) {
+        .ppg-chart-row { grid-template-columns: 1fr; gap: .5rem; }
+        .ppg-chart-bar-row { grid-template-columns: 5rem minmax(0, 1fr) 1.75rem; }
+    }
     #rede-academica { width: 100%; min-height: 34rem; border: 1px solid rgba(151, 205, 225, .14); background: radial-gradient(circle at center, rgba(18, 102, 177, .14), rgba(5, 19, 40, .8)); }
 </style>
 
@@ -232,6 +257,45 @@ $fotoPessoaDisponivel = static function (array $pessoa): bool {
                             <div class="col-lg-4"><h3 class="h6 text-white mb-3"><i class="bi bi-bullseye me-2 cyra-accent"></i>Áreas de concentração</h3><ul class="cyra-muted mb-0"><?php foreach ($listas['areas_concentracao'] as $area) : ?><li class="mb-2"><?= esc(is_array($area) ? implode(' - ', $area) : $area) ?></li><?php endforeach; ?></ul></div>
                             <div class="col-lg-4"><h3 class="h6 text-white mb-3"><i class="bi bi-diagram-3 me-2 cyra-accent"></i>Linhas de pesquisa</h3><ul class="cyra-muted mb-0"><?php foreach ($linhas as $linha) : ?><li class="mb-2"><?= esc($linha['nome']) ?></li><?php endforeach; ?></ul></div>
                         </div>
+                        <section class="ppg-orientation-chart mt-4 pt-4" aria-labelledby="grafico-orientacoes-titulo">
+                            <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
+                                <div>
+                                    <h3 class="h5 text-white mb-1" id="grafico-orientacoes-titulo"><i class="bi bi-bar-chart-fill me-2 cyra-accent"></i>Orientações por linha e professor</h3>
+                                    <p class="small cyra-muted mb-0">Orientações de mestrado e doutorado vinculadas exclusivamente a este programa.</p>
+                                </div>
+                                <div class="d-flex gap-3 small"><span class="text-info"><i class="bi bi-square-fill me-1"></i>Mestrado</span><span style="color:#b48cff"><i class="bi bi-square-fill me-1"></i>Doutorado</span></div>
+                            </div>
+                            <?php if ($linhas === []) : ?>
+                                <p class="cyra-muted mb-0">Nenhuma linha de pesquisa cadastrada.</p>
+                            <?php else : ?>
+                                <?php foreach ($linhas as $indiceLinha => $linha) : ?>
+                                    <?php $docentesGrafico = $docentesPorLinha[$linha['id']] ?? []; ?>
+                                    <article class="ppg-chart-line">
+                                        <h4 class="h6 text-white mb-2"><span class="ppg-line-number d-inline-grid me-2"><?= $indiceLinha + 1 ?></span><?= esc($linha['nome']) ?></h4>
+                                        <?php if ($docentesGrafico === []) : ?>
+                                            <p class="small cyra-muted mb-0">Nenhum professor vinculado a esta linha.</p>
+                                        <?php else : ?>
+                                            <?php foreach ($docentesGrafico as $docenteGrafico) : ?>
+                                                <?php $totaisGrafico = $orientacoesPorDocente[(int) $docenteGrafico['id']] ?? ['Mestrado' => 0, 'Doutorado' => 0]; ?>
+                                                <div class="ppg-chart-row">
+                                                    <a class="text-white text-decoration-none" href="<?= site_url('person/' . (int) $docenteGrafico['id']) ?>"><?= esc($docenteGrafico['nome']) ?></a>
+                                                    <div class="ppg-chart-bars">
+                                                        <?php foreach ([['Mestrado', 'mestrado'], ['Doutorado', 'doutorado']] as [$nivel, $classeBarra]) : ?>
+                                                            <?php $quantidade = (int) $totaisGrafico[$nivel]; $largura = $maiorTotalOrientacoes > 0 ? ($quantidade / $maiorTotalOrientacoes) * 100 : 0; ?>
+                                                            <div class="ppg-chart-bar-row">
+                                                                <span class="small cyra-muted"><?= esc($nivel) ?></span>
+                                                                <span class="ppg-chart-track"><span class="ppg-chart-bar <?= $classeBarra ?>" style="width:<?= number_format($largura, 2, '.', '') ?>%"></span></span>
+                                                                <strong class="small text-white text-end"><?= $quantidade ?></strong>
+                                                            </div>
+                                                        <?php endforeach; ?>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </article>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </section>
                     </section>
 
                     <section class="tab-pane fade" id="painel-docentes" role="tabpanel" aria-labelledby="tab-docentes" tabindex="0">
