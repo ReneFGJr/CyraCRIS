@@ -10,10 +10,14 @@
 			<p class="text-uppercase fw-bold small cyra-accent mb-4"><i class="bi bi-diagram-3 me-2"></i>Pesquisa que se conecta</p>
 			<h1 class="display-1 cyra-heading text-white lh-1">O conhecimento<br>em <span class="cyra-accent">movimento.</span></h1>
 			<p class="lead cyra-muted my-4 pe-lg-5">O CyraCRIS organiza, integra e dá visibilidade à produção científica dos programas de pós-graduação em um só lugar.</p>
-			<div class="d-flex flex-wrap gap-3">
-				<a class="btn btn-info btn-lg rounded-0 px-4" href="#recursos">Explorar o CyraCRIS <i class="bi bi-arrow-right ms-2"></i></a>
-				<a class="btn btn-outline-light btn-lg rounded-0 px-4" href="mailto:contato@cyracris.com.br">Fale conosco</a>
-			</div>
+			<form class="pe-lg-5" method="get" action="<?= site_url('person/search') ?>" role="search">
+				<label class="form-label text-white fw-semibold" for="home-person-search">Buscar indivíduo</label>
+				<div class="input-group input-group-lg">
+					<span class="input-group-text rounded-0"><i class="bi bi-person-search"></i></span>
+					<input class="form-control rounded-0" id="home-person-search" name="q" type="search" placeholder="Digite o nome ou ID Lattes" aria-label="Nome ou ID Lattes do indivíduo" required>
+					<button class="btn btn-info rounded-0 px-4" type="submit"><i class="bi bi-search me-2"></i>Buscar</button>
+				</div>
+			</form>
 		</div>
 
 		<div class="col-lg-5" id="recursos">

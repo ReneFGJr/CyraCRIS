@@ -68,6 +68,7 @@ class Ppg extends BaseController
                 ->join('individuo e', 'e.id = o.estudante_id')
                 ->join('individuo orientador', 'orientador.id = o.orientador_id')
                 ->whereIn('o.orientador_id', $docenteIds)
+                ->where('o.programa_id', $id)
                 ->whereIn('o.tipo', ['Mestrado', 'Doutorado'])
                 ->orderBy('e.nome', 'ASC')
                 ->get()
@@ -118,6 +119,65 @@ class Ppg extends BaseController
             'alunos'           => $alunos,
             'rede'             => ['nodes' => array_values($pessoasRede), 'links' => array_values($arestasRede)],
         ]);
+    }
+
+    public function uploadLogo(int $id): RedirectResponse
+    {
+        if (session()->get('auth_logged_in') !== true) {
+            return redirect()->to(site_url('login'))
+                ->with('erro', 'Faça login como administrador para enviar o logo.');
+        }
+
+        $model = new ProgramaPosGraduacaoModel();
+        $programa = $model->find($id);
+
+        if ($programa === null) {
+            throw PageNotFoundException::forPageNotFound('Programa de pós-graduação não encontrado.');
+        }
+
+        $logo = $this->request->getFile('logo');
+
+        if ($logo === null || ! $logo->isValid()) {
+            return redirect()->to(site_url('ppg/' . $id))->with('erro', 'Selecione uma imagem válida para o logo.');
+        }
+
+        if ($logo->getSize() > 5 * 1024 * 1024) {
+            return redirect()->to(site_url('ppg/' . $id))->with('erro', 'O logo deve ter no máximo 5 MB.');
+        }
+
+        $imagem = @getimagesize($logo->getTempName());
+        $extensoes = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif', 'image/webp' => 'webp'];
+        $mime = (string) ($imagem['mime'] ?? '');
+
+        if ($imagem === false || ! isset($extensoes[$mime])) {
+            return redirect()->to(site_url('ppg/' . $id))->with('erro', 'Envie um logo JPEG, PNG, GIF ou WebP.');
+        }
+
+        $diretorio = FCPATH . '_repository' . DIRECTORY_SEPARATOR . 'logoPPG';
+
+        if (! is_dir($diretorio) && ! mkdir($diretorio, 0775, true) && ! is_dir($diretorio)) {
+            return redirect()->to(site_url('ppg/' . $id))->with('erro', 'Não foi possível preparar o diretório de logos.');
+        }
+
+        $nomeArquivo = $id . '.' . $extensoes[$mime];
+
+        try {
+            $logo->move($diretorio, $nomeArquivo, true);
+        } catch (\Throwable $e) {
+            log_message('error', 'Falha ao salvar logo do PPG {id}: {erro}', ['id' => $id, 'erro' => $e->getMessage()]);
+
+            return redirect()->to(site_url('ppg/' . $id))->with('erro', 'Não foi possível salvar o logo enviado.');
+        }
+
+        if (! $model->update($id, ['logo' => $nomeArquivo])) {
+            if (is_file($diretorio . DIRECTORY_SEPARATOR . $nomeArquivo)) {
+                unlink($diretorio . DIRECTORY_SEPARATOR . $nomeArquivo);
+            }
+
+            return redirect()->to(site_url('ppg/' . $id))->with('erro', 'Não foi possível vincular o logo ao programa.');
+        }
+
+        return redirect()->to(site_url('ppg/' . $id))->with('sucesso', 'Logo do programa salvo com sucesso.');
     }
 
     private function normalizarNome(string $nome): string

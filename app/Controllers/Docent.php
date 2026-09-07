@@ -6,6 +6,7 @@ use App\Services\LattesProductionImporter;
 use App\Services\LattesProjectImporter;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\RedirectResponse;
+use CodeIgniter\HTTP\ResponseInterface;
 use DateTimeImmutable;
 use RuntimeException;
 use SimpleXMLElement;
@@ -15,6 +16,32 @@ use ZipArchive;
 class Docent extends BaseController
 {
     private const LATTES_API = 'https://brapci.inf.br/ws/api/';
+
+    public function search(): string
+    {
+        $query = trim((string) $this->request->getGet('q'));
+        $pessoas = [];
+
+        if ($query !== '') {
+            $pessoas = db_connect()->table('individuo')
+                ->select('id, nome, lattes_id, orcid, email')
+                ->where('use', 0)
+                ->groupStart()
+                    ->like('nome', $query, 'both', null, true)
+                    ->orLike('lattes_id', $query, 'both', null, true)
+                    ->orLike('orcid', $query, 'both', null, true)
+                ->groupEnd()
+                ->orderBy('nome', 'ASC')
+                ->limit(50)
+                ->get()
+                ->getResultArray();
+        }
+
+        return view('person/search', [
+            'query'   => $query,
+            'pessoas' => $pessoas,
+        ]);
+    }
 
     public function show(int $id): string
     {
@@ -48,8 +75,10 @@ class Docent extends BaseController
             ->getResultArray();
 
         $orientacoes = $db->table('orientacoes o')
-            ->select('o.tipo, o.status, o.ano_inicio, o.ano_final, o.titulo, e.id AS estudante_id, e.nome AS estudante_nome, e.lattes_id AS estudante_lattes_id')
+            ->select('o.tipo, o.tipo_orientacao, o.status, o.ano_inicio, o.ano_final, o.titulo, e.id AS estudante_id, e.nome AS estudante_nome, e.lattes_id AS estudante_lattes_id, p.id AS programa_id, p.nome AS programa_nome, inst.id AS instituicao_id, inst.nome AS instituicao_nome')
             ->join('individuo e', 'e.id = o.estudante_id')
+            ->join('programas_pos_graduacao p', 'p.id = o.programa_id', 'left')
+            ->join('instituicao inst', 'inst.id = o.instituicao_id', 'left')
             ->where('o.orientador_id', $id)
             ->orderBy('o.status', 'ASC')
             ->orderBy('o.ano_final', 'DESC')
@@ -58,8 +87,10 @@ class Docent extends BaseController
             ->getResultArray();
 
         $orientadores = $db->table('orientacoes o')
-            ->select('o.tipo, o.status, o.ano_inicio, o.ano_final, o.titulo, i.id AS orientador_id, i.nome AS orientador_nome')
+            ->select('o.tipo, o.tipo_orientacao, o.status, o.ano_inicio, o.ano_final, o.titulo, i.id AS orientador_id, i.nome AS orientador_nome, p.id AS programa_id, p.nome AS programa_nome, inst.id AS instituicao_id, inst.nome AS instituicao_nome')
             ->join('individuo i', 'i.id = o.orientador_id')
+            ->join('programas_pos_graduacao p', 'p.id = o.programa_id', 'left')
+            ->join('instituicao inst', 'inst.id = o.instituicao_id', 'left')
             ->where('o.estudante_id', $id)
             ->orderBy('o.status', 'ASC')
             ->orderBy('o.ano_final', 'DESC')
@@ -90,6 +121,28 @@ class Docent extends BaseController
             ->get()
             ->getResultArray();
 
+        $rdfDados = [];
+        $rdfClasses = [];
+
+        if (session()->get('auth_logged_in') === true) {
+            $rdfDados = $db->table('rdf_data d')
+                ->select('d.id_d, d.d_update, literal.n_name AS valor, classe.c_class AS classe, propriedade.c_class AS propriedade')
+                ->join('rdf_literal literal', 'literal.id_n = d.d_literal', 'left')
+                ->join('rdf_class classe', 'classe.id_c = d.d_c2', 'left')
+                ->join('rdf_class propriedade', 'propriedade.id_c = d.d_p', 'left')
+                ->where('d.d_individuo', $id)
+                ->orderBy('classe.c_class', 'ASC')
+                ->orderBy('d.id_d', 'DESC')
+                ->get()
+                ->getResultArray();
+            $rdfClasses = $db->table('rdf_class')
+                ->select('id_c, c_class, c_description')
+                ->where('c_type', 'C')
+                ->orderBy('c_class', 'ASC')
+                ->get()
+                ->getResultArray();
+        }
+
         return view('docent/show', [
             'docente'      => $docente,
             'instituicoes' => $instituicoes,
@@ -99,9 +152,33 @@ class Docent extends BaseController
             'producoes'    => $producoes,
             'projetos'     => $projetos,
             'remissivas'   => $remissivas,
+            'rdfDados'     => $rdfDados,
+            'rdfClasses'   => $rdfClasses,
             'redeIndividual' => $redeIndividual,
             'coletaLattesHabilitada' => filter_var(env('lattes.collectionEnabled', false), FILTER_VALIDATE_BOOL),
         ]);
+    }
+
+    public function foto(int $id): ResponseInterface
+    {
+        $docente = db_connect()->table('individuo')->select('lattes_id')->where('id', $id)->get()->getRowArray();
+        $lattesId = preg_replace('/\D/', '', (string) ($docente['lattes_id'] ?? ''));
+        $arquivo = FCPATH . '_repository' . DIRECTORY_SEPARATOR . 'foto' . DIRECTORY_SEPARATOR . $lattesId . '.jpg';
+
+        if ($docente === null || strlen($lattesId) !== 16 || ! is_file($arquivo)) {
+            throw PageNotFoundException::forPageNotFound('Foto não encontrada.');
+        }
+
+        $imagem = @getimagesize($arquivo);
+
+        if ($imagem === false || ! str_starts_with((string) ($imagem['mime'] ?? ''), 'image/')) {
+            throw PageNotFoundException::forPageNotFound('Foto inválida.');
+        }
+
+        return $this->response
+            ->setContentType((string) $imagem['mime'])
+            ->setHeader('Cache-Control', 'public, max-age=86400')
+            ->setBody((string) file_get_contents($arquivo));
     }
 
     public function atualizar(int $id): RedirectResponse
@@ -140,44 +217,6 @@ class Docent extends BaseController
         $arquivoTemporario = null;
 
         try {
-            $token = trim((string) env('lattes.apiToken'));
-
-            if ($token === '') {
-                throw new RuntimeException('O token do serviço Lattes não está configurado.');
-            }
-
-            $verificarSsl = filter_var(env('lattes.verifySsl', true), FILTER_VALIDATE_BOOL);
-            $caBundle = trim((string) env('lattes.caBundle'));
-
-            if ($verificarSsl && ($caBundle === '' || ! is_file($caBundle))) {
-                throw new RuntimeException('O pacote de certificados SSL do serviço Lattes não está configurado.');
-            }
-
-            $response = service('curlrequest')->get(self::LATTES_API, [
-                'query' => [
-                    'verb'  => 'lattes',
-                    'q'     => $lattesId,
-                    'token' => $token,
-                ],
-                'connect_timeout' => 15,
-                'timeout'         => 90,
-                'http_errors'     => false,
-                'verify'          => $verificarSsl ? $caBundle : false,
-            ]);
-
-            if ($response->getStatusCode() !== 200) {
-                throw new RuntimeException('O serviço Lattes respondeu com HTTP ' . $response->getStatusCode() . '.');
-            }
-
-            $arquivoTemporario = tempnam(WRITEPATH, 'lattes_');
-
-            if ($arquivoTemporario === false || file_put_contents($arquivoTemporario, $response->getBody(), LOCK_EX) === false) {
-                throw new RuntimeException('Não foi possível salvar o arquivo temporário.');
-            }
-
-            [$xml, $nomeArquivoXml] = $this->lerXmlDoZip($arquivoTemporario, $lattesId);
-            $dados = $this->extrairDados($xml);
-
             $diretorioRepositorio = FCPATH . '_repository';
 
             if (! is_dir($diretorioRepositorio) && ! mkdir($diretorioRepositorio, 0775, true) && ! is_dir($diretorioRepositorio)) {
@@ -185,10 +224,59 @@ class Docent extends BaseController
             }
 
             $arquivoDestino = $diretorioRepositorio . DIRECTORY_SEPARATOR . $lattesId . '.zip';
+            $arquivoSemExtensao = $diretorioRepositorio . DIRECTORY_SEPARATOR . $lattesId;
+            $arquivoFonte = is_file($arquivoDestino)
+                ? $arquivoDestino
+                : (is_file($arquivoSemExtensao) ? $arquivoSemExtensao : null);
 
-            if (! copy($arquivoTemporario, $arquivoDestino)) {
-                throw new RuntimeException('Não foi possível armazenar o ZIP no repositório.');
+            if ($arquivoFonte === null) {
+                $token = trim((string) env('lattes.apiToken'));
+
+                if ($token === '') {
+                    throw new RuntimeException('O token do serviço Lattes não está configurado.');
+                }
+
+                $verificarSsl = filter_var(env('lattes.verifySsl', true), FILTER_VALIDATE_BOOL);
+                $caBundle = trim((string) env('lattes.caBundle'));
+
+                if ($verificarSsl && ($caBundle === '' || ! is_file($caBundle))) {
+                    throw new RuntimeException('O pacote de certificados SSL do serviço Lattes não está configurado.');
+                }
+
+                $response = service('curlrequest')->get(self::LATTES_API, [
+                    'query' => [
+                        'verb'  => 'lattes',
+                        'q'     => $lattesId,
+                        'token' => $token,
+                    ],
+                    'connect_timeout' => 15,
+                    'timeout'         => 90,
+                    'http_errors'     => false,
+                    'verify'          => $verificarSsl ? $caBundle : false,
+                ]);
+
+                if ($response->getStatusCode() !== 200) {
+                    throw new RuntimeException('O serviço Lattes respondeu com HTTP ' . $response->getStatusCode() . '.');
+                }
+
+                $arquivoTemporario = tempnam(WRITEPATH, 'lattes_');
+
+                if ($arquivoTemporario === false || file_put_contents($arquivoTemporario, $response->getBody(), LOCK_EX) === false) {
+                    throw new RuntimeException('Não foi possível salvar o arquivo temporário.');
+                }
+
+                // Só guarda a resposta do serviço depois de confirmar que é um ZIP Lattes válido.
+                $this->lerXmlDoZip($arquivoTemporario, $lattesId);
+
+                if (! copy($arquivoTemporario, $arquivoDestino)) {
+                    throw new RuntimeException('Não foi possível armazenar o ZIP no repositório.');
+                }
+
+                $arquivoFonte = $arquivoDestino;
             }
+
+            [$xml, $nomeArquivoXml] = $this->lerXmlDoZip($arquivoFonte, $lattesId, true);
+            $dados = $this->extrairDados($xml);
 
             $db->transStart();
             $this->limparDadosAcademicos(array_values(array_unique([$idAcessado, $id])));
@@ -222,6 +310,271 @@ class Docent extends BaseController
                 unlink($arquivoTemporario);
             }
         }
+    }
+
+    public function uploadFoto(int $id): RedirectResponse
+    {
+        if (session()->get('auth_logged_in') !== true) {
+            return redirect()->to(site_url('login'))
+                ->with('erro', 'Faça login como administrador para alterar a foto.');
+        }
+
+        $docente = db_connect()->table('individuo')->where('id', $id)->get()->getRowArray();
+
+        if ($docente === null) {
+            throw PageNotFoundException::forPageNotFound('Docente não encontrado.');
+        }
+
+        $lattesId = preg_replace('/\D/', '', (string) ($docente['lattes_id'] ?? ''));
+
+        if (strlen($lattesId) !== 16) {
+            return redirect()->to(site_url('person/' . $id))
+                ->with('erro', 'Informe um ID Lattes válido antes de enviar a foto.');
+        }
+
+        $foto = $this->request->getFile('foto');
+
+        if ($foto === null || ! $foto->isValid()) {
+            return redirect()->to(site_url('person/' . $id))
+                ->with('erro', 'Selecione uma imagem válida para o perfil.');
+        }
+
+        if ($foto->getSize() > 5 * 1024 * 1024) {
+            return redirect()->to(site_url('person/' . $id))
+                ->with('erro', 'A foto deve ter no máximo 5 MB.');
+        }
+
+        $imagem = @getimagesize($foto->getTempName());
+        $mimesPermitidos = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+        if ($imagem === false || ! in_array((string) ($imagem['mime'] ?? ''), $mimesPermitidos, true)) {
+            return redirect()->to(site_url('person/' . $id))
+                ->with('erro', 'Envie uma imagem JPEG, PNG, GIF ou WebP.');
+        }
+
+        $diretorio = FCPATH . '_repository' . DIRECTORY_SEPARATOR . 'foto';
+
+        if (! is_dir($diretorio) && ! mkdir($diretorio, 0775, true) && ! is_dir($diretorio)) {
+            return redirect()->to(site_url('person/' . $id))
+                ->with('erro', 'Não foi possível preparar o diretório de fotos.');
+        }
+
+        try {
+            if (! $this->salvarImagemComoJpeg($foto->getTempName(), $diretorio . DIRECTORY_SEPARATOR . $lattesId . '.jpg')) {
+                throw new RuntimeException('Falha ao converter a imagem para JPEG.');
+            }
+        } catch (Throwable $e) {
+            log_message('error', 'Falha ao salvar foto do docente {id}: {erro}', ['id' => $id, 'erro' => $e->getMessage()]);
+
+            return redirect()->to(site_url('person/' . $id))
+                ->with('erro', 'Não foi possível salvar a foto enviada.');
+        }
+
+        return redirect()->to(site_url('person/' . $id))
+            ->with('sucesso', 'Foto do perfil atualizada.');
+    }
+
+    public function extrairFotoLattes(int $id): RedirectResponse
+    {
+        if (session()->get('auth_logged_in') !== true) {
+            return redirect()->to(site_url('login'))
+                ->with('erro', 'Faça login como administrador para extrair a foto.');
+        }
+
+        $docente = db_connect()->table('individuo')->where('id', $id)->get()->getRowArray();
+
+        if ($docente === null) {
+            throw PageNotFoundException::forPageNotFound('Docente não encontrado.');
+        }
+
+        $lattesId = preg_replace('/\D/', '', (string) ($docente['lattes_id'] ?? ''));
+
+        if (strlen($lattesId) !== 16) {
+            return redirect()->to(site_url('person/' . $id))
+                ->with('erro', 'Informe um ID Lattes válido antes de extrair a foto.');
+        }
+
+        $arquivoTemporario = null;
+
+        try {
+            $cliente = service('curlrequest');
+            $curriculo = $cliente->get('http://lattes.cnpq.br/' . $lattesId, [
+                'connect_timeout' => 15,
+                'timeout'         => 30,
+                'http_errors'     => false,
+                'allow_redirects' => ['max' => 5],
+            ]);
+
+            if ($curriculo->getStatusCode() !== 200
+                || preg_match('/name=["\']id["\'][^>]*value=["\']([A-Z]\d+[A-Z]\d+)["\']/i', $curriculo->getBody(), $resultado) !== 1) {
+                throw new RuntimeException('Não foi possível localizar o currículo na Plataforma Lattes.');
+            }
+
+            $identificadorInterno = $resultado[1];
+            $respostaFoto = $cliente->get('http://servicosweb.cnpq.br/wspessoa/servletrecuperafoto', [
+                'query' => ['id' => $identificadorInterno],
+                'connect_timeout' => 15,
+                'timeout'         => 30,
+                'http_errors'     => false,
+            ]);
+
+            if ($respostaFoto->getStatusCode() !== 200 || $respostaFoto->getBody() === '') {
+                throw new RuntimeException('O currículo não possui uma foto disponível.');
+            }
+
+            $diretorio = FCPATH . '_repository' . DIRECTORY_SEPARATOR . 'foto';
+
+            if (! is_dir($diretorio) && ! mkdir($diretorio, 0775, true) && ! is_dir($diretorio)) {
+                throw new RuntimeException('Não foi possível preparar o diretório de fotos.');
+            }
+
+            $arquivoTemporario = tempnam($diretorio, 'foto_');
+
+            if ($arquivoTemporario === false
+                || file_put_contents($arquivoTemporario, $respostaFoto->getBody(), LOCK_EX) === false) {
+                throw new RuntimeException('Não foi possível armazenar a foto temporária.');
+            }
+
+            $imagem = @getimagesize($arquivoTemporario);
+            $mimesPermitidos = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+            if ($imagem === false || ! in_array((string) ($imagem['mime'] ?? ''), $mimesPermitidos, true)) {
+                throw new RuntimeException('A Plataforma Lattes não retornou uma imagem válida.');
+            }
+
+            if (! $this->salvarImagemComoJpeg($arquivoTemporario, $diretorio . DIRECTORY_SEPARATOR . $lattesId . '.jpg')) {
+                throw new RuntimeException('Não foi possível converter e salvar a foto extraída.');
+            }
+
+            return redirect()->to(site_url('person/' . $id))
+                ->with('sucesso', 'Foto extraída da Plataforma Lattes.');
+        } catch (Throwable $e) {
+            log_message('error', 'Falha ao extrair foto Lattes do docente {id}: {erro}', ['id' => $id, 'erro' => $e->getMessage()]);
+
+            return redirect()->to(site_url('person/' . $id))
+                ->with('erro', 'Não foi possível extrair a foto: ' . $e->getMessage());
+        } finally {
+            if ($arquivoTemporario !== null && is_file($arquivoTemporario)) {
+                unlink($arquivoTemporario);
+            }
+        }
+    }
+
+    public function adicionarRdfData(int $id): RedirectResponse
+    {
+        if (session()->get('auth_logged_in') !== true) {
+            return redirect()->to(site_url('login'))
+                ->with('erro', 'Faça login como administrador para incluir dados RDF.');
+        }
+
+        $db = db_connect();
+
+        if ($db->table('individuo')->where('id', $id)->countAllResults() === 0) {
+            throw PageNotFoundException::forPageNotFound('Indivíduo não encontrado.');
+        }
+
+        $classeId = (int) $this->request->getPost('rdf_class_id');
+        $valor = trim((string) $this->request->getPost('rdf_value'));
+        $classe = $db->table('rdf_class')
+            ->select('id_c, c_class')
+            ->where('id_c', $classeId)
+            ->where('c_type', 'C')
+            ->get()
+            ->getRowArray();
+
+        if ($classe === null || $valor === '') {
+            return redirect()->to(site_url('person/' . $id) . '#dados')
+                ->with('erro', 'Selecione uma classe RDF e informe o valor textual.');
+        }
+
+        if (mb_strlen($valor) > 5000) {
+            return redirect()->to(site_url('person/' . $id) . '#dados')
+                ->with('erro', 'O valor RDF deve ter no máximo 5.000 caracteres.');
+        }
+
+        $propriedade = $db->table('rdf_class')
+            ->select('id_c')
+            ->where('c_type', 'P')
+            ->where('c_class', 'has' . (string) $classe['c_class'])
+            ->get()
+            ->getRowArray();
+        $md5 = md5($valor);
+        $literal = $db->table('rdf_literal')
+            ->select('id_n')
+            ->where('n_md5', $md5)
+            ->where('n_name', $valor)
+            ->get()
+            ->getRowArray();
+
+        if ($literal === null) {
+            $db->table('rdf_literal')->insert([
+                'n_name'    => $valor,
+                'n_lang'    => 'pt_BR',
+                'n_md5'     => $md5,
+                'n_charset' => 'UTF-8',
+            ]);
+            $literalId = (int) $db->insertID();
+        } else {
+            $literalId = (int) $literal['id_n'];
+        }
+
+        $duplicado = $db->table('rdf_data')
+            ->where('d_individuo', $id)
+            ->where('d_c2', $classeId)
+            ->where('d_literal', $literalId)
+            ->countAllResults() > 0;
+
+        if ($duplicado) {
+            return redirect()->to(site_url('person/' . $id) . '#dados')
+                ->with('erro', 'Este dado RDF já está vinculado ao indivíduo.');
+        }
+
+        $salvo = $db->table('rdf_data')->insert([
+            'd_individuo' => $id,
+            'd_r1'        => 0,
+            'd_p'         => (int) ($propriedade['id_c'] ?? 0),
+            'd_r2'        => 0,
+            'd_literal'   => $literalId,
+            'd_c1'        => 0,
+            'd_c2'        => $classeId,
+            'd_update'    => date('Y-m-d H:i:s'),
+        ]);
+
+        if (! $salvo) {
+            return redirect()->to(site_url('person/' . $id) . '#dados')
+                ->with('erro', 'Não foi possível salvar o dado RDF.');
+        }
+
+        return redirect()->to(site_url('person/' . $id) . '#dados')
+            ->with('sucesso', 'Dado RDF incluído com sucesso.');
+    }
+
+    private function salvarImagemComoJpeg(string $origem, string $destino): bool
+    {
+        $conteudo = file_get_contents($origem);
+
+        if ($conteudo === false || ($imagemOriginal = @imagecreatefromstring($conteudo)) === false) {
+            return false;
+        }
+
+        $largura = imagesx($imagemOriginal);
+        $altura = imagesy($imagemOriginal);
+        $imagemJpeg = imagecreatetruecolor($largura, $altura);
+
+        if ($imagemJpeg === false) {
+            imagedestroy($imagemOriginal);
+
+            return false;
+        }
+
+        $branco = imagecolorallocate($imagemJpeg, 255, 255, 255);
+        imagefill($imagemJpeg, 0, 0, $branco);
+        imagecopy($imagemJpeg, $imagemOriginal, 0, 0, 0, 0, $largura, $altura);
+        $salvo = imagejpeg($imagemJpeg, $destino, 90);
+        imagedestroy($imagemOriginal);
+        imagedestroy($imagemJpeg);
+
+        return $salvo;
     }
 
     /** @param list<int> $individuoIds */
@@ -380,7 +733,7 @@ class Docent extends BaseController
     }
 
     /** @return array{0: SimpleXMLElement, 1: string} */
-    private function lerXmlDoZip(string $arquivoZip, string $lattesId): array
+    private function lerXmlDoZip(string $arquivoZip, string $lattesId, bool $salvarNoRepositorio = false): array
     {
         $zip = new ZipArchive();
 
@@ -422,6 +775,20 @@ class Docent extends BaseController
 
         if ((string) $xml['NUMERO-IDENTIFICADOR'] !== $lattesId) {
             throw new RuntimeException('O currículo retornado não corresponde ao ID Lattes do docente.');
+        }
+
+        if ($salvarNoRepositorio) {
+            $diretorioLattes = FCPATH . '_repository' . DIRECTORY_SEPARATOR . 'lattes';
+
+            if (! is_dir($diretorioLattes) && ! mkdir($diretorioLattes, 0775, true) && ! is_dir($diretorioLattes)) {
+                throw new RuntimeException('Não foi possível criar o diretório de XMLs Lattes.');
+            }
+
+            $arquivoXml = $diretorioLattes . DIRECTORY_SEPARATOR . $lattesId . '.xml';
+
+            if (file_put_contents($arquivoXml, $conteudoXml, LOCK_EX) === false) {
+                throw new RuntimeException('Não foi possível salvar o XML descompactado do currículo.');
+            }
         }
 
         return [$xml, $nomeArquivoXml];
@@ -512,6 +879,16 @@ class Docent extends BaseController
 
     private function atualizarOrientacoes(int $orientadorId, SimpleXMLElement $xml): void
     {
+        $db = db_connect();
+        $programas = $db->table('programas_pos_graduacao')
+            ->select('id, nome, instituicao_codigo, instituicao_nome, instituicao_sigla, graus')
+            ->get()
+            ->getResultArray();
+        $instituicoes = $db->table('instituicao')
+            ->select('id, codigo_externo, nome, sigla')
+            ->get()
+            ->getResultArray();
+
         foreach ([0 => '//ORIENTACOES-EM-ANDAMENTO/*', 1 => '//ORIENTACOES-CONCLUIDAS/*'] as $status => $xpath) {
             foreach ($xml->xpath($xpath) ?: [] as $orientacaoXml) {
                 $elementos = $orientacaoXml->children();
@@ -541,9 +918,18 @@ class Docent extends BaseController
                 }
 
                 $tipo = $this->classificarOrientacao($orientacaoXml->getName(), (string) $dadosBasicos['NATUREZA']);
+                $tipoOrientacaoXml = str_replace(['-', ' '], '_', strtoupper(trim((string) $detalhamento['TIPO-DE-ORIENTACAO'])));
+                $tipoOrientacao = $tipoOrientacaoXml === 'CO_ORIENTADOR' ? 'CO_ORIENTADOR' : 'ORIENTADOR';
+                $programaId = in_array($tipo, ['Mestrado', 'Doutorado'], true)
+                    ? $this->localizarProgramaOrientacao($tipo, $detalhamento, $programas)
+                    : null;
+                $instituicaoId = $this->localizarInstituicaoOrientacao($detalhamento, $instituicoes, $programaId, $programas);
                 $ano = (int) $dadosBasicos['ANO'];
                 $agora = date('Y-m-d H:i:s');
                 $dados = [
+                    'programa_id'   => $programaId,
+                    'instituicao_id' => $instituicaoId,
+                    'tipo_orientacao' => $tipoOrientacao,
                     'status'     => $status,
                     'ano_inicio' => $status === 0 && $ano > 0 ? $ano : null,
                     'ano_final'  => $status === 1 && $ano > 0 ? $ano : null,
@@ -575,6 +961,127 @@ class Docent extends BaseController
                 }
             }
         }
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $programas
+     */
+    private function localizarProgramaOrientacao(string $tipo, SimpleXMLElement $detalhamento, array $programas): ?int
+    {
+        $curso = $this->normalizarNomePrograma((string) $detalhamento['NOME-CURSO']);
+        $instituicao = $this->normalizarNome((string) $detalhamento['NOME-INSTITUICAO']);
+        $melhorId = null;
+        $melhorPontuacao = 0;
+
+        if ($curso === '') {
+            return null;
+        }
+
+        foreach ($programas as $programa) {
+            $graus = json_decode((string) ($programa['graus'] ?? '[]'), true);
+
+            if (is_array($graus) && $graus !== [] && ! in_array($tipo, $graus, true)) {
+                continue;
+            }
+
+            $nomeInstituicaoPrograma = $this->normalizarNome((string) ($programa['instituicao_nome'] ?? ''));
+
+            // Cursos homônimos existem em instituições diferentes. Sem a mesma
+            // instituição, a orientação não pode ser atribuída a este PPG.
+            if ($instituicao === '' || $nomeInstituicaoPrograma === '' || $nomeInstituicaoPrograma !== $instituicao) {
+                continue;
+            }
+
+            $nomePrograma = $this->normalizarNomePrograma((string) $programa['nome']);
+            $pontuacao = $curso === $nomePrograma
+                ? 10
+                : ((str_contains($curso, $nomePrograma) || str_contains($nomePrograma, $curso)) ? 6 : 0);
+
+            if ($pontuacao === 0) {
+                continue;
+            }
+
+            $pontuacao += 5;
+
+            if ($pontuacao > $melhorPontuacao) {
+                $melhorPontuacao = $pontuacao;
+                $melhorId = (int) $programa['id'];
+            }
+        }
+
+        return $melhorId;
+    }
+
+    /**
+     * @param array<int, array<string, mixed>> $instituicoes
+     * @param array<int, array<string, mixed>> $programas
+     */
+    private function localizarInstituicaoOrientacao(SimpleXMLElement $detalhamento, array &$instituicoes, ?int $programaId, array $programas): ?int
+    {
+        $nomeOriginal = trim((string) $detalhamento['NOME-INSTITUICAO']);
+        $nome = $this->normalizarNome($nomeOriginal);
+        $codigo = preg_replace('/\D/', '', (string) $detalhamento['CODIGO-INSTITUICAO']) ?? '';
+        $codigoSemZeros = ltrim($codigo, '0');
+        $codigoExterno = $codigoSemZeros !== '' ? (int) $codigoSemZeros : null;
+
+        foreach ($instituicoes as $instituicao) {
+            if ($nome !== '' && $this->normalizarNome((string) $instituicao['nome']) === $nome) {
+                return (int) $instituicao['id'];
+            }
+
+            if ($codigoExterno !== null && (int) ($instituicao['codigo_externo'] ?? 0) === $codigoExterno) {
+                return (int) $instituicao['id'];
+            }
+        }
+
+        if ($programaId !== null) {
+            foreach ($programas as $programa) {
+                if ((int) $programa['id'] !== $programaId) {
+                    continue;
+                }
+
+                foreach ($instituicoes as $instituicao) {
+                    if (! empty($programa['instituicao_codigo'])
+                        && (int) $instituicao['codigo_externo'] === (int) $programa['instituicao_codigo']) {
+                        return (int) $instituicao['id'];
+                    }
+                }
+            }
+        }
+
+        if ($nomeOriginal === '') {
+            return null;
+        }
+
+        $agora = date('Y-m-d H:i:s');
+        $novaInstituicao = [
+            'codigo_externo' => $codigoExterno,
+            'nome'           => $nomeOriginal,
+            'sigla'          => null,
+            'created_at'     => $agora,
+            'updated_at'     => $agora,
+        ];
+        $db = db_connect();
+
+        if (! $db->table('instituicao')->insert($novaInstituicao)) {
+            log_message('warning', 'Não foi possível cadastrar a instituição da orientação: {instituicao}.', [
+                'instituicao' => $nomeOriginal,
+            ]);
+
+            return null;
+        }
+
+        $novaInstituicao['id'] = (int) $db->insertID();
+        $instituicoes[] = $novaInstituicao;
+
+        return (int) $novaInstituicao['id'];
+    }
+
+    private function normalizarNomePrograma(string $nome): string
+    {
+        $nome = $this->normalizarNome($nome);
+
+        return trim((string) preg_replace('/^(programa de )?pos graduacao (em |de )?/', '', $nome));
     }
 
     private function localizarOuCriarEstudante(string $nome, ?string $lattesId): int

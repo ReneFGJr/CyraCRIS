@@ -19,6 +19,7 @@ class ProgramaPosGraduacaoModel extends Model
         'telefone',
         'email',
         'website',
+        'logo',
         'ano_inicio',
         'situacao',
         'nota_capes',

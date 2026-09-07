@@ -7,6 +7,8 @@
 /** @var array<int, array<string, mixed>> $producoes */
 /** @var array<int, array<string, mixed>> $projetos */
 /** @var array<int, array<string, mixed>> $remissivas */
+/** @var array<int, array<string, mixed>> $rdfDados */
+/** @var array<int, array<string, mixed>> $rdfClasses */
 /** @var array{nodes: array<int, array<string, mixed>>, links: array<int, array<string, mixed>>} $redeIndividual */
 /** @var bool $coletaLattesHabilitada */
 $genero = match ((int) ($docente['genero'] ?? 0)) { 1 => 'Masculino', 2 => 'Feminino', default => 'Não informado' };
@@ -49,8 +51,42 @@ $producoesPorAba = [
 ];
 $projetosEmAndamento = array_filter($projetos, static fn (array $item): bool => $item['situacao'] === 'EM_ANDAMENTO');
 $projetosConcluidos = array_filter($projetos, static fn (array $item): bool => $item['situacao'] === 'CONCLUIDO');
+$lattesIdFoto = preg_replace('/\D/', '', (string) ($docente['lattes_id'] ?? ''));
+$fotoRelativa = '_repository/foto/' . $lattesIdFoto . '.jpg';
+$fotoDisponivel = is_file(FCPATH . str_replace('/', DIRECTORY_SEPARATOR, $fotoRelativa));
+$administradorLogado = session()->get('auth_logged_in') === true;
+$lattesXmlRelativo = '_repository/lattes/' . $lattesIdFoto . '.xml';
+$lattesXmlDisponivel = strlen($lattesIdFoto) === 16 && is_file(FCPATH . str_replace('/', DIRECTORY_SEPARATOR, $lattesXmlRelativo));
+$formatarTelefone = static function (string $valor): string {
+    $digitos = preg_replace('/\D/', '', $valor) ?? '';
+    $prefixoPais = '';
+
+    if (str_starts_with($digitos, '55') && in_array(strlen($digitos), [12, 13], true)) {
+        $digitos = substr($digitos, 2);
+        $prefixoPais = '+55 ';
+    }
+
+    if (strlen($digitos) === 11) {
+        return $prefixoPais . sprintf('(%s) %s-%s', substr($digitos, 0, 2), substr($digitos, 2, 5), substr($digitos, 7, 4));
+    }
+
+    if (strlen($digitos) === 10) {
+        return $prefixoPais . sprintf('(%s) %s-%s', substr($digitos, 0, 2), substr($digitos, 2, 4), substr($digitos, 6, 4));
+    }
+
+    return $valor;
+};
+$numeroWhatsapp = static function (string $valor): string {
+    $digitos = preg_replace('/\D/', '', $valor) ?? '';
+
+    if (str_starts_with($digitos, '55') && in_array(strlen($digitos), [12, 13], true)) {
+        return $digitos;
+    }
+
+    return in_array(strlen($digitos), [10, 11], true) ? '55' . $digitos : '';
+};
 ?>
-<?= view('layout/header', ['title' => $docente['nome'], 'description' => 'Perfil acadêmico de ' . $docente['nome'] . '.']) ?>
+<?= view('layout/header', ['title' => $docente['nome'], 'description' => 'Perfil acadêmico de ' . $docente['nome'] . '.', 'fluid' => true]) ?>
 
 <style>
     #rede-individual { width: 100%; min-height: 36rem; border: 1px solid rgba(151, 205, 225, .14); background: radial-gradient(circle at center, rgba(18, 102, 177, .18), rgba(5, 19, 40, .86)); }
@@ -59,9 +95,17 @@ $projetosConcluidos = array_filter($projetos, static fn (array $item): bool => $
     .perfil-name-icon:hover, .perfil-name-icon:focus { color: var(--cyra-cyan); }
     .perfil-name-icon.is-empty { color: #fff; opacity: .45; }
     .orientation-person-column { width: 25%; min-width: 16rem; }
+    .lattes-xml-frame { width: 100%; min-height: 70vh; border: 1px solid rgba(151, 205, 225, .25); background: #fff; }
+    .resumo-geral-layout { display: grid; grid-template-columns: minmax(0, 1fr) 10rem; gap: 1.5rem; align-items: start; }
+    .resumo-geral-foto { width: 10rem; aspect-ratio: 4 / 5; object-fit: cover; object-position: center top; border: 1px solid rgba(255, 255, 255, .2); background: rgba(255, 255, 255, .04); }
+    .resumo-geral-foto-vazia { display: flex; align-items: center; justify-content: center; font-size: 4rem; color: rgba(255, 255, 255, .35); }
+    @media (max-width: 767.98px) {
+        .resumo-geral-layout { grid-template-columns: 1fr; }
+        .resumo-geral-foto { width: 8rem; grid-row: 1; }
+    }
 </style>
 
-<main class="container py-5">
+<main class="container-fluid px-3 px-md-4 px-xxl-5 py-5">
     <div class="d-flex flex-wrap justify-content-between gap-2 mb-4">
         <a class="btn btn-sm btn-outline-info rounded-0" href="javascript:history.back()"><i class="bi bi-arrow-left me-2"></i>Voltar</a>
         <div class="d-flex flex-wrap gap-2">
@@ -106,7 +150,7 @@ $projetosConcluidos = array_filter($projetos, static fn (array $item): bool => $
     </header>
 
     <ul class="nav nav-tabs flex-nowrap overflow-x-auto border-secondary" id="perfil-tabs" role="tablist">
-        <?php foreach ([['resumo','speedometer2','Resumo geral'],['dados','person-vcard','Informações'],['vinculos','building','Instituições e linhas'],['orientacoes','mortarboard','Orientações / Orientadores'],['projetos','kanban','Projetos'],['rede','share','Rede'],['producao','collection','Produção']] as $indice => [$idAba,$icone,$rotulo]) : ?>
+        <?php foreach ([['resumo','speedometer2','Resumo geral'],['dados','person-vcard','Informações'],['vinculos','building','Instituições e linhas'],['orientacoes','mortarboard','Orientações / Orientadores'],['projetos','kanban','Projetos'],['rede','share','Rede'],['producao','collection','Produção'],['lattes-xml','filetype-xml','Lattes XML']] as $indice => [$idAba,$icone,$rotulo]) : ?>
             <li class="nav-item" role="presentation"><button class="nav-link text-nowrap rounded-0 <?= $indice === 0 ? 'active' : '' ?>" id="<?= $idAba ?>-tab" data-bs-toggle="tab" data-bs-target="#<?= $idAba ?>" type="button" role="tab" aria-controls="<?= $idAba ?>" aria-selected="<?= $indice === 0 ? 'true' : 'false' ?>"><i class="bi bi-<?= $icone ?> me-1"></i><?= esc($rotulo) ?></button></li>
         <?php endforeach; ?>
     </ul>
@@ -114,6 +158,8 @@ $projetosConcluidos = array_filter($projetos, static fn (array $item): bool => $
     <div class="tab-content cyra-panel border-top-0 p-4" id="perfil-tabs-content">
         <section class="tab-pane fade show active" id="resumo" role="tabpanel" aria-labelledby="resumo-tab" tabindex="0">
             <h2 class="h5 text-white mb-4">Resumo geral</h2>
+            <div class="<?= ($fotoDisponivel || $administradorLogado) ? 'resumo-geral-layout' : '' ?>">
+                <div>
             <div class="row g-3">
                 <?php foreach ([['building',count($instituicoes),'Instituições'],['diagram-3',count($linhas),'Linhas de pesquisa'],['hourglass-split',$totalAndamento,'Orientações em andamento'],['check-circle',$totalConcluidas,'Orientações concluídas'],['person-check',count($orientadores),'Orientadores']] as [$icone,$valor,$rotulo]) : ?>
                     <div class="col-sm-6 col-lg"><div class="border border-light border-opacity-10 p-3 h-100"><i class="bi bi-<?= $icone ?> cyra-accent"></i><strong class="d-block display-6 text-white"><?= (int) $valor ?></strong><span class="cyra-muted small"><?= esc($rotulo) ?></span></div></div>
@@ -153,6 +199,31 @@ $projetosConcluidos = array_filter($projetos, static fn (array $item): bool => $
                     <?php endforeach; ?>
                 </div>
             </div>
+                </div>
+                <?php if ($fotoDisponivel || $administradorLogado) : ?>
+                    <aside class="text-md-end" aria-label="Foto de <?= esc($docente['nome'], 'attr') ?>">
+                        <?php if ($fotoDisponivel) : ?>
+                            <img class="resumo-geral-foto" src="<?= site_url('person/' . (int) $docente['id'] . '/foto') ?>?v=<?= filemtime(FCPATH . str_replace('/', DIRECTORY_SEPARATOR, $fotoRelativa)) ?>" alt="Foto de <?= esc($docente['nome'], 'attr') ?>">
+                        <?php else : ?>
+                            <div class="resumo-geral-foto resumo-geral-foto-vazia" aria-label="Foto não cadastrada"><i class="bi bi-person"></i></div>
+                        <?php endif; ?>
+                        <?php if ($administradorLogado) : ?>
+                            <form class="mt-2 text-start" method="post" action="<?= site_url('person/' . (int) $docente['id'] . '/foto') ?>" enctype="multipart/form-data">
+                                <?= csrf_field() ?>
+                                <label class="form-label small cyra-muted" for="foto-perfil">Foto do perfil</label>
+                                <input class="form-control form-control-sm rounded-0 mb-2" id="foto-perfil" name="foto" type="file" accept="image/jpeg,image/png,image/gif,image/webp" required>
+                                <button class="btn btn-sm btn-outline-info rounded-0 w-100" type="submit"><i class="bi bi-upload me-1"></i><?= $fotoDisponivel ? 'Trocar foto' : 'Enviar foto' ?></button>
+                            </form>
+                            <?php if (strlen($lattesIdFoto) === 16) : ?>
+                                <form class="mt-2" method="post" action="<?= site_url('person/' . (int) $docente['id'] . '/foto-lattes') ?>">
+                                    <?= csrf_field() ?>
+                                    <button class="btn btn-sm btn-info rounded-0 w-100" type="submit"><i class="bi bi-cloud-download me-1"></i>Extrair do Lattes</button>
+                                </form>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    </aside>
+                <?php endif; ?>
+            </div>
         </section>
 
         <section class="tab-pane fade" id="dados" role="tabpanel" aria-labelledby="dados-tab" tabindex="0">
@@ -163,6 +234,29 @@ $projetosConcluidos = array_filter($projetos, static fn (array $item): bool => $
                 <dt class="col-sm-3 cyra-muted">ID Lattes</dt><dd class="col-sm-9 mb-3"><?php if (! empty($docente['lattes_id'])) : ?><a class="cyra-accent" href="http://lattes.cnpq.br/<?= esc($docente['lattes_id'], 'attr') ?>" target="_blank" rel="noopener noreferrer"><?= esc($docente['lattes_id']) ?> <i class="bi bi-box-arrow-up-right ms-1"></i></a><?php else : ?><span class="text-white">Não informado</span><?php endif; ?></dd>
                 <dt class="col-sm-3 cyra-muted">ORCID</dt><dd class="col-sm-9 mb-0"><?php if (! empty($docente['orcid'])) : ?><a class="cyra-accent" href="https://orcid.org/<?= esc($docente['orcid'], 'attr') ?>" target="_blank" rel="noopener noreferrer"><?= esc($docente['orcid']) ?></a><?php else : ?><span class="text-white">Não informado</span><?php endif; ?></dd>
             </dl>
+            <?php if ($administradorLogado) : ?>
+                <section class="border-top border-secondary mt-4 pt-4" aria-labelledby="rdf-data-title">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                        <div><h3 class="h6 text-white mb-1" id="rdf-data-title"><i class="bi bi-diagram-2 me-2 cyra-accent"></i>Dados RDF</h3><p class="small cyra-muted mb-0">Dados vinculados pelo campo d_individuo.</p></div>
+                        <button class="btn btn-sm btn-info rounded-0" type="button" data-bs-toggle="collapse" data-bs-target="#adicionar-rdf-data" aria-expanded="false" aria-controls="adicionar-rdf-data" <?= $rdfClasses === [] ? 'disabled' : '' ?> title="Incluir novo dado RDF"><i class="bi bi-plus-lg"></i><span class="visually-hidden">Incluir novo dado RDF</span></button>
+                    </div>
+                    <div class="collapse mb-4" id="adicionar-rdf-data">
+                        <form class="cyra-panel p-3" method="post" action="<?= site_url('person/' . (int) $docente['id'] . '/rdf-data') ?>">
+                            <?= csrf_field() ?>
+                            <div class="row g-3 align-items-end">
+                                <div class="col-md-4"><label class="form-label" for="rdf-class-id">Classe RDF</label><select class="form-select rounded-0" id="rdf-class-id" name="rdf_class_id" required><option value="">Selecione</option><?php foreach ($rdfClasses as $rdfClass) : ?><option value="<?= (int) $rdfClass['id_c'] ?>"><?= esc($rdfClass['c_class']) ?></option><?php endforeach; ?></select></div>
+                                <div class="col-md-6"><label class="form-label" for="rdf-value">Valor textual</label><input class="form-control rounded-0" id="rdf-value" name="rdf_value" type="text" maxlength="5000" required></div>
+                                <div class="col-md-2"><button class="btn btn-info rounded-0 w-100" type="submit"><i class="bi bi-check-lg me-1"></i>Salvar</button></div>
+                            </div>
+                        </form>
+                    </div>
+                    <?php if ($rdfDados === []) : ?>
+                        <p class="cyra-muted mb-0">Nenhum dado RDF vinculado a este indivíduo.</p>
+                    <?php else : ?>
+                        <div class="table-responsive"><table class="table table-dark table-hover align-middle mb-0"><thead><tr><th>Classe</th><th>Propriedade</th><th>Valor literal</th><th>Atualização</th></tr></thead><tbody><?php foreach ($rdfDados as $rdfDado) : ?><?php $ehTelefone = $rdfDado['classe'] === 'PhoneNumber'; $whatsapp = $ehTelefone ? $numeroWhatsapp((string) $rdfDado['valor']) : ''; ?><tr><td class="text-white"><?= esc($rdfDado['classe'] ?: '-') ?></td><td class="cyra-muted"><?= esc($rdfDado['propriedade'] ?: '-') ?></td><td class="text-white"><?php if ($ehTelefone && ! empty($rdfDado['valor'])) : ?><?= esc($formatarTelefone((string) $rdfDado['valor'])) ?><?php if ($whatsapp !== '') : ?> <a class="text-success ms-1" href="https://wa.me/<?= esc($whatsapp, 'attr') ?>" target="_blank" rel="noopener noreferrer" title="Conversar pelo WhatsApp" aria-label="Conversar com <?= esc($formatarTelefone((string) $rdfDado['valor']), 'attr') ?> pelo WhatsApp"><i class="bi bi-whatsapp"></i></a><?php endif; ?><?php else : ?><?= esc($rdfDado['valor'] ?: '-') ?><?php endif; ?></td><td class="cyra-muted text-nowrap"><?= esc($rdfDado['d_update'] ?: '-') ?></td></tr><?php endforeach; ?></tbody></table></div>
+                    <?php endif; ?>
+                </section>
+            <?php endif; ?>
             <div class="border-top border-secondary mt-4 pt-4">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                     <h3 class="h6 text-white mb-0"><i class="bi bi-signpost-split me-2 cyra-accent"></i>Remissivas</h3>
@@ -224,12 +318,14 @@ $projetosConcluidos = array_filter($projetos, static fn (array $item): bool => $
                         </h4>
                         <div class="table-responsive mb-3">
                                 <table class="table table-dark table-hover align-middle mb-0">
-                                    <thead><tr><th class="orientation-person-column">Estudante</th><th>Tipo</th><th>Início</th><th>Final</th><th>Título</th></tr></thead>
+                                    <thead><tr><th class="orientation-person-column">Estudante</th><th>Tipo</th><th>Função</th><th>Programa / Instituição</th><th>Início</th><th>Final</th><th>Título</th></tr></thead>
                                     <tbody>
                                         <?php foreach ($itensOrientacao as $item) : ?>
                                             <tr>
                                                 <td class="orientation-person-column"><a class="cyra-accent" href="<?= site_url('person/' . $item['estudante_id']) ?>"><?= esc($item['estudante_nome']) ?></a></td>
                                                 <td class="text-white"><?= esc($item['tipo']) ?></td>
+                                                <td><span class="badge <?= $item['tipo_orientacao'] === 'CO_ORIENTADOR' ? 'text-bg-secondary' : 'text-bg-info' ?> rounded-0"><?= $item['tipo_orientacao'] === 'CO_ORIENTADOR' ? 'Coorientador' : 'Orientador' ?></span></td>
+                                                <td class="cyra-muted small"><?php if (! empty($item['programa_id'])) : ?><a class="cyra-accent" href="<?= site_url('ppg/' . (int) $item['programa_id']) ?>"><?= esc($item['programa_nome']) ?></a><?php else : ?>-<?php endif; ?><?php if (! empty($item['instituicao_nome'])) : ?><span class="d-block"><?= esc($item['instituicao_nome']) ?></span><?php endif; ?></td>
                                                 <td class="cyra-muted"><?= esc($item['ano_inicio'] ?? '-') ?></td>
                                                 <td class="cyra-muted"><?= esc($item['ano_final'] ?? '-') ?></td>
                                                 <td class="cyra-muted"><?= esc($item['titulo'] ?: '-') ?></td>
@@ -243,7 +339,7 @@ $projetosConcluidos = array_filter($projetos, static fn (array $item): bool => $
                 <div class="mb-5"></div>
             <?php endif; ?>
             <h2 class="h5 text-white mb-3">Orientadores deste estudante</h2>
-            <?php if ($orientadores === []) : ?><p class="cyra-muted mb-0">Nenhum orientador registrado para este indivíduo.</p><?php else : ?><div class="table-responsive"><table class="table table-dark table-hover align-middle mb-0"><thead><tr><th class="orientation-person-column">Orientador</th><th>Tipo</th><th>Status</th><th>Período</th><th>Título</th></tr></thead><tbody><?php foreach ($orientadores as $item) : ?><tr><td class="orientation-person-column"><a class="cyra-accent" href="<?= site_url('person/' . $item['orientador_id']) ?>"><?= esc($item['orientador_nome']) ?></a></td><td class="text-white"><?= esc($item['tipo']) ?></td><td class="cyra-muted"><?= (int) $item['status'] === 1 ? 'Concluída' : 'Em andamento' ?></td><td class="cyra-muted"><?= esc($item['ano_inicio'] ?? '-') ?> – <?= esc($item['ano_final'] ?? '-') ?></td><td class="cyra-muted"><?= esc($item['titulo'] ?: '-') ?></td></tr><?php endforeach; ?></tbody></table></div><?php endif; ?>
+            <?php if ($orientadores === []) : ?><p class="cyra-muted mb-0">Nenhum orientador registrado para este indivíduo.</p><?php else : ?><div class="table-responsive"><table class="table table-dark table-hover align-middle mb-0"><thead><tr><th class="orientation-person-column">Orientador</th><th>Tipo</th><th>Função</th><th>Programa / Instituição</th><th>Status</th><th>Período</th><th>Título</th></tr></thead><tbody><?php foreach ($orientadores as $item) : ?><tr><td class="orientation-person-column"><a class="cyra-accent" href="<?= site_url('person/' . $item['orientador_id']) ?>"><?= esc($item['orientador_nome']) ?></a></td><td class="text-white"><?= esc($item['tipo']) ?></td><td><span class="badge <?= $item['tipo_orientacao'] === 'CO_ORIENTADOR' ? 'text-bg-secondary' : 'text-bg-info' ?> rounded-0"><?= $item['tipo_orientacao'] === 'CO_ORIENTADOR' ? 'Coorientador' : 'Orientador' ?></span></td><td class="cyra-muted small"><?php if (! empty($item['programa_id'])) : ?><a class="cyra-accent" href="<?= site_url('ppg/' . (int) $item['programa_id']) ?>"><?= esc($item['programa_nome']) ?></a><?php else : ?>-<?php endif; ?><?php if (! empty($item['instituicao_nome'])) : ?><span class="d-block"><?= esc($item['instituicao_nome']) ?></span><?php endif; ?></td><td class="cyra-muted"><?= (int) $item['status'] === 1 ? 'Concluída' : 'Em andamento' ?></td><td class="cyra-muted"><?= esc($item['ano_inicio'] ?? '-') ?> – <?= esc($item['ano_final'] ?? '-') ?></td><td class="cyra-muted"><?= esc($item['titulo'] ?: '-') ?></td></tr><?php endforeach; ?></tbody></table></div><?php endif; ?>
         </section>
 
         <section class="tab-pane fade" id="projetos" role="tabpanel" aria-labelledby="projetos-tab" tabindex="0">
@@ -300,6 +396,18 @@ $projetosConcluidos = array_filter($projetos, static fn (array $item): bool => $
                 <?php endforeach; ?>
             </div>
         </section>
+
+        <section class="tab-pane fade" id="lattes-xml" role="tabpanel" aria-labelledby="lattes-xml-tab" tabindex="0">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+                <div><h2 class="h5 text-white mb-1"><i class="bi bi-filetype-xml me-2 cyra-accent"></i>Currículo Lattes em XML</h2><p class="small cyra-muted mb-0">Conteúdo original extraído do arquivo ZIP armazenado no repositório.</p></div>
+                <?php if ($lattesXmlDisponivel) : ?><a class="btn btn-sm btn-outline-info rounded-0" href="<?= base_url($lattesXmlRelativo) ?>" target="_blank" rel="noopener noreferrer"><i class="bi bi-box-arrow-up-right me-2"></i>Abrir XML completo</a><?php endif; ?>
+            </div>
+            <?php if ($lattesXmlDisponivel) : ?>
+                <iframe class="lattes-xml-frame" src="<?= base_url($lattesXmlRelativo) ?>" title="Conteúdo XML do currículo Lattes de <?= esc($docente['nome'], 'attr') ?>" loading="lazy"></iframe>
+            <?php else : ?>
+                <div class="border border-light border-opacity-10 p-5 text-center"><i class="bi bi-file-earmark-x display-5 cyra-muted"></i><p class="cyra-muted mt-3 mb-0">O XML ainda não foi extraído. Execute a atualização das informações acadêmicas.</p></div>
+            <?php endif; ?>
+        </section>
     </div>
 </main>
 
@@ -342,6 +450,22 @@ $projetosConcluidos = array_filter($projetos, static fn (array $item): bool => $
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    const hashTab = location.hash ? document.querySelector(`[data-bs-target="${location.hash}"]`) : null;
+    if (hashTab) bootstrap.Tab.getOrCreateInstance(hashTab).show();
+    const rdfClass = document.getElementById('rdf-class-id');
+    const rdfValue = document.getElementById('rdf-value');
+    const maskPhone = () => {
+        if (!rdfClass || !rdfValue || rdfClass.options[rdfClass.selectedIndex]?.text !== 'PhoneNumber') return;
+        const digits = rdfValue.value.replace(/\D/g, '').slice(0, 13);
+        const national = digits.startsWith('55') && digits.length > 11 ? digits.slice(2) : digits;
+        const country = digits.startsWith('55') && digits.length > 11 ? '+55 ' : '';
+        if (national.length > 10) rdfValue.value = `${country}(${national.slice(0,2)}) ${national.slice(2,7)}-${national.slice(7,11)}`;
+        else if (national.length > 6) rdfValue.value = `${country}(${national.slice(0,2)}) ${national.slice(2,6)}-${national.slice(6,10)}`;
+        else if (national.length > 2) rdfValue.value = `${country}(${national.slice(0,2)}) ${national.slice(2)}`;
+        else rdfValue.value = national;
+    };
+    rdfClass?.addEventListener('change', maskPhone);
+    rdfValue?.addEventListener('input', maskPhone);
     const data = <?= json_encode($redeIndividual, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     const svg = document.getElementById('rede-individual');
     const render = () => {
