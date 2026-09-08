@@ -9,6 +9,8 @@ $routes->get('login', 'Auth::login');
 $routes->get('profile', 'Auth::profile');
 $routes->get('admin', 'Admin::index');
 $routes->get('admin/report', 'Admin\\Report::index');
+$routes->get('admin/csv', 'Admin\\Csv::index');
+$routes->post('admin/csv', 'Admin\\Csv::import', ['filter' => 'csrf']);
 $routes->get('admin/tools/names', 'Admin\\Tools::names');
 $routes->post('admin/tools/names', 'Admin\\Tools::updateNames', ['filter' => 'csrf']);
 $routes->get('admin/tools/names_duplicate', 'Admin\\Tools::duplicateNames');
