@@ -1,4 +1,4 @@
-<?= view('layout/header', [
+<?= view('header/header', [
     'title'       => $title ?? 'Agrupar nomes',
     'description' => 'Agrupamento de registros de pessoas com nomes semelhantes.',
     'fluid'       => true,
@@ -15,12 +15,8 @@
         <a class="btn btn-outline-info rounded-0" href="<?= site_url('person/edit/' . (int) $person['id']) ?>"><i class="bi bi-arrow-left me-2"></i>Voltar à edição</a>
     </header>
 
-    <?php if (session()->getFlashdata('error')) : ?>
-        <div class="alert alert-danger rounded-0" role="alert"><?= esc(session()->getFlashdata('error')) ?></div>
-    <?php endif; ?>
-    <?php if (session()->getFlashdata('success')) : ?>
-        <div class="alert alert-success rounded-0" role="alert"><?= esc(session()->getFlashdata('success')) ?></div>
-    <?php endif; ?>
+
+
 
     <section class="cyra-panel p-3 p-md-4 mb-4">
         <span class="cyra-muted me-2">Palavras pesquisadas:</span>
@@ -70,4 +66,4 @@
     <?php endif; ?>
 </main>
 
-<?= view('layout/footer', ['fluid' => true]) ?>
+<?= view('header/footer', ['fluid' => true]) ?>

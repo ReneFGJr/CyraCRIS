@@ -1,44 +1,62 @@
-<?= view('layout/header', [
-	'title' => 'Início',
-	'description' => 'CyraCRIS - Current Research Information System para programas de pós-graduação.',
-	'fluid' => true,
-]) ?>
-
-<main class="container-fluid px-3 px-md-4 px-xxl-5 py-5" id="sobre">
-	<section class="row align-items-center g-5 py-lg-5">
-		<div class="col-lg-7">
-			<p class="text-uppercase fw-bold small cyra-accent mb-4"><i class="bi bi-diagram-3 me-2"></i>Pesquisa que se conecta</p>
-			<h1 class="display-1 cyra-heading text-white lh-1">O conhecimento<br>em <span class="cyra-accent">movimento.</span></h1>
-			<p class="lead cyra-muted my-4 pe-lg-5">O CyraCRIS organiza, integra e dá visibilidade à produção científica dos programas de pós-graduação em um só lugar.</p>
-			<form class="pe-lg-5" method="get" action="<?= site_url('person/search') ?>" role="search">
-				<label class="form-label text-white fw-semibold" for="home-person-search">Buscar indivíduo</label>
-				<div class="input-group input-group-lg">
-					<span class="input-group-text rounded-0"><i class="bi bi-person-search"></i></span>
-					<input class="form-control rounded-0" id="home-person-search" name="q" type="search" placeholder="Digite o nome ou ID Lattes" aria-label="Nome ou ID Lattes do indivíduo" required>
-					<button class="btn btn-info rounded-0 px-4" type="submit"><i class="bi bi-search me-2"></i>Buscar</button>
-				</div>
-			</form>
-		</div>
-
-		<div class="col-lg-5" id="recursos">
-			<div class="cyra-panel p-4 p-md-5">
-				<img class="img-fluid d-block mx-auto mb-4" src="<?= base_url('assets/logo/logo_cyracris_full.png') ?>" alt="CyraCRIS" style="max-height: 120px;">
-				<p class="text-uppercase small cyra-muted mb-4">Um sistema para cada etapa</p>
-				<div class="border-top border-light border-opacity-10 py-3 d-flex gap-3">
-					<i class="bi bi-database-check fs-4 cyra-accent"></i>
-					<div><h2 class="h5 text-white">Dados organizados</h2><p class="small cyra-muted mb-0">Informações acadêmicas acessíveis e estruturadas.</p></div>
-				</div>
-				<div class="border-top border-light border-opacity-10 py-3 d-flex gap-3">
-					<i class="bi bi-share fs-4 cyra-accent"></i>
-					<div><h2 class="h5 text-white">Pesquisa conectada</h2><p class="small cyra-muted mb-0">Conecte pessoas, projetos e resultados.</p></div>
-				</div>
-				<div class="border-top border-bottom border-light border-opacity-10 py-3 d-flex gap-3">
-					<i class="bi bi-graph-up-arrow fs-4 cyra-accent"></i>
-					<div><h2 class="h5 text-white">Decisões melhores</h2><p class="small cyra-muted mb-0">Indicadores claros para acompanhar a evolução.</p></div>
-				</div>
-			</div>
-		</div>
-	</section>
+<?= view('header/header', ['title' => 'Programas de pós-graduação', 'fluid' => true]) ?>
+<main class="container-fluid px-3 px-md-4 px-xxl-5 py-4 py-lg-5">
+    <header class="mb-4">
+        <p class="small text-uppercase fw-bold cyra-accent mb-2">Pesquisa que se conecta</p>
+        <h1 class="home-heading display-5 home-title">Programas de <span>pós-graduação</span></h1>
+        <p class="cyra-muted">Explore os programas, suas linhas de pesquisa e as pessoas que fazem a ciência acontecer.</p>
+        <form class="d-flex gap-2 mt-3" method="get" action="<?= site_url('person/search') ?>" role="search" style="max-width: 36rem">
+            <label class="visually-hidden" for="home-person-search">Buscar indivíduo por nome ou ID Lattes</label>
+            <input class="form-control" id="home-person-search" name="q" type="search" placeholder="Buscar por nome ou ID Lattes" required>
+            <button class="btn btn-outline-info" type="submit">Buscar</button>
+        </form>
+    </header>
+    <div class="home-workspace">
+        <aside class="home-panel home-programs" aria-labelledby="programs-title">
+            <h2 class="h5 home-heading" id="programs-title">Programas <span class="small cyra-muted">(<?= count($programas) ?>)</span></h2>
+            <p class="small cyra-muted">Selecione um PPG para consultar os detalhes.</p>
+            <nav aria-label="Selecionar programa de pós-graduação">
+                <?php foreach ($programas as $programa) : ?>
+                    <a class="home-program" href="<?= site_url('/') . '?ppg=' . (int) $programa['id'] ?>" <?= (int) $programa['id'] === (int) ($selecionado['id'] ?? 0) ? 'aria-current="true"' : '' ?>>
+                        <span><strong><?= esc($programa['nome']) ?></strong><small><?= esc(($programa['instituicao_sigla'] ?? '') ?: ($programa['instituicao_nome'] ?? '')) ?></small></span>
+                        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                    </a>
+                <?php endforeach; ?>
+                <?php if ($programas === []) : ?><p class="cyra-muted mb-0">Nenhum programa cadastrado.</p><?php endif; ?>
+            </nav>
+        </aside>
+        <section class="home-details" aria-labelledby="selected-title">
+            <?php if ($selecionado !== null) : ?>
+                <header class="home-panel p-4 mb-3">
+                    <p class="small cyra-accent mb-2"><?= esc($selecionado['instituicao_nome'] ?? '') ?></p>
+                    <h2 class="home-heading h2" id="selected-title"><?= esc($selecionado['nome']) ?></h2>
+                    <p class="cyra-muted mb-3"><?= esc($selecionado['modalidade'] ?? '') ?><?php if (! empty($selecionado['situacao'])) : ?> · <?= esc($selecionado['situacao']) ?><?php endif; ?></p>
+                    <a class="home-link" href="<?= site_url('ppg/' . (int) $selecionado['id']) ?>">Ver página completa do programa <i class="bi bi-arrow-up-right" aria-hidden="true"></i></a>
+                </header>
+                <div class="home-stats mb-3" aria-label="Indicadores do programa">
+                    <?php foreach ([['Linhas de pesquisa', count($linhas), 'diagram-3'], ['Docentes', count($docentes), 'people'], ['Nota CAPES', $selecionado['nota_capes'] ?? 'Não informada', 'award']] as [$rotulo, $valor, $icone]) : ?>
+                        <article class="home-stat"><i class="bi bi-<?= $icone ?> cyra-accent" aria-hidden="true"></i><strong><?= esc((string) $valor) ?></strong><span class="small cyra-muted"><?= esc($rotulo) ?></span></article>
+                    <?php endforeach; ?>
+                </div>
+                <section class="home-panel p-4 mb-3" aria-labelledby="research-title">
+                    <h3 class="home-heading h4 mb-3" id="research-title">Linhas de pesquisa</h3>
+                    <?php foreach ($linhas as $linha) : ?>
+                        <article class="home-entry"><h4 class="h6 mb-1"><?= esc($linha['nome']) ?></h4><?php if (! empty($linha['area_concentracao'])) : ?><p class="small cyra-muted mb-0"><?= esc($linha['area_concentracao']) ?></p><?php endif; ?></article>
+                    <?php endforeach; ?>
+                    <?php if ($linhas === []) : ?><p class="cyra-muted mb-0">Nenhuma linha de pesquisa cadastrada para este programa.</p><?php endif; ?>
+                </section>
+                <section class="home-panel p-4" aria-labelledby="teachers-title">
+                    <h3 class="home-heading h4 mb-3" id="teachers-title">Docentes</h3>
+                    <div class="home-teachers">
+                        <?php foreach ($docentes as $docente) : ?>
+                            <a class="home-teacher" href="<?= site_url('person/' . (int) $docente['id']) ?>"><span class="home-avatar" aria-hidden="true"><?= esc(mb_strtoupper(mb_substr($docente['nome'], 0, 1))) ?></span><span><?= esc($docente['nome']) ?></span></a>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php if ($docentes === []) : ?><p class="cyra-muted mb-0">Nenhum docente vinculado às linhas deste programa.</p><?php endif; ?>
+                </section>
+            <?php else : ?>
+                <div class="home-panel p-4"><h2 class="home-heading h4" id="selected-title">Explore os programas</h2><p class="cyra-muted mb-0">Os indicadores aparecerão aqui quando houver programas cadastrados.</p></div>
+            <?php endif; ?>
+        </section>
+    </div>
 </main>
-
-<?= view('layout/footer', ['fluid' => true]) ?>
+<?= view('header/footer', ['fluid' => true]) ?>

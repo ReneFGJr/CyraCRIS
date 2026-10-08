@@ -1,4 +1,4 @@
-<?= view('layout/header', [
+<?= view('header/header', [
     'title'       => $title ?? 'Meu perfil',
     'description' => 'Dados do usuário autenticado no CyraCRIS.',
     'fluid'       => true,
@@ -159,4 +159,4 @@ $formatLabel = static function (string $field): string {
     </section>
 </main>
 
-<?= view('layout/footer') ?>
+<?= view('header/footer') ?>

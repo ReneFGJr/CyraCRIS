@@ -56,7 +56,7 @@ $fotoPessoaDisponivel = static function (array $pessoa): bool {
         && is_file(FCPATH . '_repository' . DIRECTORY_SEPARATOR . 'foto' . DIRECTORY_SEPARATOR . $lattesId . '.jpg');
 };
 ?>
-<?= view('layout/header', [
+<?= view('header/header', [
     'title' => $programa['nome'],
     'description' => 'Detalhes do programa de pós-graduação ' . $programa['nome'] . '.',
     'fluid' => true,
@@ -152,12 +152,8 @@ $fotoPessoaDisponivel = static function (array $pessoa): bool {
         </div>
     </header>
 
-    <?php if (session('sucesso')) : ?>
-        <div class="alert alert-success rounded-0" role="alert"><?= esc(session('sucesso')) ?></div>
-    <?php endif; ?>
-    <?php if (session('erro')) : ?>
-        <div class="alert alert-danger rounded-0" role="alert"><?= esc(session('erro')) ?></div>
-    <?php endif; ?>
+
+
 
     <div class="row g-3 mb-4">
         <?php foreach ([
@@ -465,4 +461,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<?= view('layout/footer', ['fluid' => true]) ?>
+<?= view('header/footer', ['fluid' => true]) ?>

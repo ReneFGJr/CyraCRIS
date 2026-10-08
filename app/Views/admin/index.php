@@ -1,4 +1,4 @@
-<?= view('layout/header', [
+<?= view('header/header', [
     'title'       => $title ?? 'Administração',
     'description' => 'Painel administrativo do CyraCRIS.',
     'fluid'       => true,
@@ -62,6 +62,22 @@
 
         <div class="row g-3 g-xl-4">
             <div class="col-12 col-md-6 col-xl-4">
+                <a class="admin-card p-4" href="<?= site_url('admin/qualificacao') ?>">
+                    <div class="admin-icon mb-4"><i class="bi bi-calendar-check" aria-hidden="true"></i></div>
+                    <h3 class="h5 text-white">Marcação de qualificação</h3>
+                    <p class="cyra-muted mb-4">Acesse a área de marcação de exames de qualificação.</p>
+                    <span class="mt-auto cyra-accent">Acessar <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i></span>
+                </a>
+            </div>
+            <div class="col-12 col-md-6 col-xl-4">
+                <a class="admin-card p-4" href="<?= site_url('admin/defesa') ?>">
+                    <div class="admin-icon mb-4"><i class="bi bi-mortarboard" aria-hidden="true"></i></div>
+                    <h3 class="h5 text-white">Marcação de defesa</h3>
+                    <p class="cyra-muted mb-4">Acesse a área de marcação de defesas.</p>
+                    <span class="mt-auto cyra-accent">Acessar <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i></span>
+                </a>
+            </div>
+            <div class="col-12 col-md-6 col-xl-4">
                 <a class="admin-card p-4" href="<?= site_url('ppg') ?>">
                     <div class="admin-icon mb-4"><i class="bi bi-mortarboard"></i></div>
                     <h3 class="h5 text-white">Programas de pós-graduação</h3>
@@ -105,4 +121,4 @@
     </section>
 </main>
 
-<?= view('layout/footer', ['fluid' => true]) ?>
+<?= view('header/footer', ['fluid' => true]) ?>

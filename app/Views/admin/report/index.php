@@ -1,4 +1,4 @@
-<?= view('layout/header', [
+<?= view('header/header', [
     'title'       => $title ?? 'Relatórios do sistema',
     'description' => 'Central de relatórios administrativos do CyraCRIS.',
     'fluid'       => true,
@@ -46,4 +46,4 @@
     </div>
 </main>
 
-<?= view('layout/footer', ['fluid' => true]) ?>
+<?= view('header/footer', ['fluid' => true]) ?>

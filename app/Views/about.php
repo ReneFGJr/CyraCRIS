@@ -1,4 +1,4 @@
-<?= view('layout/header', [
+<?= view('header/header', [
     'title'       => 'Sobre o CyraCRIS',
     'description' => 'Conheça a identidade, a proposta e os fundamentos do CyraCRIS.',
     'fluid'       => true,
@@ -150,4 +150,4 @@
     </footer>
 </main>
 
-<?= view('layout/footer', ['fluid' => true]) ?>
+<?= view('header/footer', ['fluid' => true]) ?>

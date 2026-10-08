@@ -1,4 +1,4 @@
-<?= view('layout/header', [
+<?= view('header/header', [
     'title' => $title ?? 'Importar orientações',
     'description' => 'Importação temporária de orientações por arquivo CSV ou texto.',
     'fluid' => true,
@@ -14,16 +14,8 @@
         <div class="text-lg-end"><strong class="display-6 text-white d-block"><?= (int) $total ?></strong><span class="small cyra-muted">registros na tabela temporária</span></div>
     </header>
 
-    <?php if (session()->getFlashdata('error')) : ?><div class="alert alert-danger rounded-0" role="alert"><?= esc(session()->getFlashdata('error')) ?></div><?php endif; ?>
-    <?php $resultado = session()->getFlashdata('import_result'); ?>
-    <?php if (is_array($resultado)) : ?>
-        <div class="alert alert-info rounded-0" role="status">
-            <strong><?= (int) $resultado['importados'] ?> importados</strong> e <?= (int) $resultado['duplicados'] ?> duplicados ignorados.
-            <?php if ($resultado['erros'] !== []) : ?><details class="mt-2"><summary><?= count($resultado['erros']) ?> linhas com erro</summary><ul class="mb-0 mt-2"><?php foreach ($resultado['erros'] as $erro) : ?><li><?= esc($erro) ?></li><?php endforeach; ?></ul></details><?php endif; ?>
-        </div>
-    <?php endif; ?>
 
-    <section class="cyra-panel p-3 p-md-4 mb-4">
+        <section class="cyra-panel p-3 p-md-4 mb-4">
         <form method="post" action="<?= site_url('admin/csv') ?>" enctype="multipart/form-data">
             <?= csrf_field() ?>
             <div class="row g-4">
@@ -50,4 +42,4 @@
     </section>
 </main>
 
-<?= view('layout/footer', ['fluid' => true]) ?>
+<?= view('header/footer', ['fluid' => true]) ?>

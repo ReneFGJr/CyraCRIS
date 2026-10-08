@@ -1,4 +1,4 @@
-<?= view('layout/header', [
+<?= view('header/header', [
     'title'       => $title ?? 'Administrar pessoas',
     'description' => 'Administração da tabela individuo.',
     'fluid'       => true,
@@ -131,4 +131,4 @@
     <?php endif; ?>
 </main>
 
-<?= view('layout/footer', ['fluid' => true]) ?>
+<?= view('header/footer', ['fluid' => true]) ?>

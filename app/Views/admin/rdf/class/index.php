@@ -1,4 +1,4 @@
-<?= view('layout/header', [
+<?= view('header/header', [
     'title'       => $title ?? 'Classes RDF',
     'description' => 'Administração das classes RDF.',
     'fluid'       => true,
@@ -16,9 +16,7 @@
         </a>
     </header>
 
-    <?php if (session()->getFlashdata('success')) : ?>
-        <div class="alert alert-success rounded-0" role="alert"><?= esc(session()->getFlashdata('success')) ?></div>
-    <?php endif; ?>
+
 
     <nav class="mb-4" aria-label="Tipos de registros RDF">
         <div class="nav nav-tabs border-secondary">
@@ -100,4 +98,4 @@
     <?php endif; ?>
 </main>
 
-<?= view('layout/footer', ['fluid' => true]) ?>
+<?= view('header/footer', ['fluid' => true]) ?>

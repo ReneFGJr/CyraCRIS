@@ -1,4 +1,4 @@
-<?= view('layout/header', [
+<?= view('header/header', [
     'title'       => $title ?? 'Possíveis nomes duplicados',
     'description' => 'Nomes com similaridade superior a 90% pelo algoritmo de Levenshtein.',
     'fluid'       => true,
@@ -51,4 +51,4 @@
     <?php endif; ?>
 </main>
 
-<?= view('layout/footer', ['fluid' => true]) ?>
+<?= view('header/footer', ['fluid' => true]) ?>

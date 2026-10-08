@@ -2,7 +2,7 @@
 /** @var array<int, array<string, mixed>> $programas */
 $rows = $programas ?? [];
 ?>
-<?= view('layout/header', [
+<?= view('header/header', [
     'title' => 'Programas de Pós-Graduação',
     'description' => 'Programas de pós-graduação cadastrados no CyraCRIS.',
     'fluid'       => true,
@@ -63,4 +63,4 @@ $rows = $programas ?? [];
     <?php endif; ?>
 </main>
 
-<?= view('layout/footer', ['fluid' => true]) ?>
+<?= view('header/footer', ['fluid' => true]) ?>

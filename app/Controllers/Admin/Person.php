@@ -132,12 +132,17 @@ class Person extends BaseController
                 continue;
             }
 
-            if (count($columns) < 5) {
-                $errors[] = 'Linha ' . ($index + 1) . ': informe Nome, ID Lattes, e-mail, CPF e crachá.';
+            if (count($columns) < 3) {
+                $errors[] = 'Linha ' . ($index + 1) . ': informe Nome, ID Lattes e e-mail. CPF e crachá são opcionais.';
                 continue;
             }
 
-            [$name, $lattesId, $email, $cpf, $cracha] = array_slice($columns, 0, 5);
+            [$name, $lattesId, $email, $cpf, $cracha] = array_pad(array_slice($columns, 0, 5), 5, '');
+
+            if ($name === '' || $lattesId === '' || $email === '') {
+                $errors[] = 'Linha ' . ($index + 1) . ': Nome, ID Lattes e e-mail são obrigatórios.';
+                continue;
+            }
 
             if ($model->insert([
                 'nome'      => $name,

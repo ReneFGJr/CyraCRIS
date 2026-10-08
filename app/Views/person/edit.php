@@ -1,4 +1,4 @@
-<?= view('layout/header', [
+<?= view('header/header', [
     'title'       => $title ?? 'Editar pessoa',
     'description' => 'Edição dos dados da pessoa.',
 ]) ?>
@@ -17,12 +17,8 @@
         </a>
     </div>
 
-    <?php if (session()->getFlashdata('erro')) : ?>
-        <div class="alert alert-danger rounded-0" role="alert"><?= esc(session()->getFlashdata('erro')) ?></div>
-    <?php endif; ?>
-    <?php if (session()->getFlashdata('success')) : ?>
-        <div class="alert alert-success rounded-0" role="alert"><?= esc(session()->getFlashdata('success')) ?></div>
-    <?php endif; ?>
+
+
 
     <section class="cyra-panel p-4 p-lg-5">
         <div class="d-flex justify-content-end mb-4">
@@ -91,4 +87,4 @@
     </section>
 </main>
 
-<?= view('layout/footer') ?>
+<?= view('header/footer') ?>

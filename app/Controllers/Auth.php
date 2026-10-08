@@ -69,6 +69,7 @@ class Auth extends BaseController
             'auth_logged_in' => true,
             'auth_givename'  => $givename,
             'auth_user'      => $credentials['user'],
+            'auth_user_id'   => \App\Libraries\IdPessoaAutenticada::extrair($data),
             'auth_data'      => $data,
             'auth_login_at'  => date('Y-m-d H:i:s'),
         ]);
@@ -79,7 +80,7 @@ class Auth extends BaseController
     public function logout(): RedirectResponse
     {
         $session = session();
-        $session->remove(['auth_logged_in', 'auth_givename', 'auth_user', 'auth_data', 'auth_login_at']);
+        $session->remove(['auth_logged_in', 'auth_givename', 'auth_user', 'auth_user_id', 'auth_data', 'auth_login_at']);
         $session->regenerate();
 
         return redirect()->to(site_url('/'))->with('success', 'Você saiu da sua conta.');

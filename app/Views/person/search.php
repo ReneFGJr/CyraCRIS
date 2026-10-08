@@ -1,4 +1,4 @@
-<?= view('layout/header', [
+<?= view('header/header', [
     'title' => 'Buscar indivíduos',
     'description' => 'Busca de indivíduos cadastrados no CyraCRIS.',
 ]) ?>
@@ -46,4 +46,4 @@
     <?php endif; ?>
 </main>
 
-<?= view('layout/footer') ?>
+<?= view('header/footer') ?>

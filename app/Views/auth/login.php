@@ -1,4 +1,4 @@
-<?= view('layout/header', [
+<?= view('header/header', [
     'title'       => $title ?? 'Entrar',
     'description' => 'Autenticação no CyraCRIS.',
     'fluid'       => true,
@@ -6,18 +6,14 @@
 
 <main class="container-fluid px-3 px-md-4 px-xxl-5 py-5">
     <div class="row justify-content-center py-lg-5">
-        <div class="col-12">
+        <div class="col-12 col-md-8 cyra-login-column">
             <section class="cyra-panel p-4 p-md-5" aria-labelledby="login-title">
                 <p class="text-uppercase fw-bold small cyra-accent mb-3">
                     <i class="bi bi-shield-lock me-2"></i>Área restrita
                 </p>
                 <h1 class="h2 cyra-heading text-white mb-4" id="login-title">Entrar no CyraCRIS</h1>
 
-                <?php if (session()->getFlashdata('error')) : ?>
-                    <div class="alert alert-danger rounded-0" role="alert">
-                        <?= esc(session()->getFlashdata('error')) ?>
-                    </div>
-                <?php endif; ?>
+
 
                 <form action="<?= site_url('login') ?>" method="post">
                     <?= csrf_field() ?>
@@ -41,4 +37,4 @@
     </div>
 </main>
 
-<?= view('layout/footer', ['fluid' => true]) ?>
+<?= view('header/footer', ['fluid' => true]) ?>

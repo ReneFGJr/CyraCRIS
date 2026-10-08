@@ -1,9 +1,9 @@
 <?php
 $editing = is_array($rdfClass);
 $value = static fn (string $field, mixed $default = ''): mixed => old($field, $editing ? ($rdfClass[$field] ?? $default) : $default);
-$errors = session()->getFlashdata('errors');
+
 ?>
-<?= view('layout/header', [
+<?= view('header/header', [
     'title'       => $title ?? ($editing ? 'Editar classe RDF' : 'Nova classe RDF'),
     'description' => $editing ? 'Edição de classe RDF.' : 'Cadastro de classe RDF.',
 ]) ?>
@@ -17,14 +17,7 @@ $errors = session()->getFlashdata('errors');
         <a class="btn btn-outline-info rounded-0" href="<?= site_url('admin/rdf/class') ?>"><i class="bi bi-arrow-left me-2"></i>Voltar</a>
     </div>
 
-    <?php if (is_array($errors) && $errors !== []) : ?>
-        <div class="alert alert-danger rounded-0" role="alert">
-            <strong>Revise os dados informados:</strong>
-            <ul class="mb-0 mt-2"><?php foreach ($errors as $error) : ?><li><?= esc($error) ?></li><?php endforeach; ?></ul>
-        </div>
-    <?php endif; ?>
-
-    <section class="cyra-panel p-4 p-lg-5">
+        <section class="cyra-panel p-4 p-lg-5">
         <form class="row g-4" method="post" action="<?= $editing ? site_url('admin/rdf/class/edit/' . (int) $rdfClass['id_c']) : site_url('admin/rdf/class') ?>">
             <?= csrf_field() ?>
 
@@ -86,4 +79,4 @@ $errors = session()->getFlashdata('errors');
     </section>
 </main>
 
-<?= view('layout/footer') ?>
+<?= view('header/footer') ?>

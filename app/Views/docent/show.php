@@ -95,7 +95,7 @@ $numeroWhatsapp = static function (string $valor): string {
     return in_array(strlen($digitos), [10, 11], true) ? '55' . $digitos : '';
 };
 ?>
-<?= view('layout/header', ['title' => $docente['nome'], 'description' => 'Perfil acadêmico de ' . $docente['nome'] . '.', 'fluid' => true]) ?>
+<?= view('header/header', ['title' => $docente['nome'], 'description' => 'Perfil acadêmico de ' . $docente['nome'] . '.', 'fluid' => true]) ?>
 
 <style>
     #perfil-tabs-content > .tab-pane:focus { outline: none; }
@@ -150,8 +150,8 @@ $numeroWhatsapp = static function (string $valor): string {
             <form method="post" action="<?= site_url('person/' . $docente['id'] . '/atualizar') ?>"><?= csrf_field() ?><button class="btn btn-sm btn-info rounded-0" type="submit" <?= ! $coletaLattesHabilitada ? 'disabled' : '' ?> title="<?= ! $coletaLattesHabilitada ? 'Coleta Lattes temporariamente desabilitada' : 'Atualizar dados pelo Lattes' ?>"><i class="bi bi-arrow-clockwise me-2"></i><?= $coletaLattesHabilitada ? 'Atualizar informações acadêmicas' : 'Coleta Lattes desabilitada' ?></button></form>
         </div>
     </div>
-    <?php if (session('sucesso')) : ?><div class="alert alert-success rounded-0" role="alert"><?= esc(session('sucesso')) ?></div><?php endif; ?>
-    <?php if (session('erro')) : ?><div class="alert alert-danger rounded-0" role="alert"><?= esc(session('erro')) ?></div><?php endif; ?>
+
+
 
     <header class="mb-4">
         <div class="d-flex align-items-center gap-3">
@@ -546,4 +546,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<?= view('layout/footer') ?>
+<?= view('header/footer') ?>
