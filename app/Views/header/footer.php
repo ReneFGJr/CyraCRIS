@@ -35,8 +35,7 @@ $statusIcons = ['success' => 'check-circle', 'error' => 'exclamation-circle', 'w
     <footer class="cyra-footer mt-auto py-4">
         <div class="<?= ($fluid ?? false) ? 'container-fluid px-3 px-md-4 px-xxl-5' : 'container' ?> cyra-footer-layout">
             <p class="mb-0 small cyra-muted">Current Research Information System</p>
-            <section class="cyra-status" id="system-status" aria-labelledby="system-status-title">
-                <h2 class="cyra-status-title" id="system-status-title"><i class="bi bi-activity" aria-hidden="true"></i> Status do sistema</h2>
+            <section class="cyra-status" id="system-status" aria-label="Mensagens do sistema">
                 <div id="system-status-messages" role="status" aria-live="polite" aria-atomic="true">
                     <?php if ($statusMessages === []) : ?>
                         <p class="cyra-status-idle mb-0">Nenhuma mensagem no momento.</p>

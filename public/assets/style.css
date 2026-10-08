@@ -12,6 +12,7 @@
     --cyra-font: "Manrope", "Segoe UI", sans-serif;
 }
 body { min-width: 320px; color: var(--cyra-ice); background: var(--cyra-background); font-family: var(--cyra-font); }
+input { border: 1px solid var(--cyra-border); }
 .cyra-page { min-height: 100vh; background: radial-gradient(ellipse at 95% 10%, #dff5fa 0, transparent 45%), linear-gradient(135deg, #fffdf8, #f1ece2); }
 .cyra-navbar { background: rgba(255, 253, 248, .94); backdrop-filter: blur(14px); border-bottom: 1px solid var(--cyra-border) !important; }
 .cyra-brand { display: inline-flex; align-items: center; padding: 0; background: transparent; }
@@ -27,6 +28,7 @@ body { min-width: 320px; color: var(--cyra-ice); background: var(--cyra-backgrou
 .cyra-navbar .navbar-toggler { color: var(--cyra-navy); border-color: var(--cyra-border); }
 .cyra-page .btn-outline-info { --bs-btn-color: var(--cyra-accent); --bs-btn-border-color: var(--cyra-accent); --bs-btn-hover-color: #fff; --bs-btn-hover-bg: var(--cyra-accent); --bs-btn-hover-border-color: var(--cyra-accent); --bs-btn-active-color: #fff; --bs-btn-active-bg: var(--cyra-navy); --bs-btn-active-border-color: var(--cyra-navy); }
 .cyra-page .btn-info { --bs-btn-color: #fff; --bs-btn-bg: var(--cyra-blue); --bs-btn-border-color: var(--cyra-blue); --bs-btn-hover-color: #fff; --bs-btn-hover-bg: var(--cyra-navy); --bs-btn-hover-border-color: var(--cyra-navy); --bs-btn-active-color: #fff; --bs-btn-active-bg: var(--cyra-navy); }
+.form-control, .form-select { border-color: var(--cyra-blue); }
 .form-control:focus, .form-select:focus { border-color: var(--cyra-blue); box-shadow: 0 0 0 .2rem rgba(0, 109, 204, .16); }
 .cyra-page .text-white { color: var(--cyra-ice) !important; }
 .cyra-page :is(.ppg-hero, .ppg-stat, .ppg-line, .ppg-teacher-card, .ppg-student-card, .ppg-chart-line, .ppg-research-table tbody tr, .dados-card, .dados-section, .orientacao-summary, .orientacao-panel, .orientacao-status, .admin-card, .report-link) { background: linear-gradient(135deg, #fffdf8, #eaf4fa) !important; border-color: var(--cyra-border); }
@@ -68,9 +70,7 @@ body { min-width: 320px; color: var(--cyra-ice); background: var(--cyra-backgrou
 /* Shared footer status: all operation and validation feedback. */
 .cyra-footer-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr); align-items: center; gap: 1.5rem; }
 .cyra-footer-copyright { text-align: right; }
-.cyra-status { min-width: 0; padding: 1rem 1.25rem; border: 1px solid var(--cyra-border); border-top: 3px solid var(--cyra-cyan); border-radius: 12px; background: rgba(255, 253, 248, .9); text-align: center; }
-.cyra-status-title { margin: 0 0 .5rem; color: var(--cyra-navy); font-size: .8rem; font-weight: 700; }
-.cyra-status-title i { margin-right: .3rem; color: var(--cyra-accent); }
+.cyra-status { min-width: 0; padding: 1rem 1.25rem; border: 1px solid var(--cyra-border); border-top: 3px solid var(--cyra-cyan); border-radius: 12px; background: transparent; text-align: center; }
 .cyra-status-idle { color: var(--cyra-muted); font-size: .8rem; }
 .cyra-status-message { display: flex; justify-content: center; align-items: baseline; gap: .5rem; margin: .4rem 0 0; font-size: .85rem; line-height: 1.5; overflow-wrap: anywhere; }
 .cyra-status-message i { flex: 0 0 auto; }
