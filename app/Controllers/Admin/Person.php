@@ -116,6 +116,15 @@ class Person extends BaseController
         $imported = 0;
         $errors   = [];
         $lines    = preg_split('/\R/u', $rawData) ?: [];
+        $existingNames = [];
+        $existingLattes = [];
+        foreach ((new PersonModel())->select('nome, lattes_id')->findAll() as $person) {
+            $existingNames[$this->normalizeImportName((string) $person['nome'])] = true;
+            $existingId = trim((string) ($person['lattes_id'] ?? ''));
+            if ($existingId !== '') {
+                $existingLattes[$existingId] = true;
+            }
+        }
 
         foreach ($lines as $index => $line) {
             $line = trim($line);
@@ -143,6 +152,18 @@ class Person extends BaseController
                 $errors[] = 'Linha ' . ($index + 1) . ': Nome, ID Lattes e e-mail são obrigatórios.';
                 continue;
             }
+            $normalizedName = $this->normalizeImportName($name);
+            $duplicates = [];
+            if (isset($existingNames[$normalizedName])) {
+                $duplicates[] = 'nome já cadastrado';
+            }
+            if (isset($existingLattes[$lattesId])) {
+                $duplicates[] = 'ID Lattes já cadastrado';
+            }
+            if ($duplicates !== []) {
+                $errors[] = 'Linha ' . ($index + 1) . ': importação rejeitada — ' . implode(' e ', $duplicates) . '.';
+                continue;
+            }
 
             if ($model->insert([
                 'nome'      => $name,
@@ -155,6 +176,8 @@ class Person extends BaseController
                 continue;
             }
 
+            $existingNames[$normalizedName] = true;
+            $existingLattes[$lattesId] = true;
             $imported++;
         }
 
@@ -162,6 +185,13 @@ class Person extends BaseController
             'imported' => $imported,
             'errors'   => $errors,
         ]);
+    }
+
+    private function normalizeImportName(string $name): string
+    {
+        $name = \Normalizer::normalize($name, \Normalizer::FORM_D) ?: $name;
+        $name = preg_replace('/\p{Mn}/u', '', $name) ?? $name;
+        return mb_strtoupper(trim(preg_replace('/\s+/u', ' ', $name) ?? $name));
     }
 
     public function joinNames(): string|RedirectResponse

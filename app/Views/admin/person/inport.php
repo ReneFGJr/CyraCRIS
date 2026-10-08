@@ -34,6 +34,7 @@
                     <div class="form-text cyra-muted mt-2" id="data-help">
                         Separe as colunas com ponto e vírgula, tabulação real, o texto /tab ou vírgula. O cabeçalho é opcional.
                         Nome, ID Lattes e e-mail são obrigatórios. CPF e crachá são opcionais e podem ser omitidos.
+                        Nomes ou IDs Lattes já cadastrados, inclusive repetidos neste lote, não serão importados.
                     </div>
                     <button class="btn btn-info rounded-0 px-4 mt-4" type="submit">
                         <i class="bi bi-database-add me-2"></i>Importar pessoas
