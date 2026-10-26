@@ -68,3 +68,15 @@ app_baseURL = 'http://cyracris/'
 #--------------------------------------------------------------------
 
 # logger.threshold = 4
+
+#--------------------------------------------------------------------
+# E-MAIL
+#--------------------------------------------------------------------
+# Uso do TLS
+# E-MAIL
+EMAIL_TYPE=sendmail
+EMAIL_SMTP=smtp.gmail.com
+EMAIL_SMTP_PORT=465
+EMAIL_FROM=
+EMAIL_PASSWORD=
+EMAIL_USER_AUTH=
