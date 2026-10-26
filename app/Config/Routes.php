@@ -8,6 +8,8 @@ $routes->get('abour', 'Home::about');
 $routes->get('login', 'Auth::login');
 $routes->get('profile', 'Auth::profile');
 $routes->get('admin', 'Admin::index');
+$routes->get('admin/email_test', 'Admin\\EmailTest::index');
+$routes->post('admin/email_test', 'Admin\\EmailTest::send', ['filter' => 'csrf']);
 $routes->get('admin/qualificacao', 'Admin::qualificacao');
 $routes->get('admin/banca/pessoas', 'Admin::buscarPessoasBanca');
 $routes->post('admin/qualificacao/(:num)', 'Admin::salvarSituacao/$1', ['filter' => 'csrf']);
