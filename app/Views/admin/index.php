@@ -62,6 +62,14 @@
 
         <div class="row g-3 g-xl-4">
             <div class="col-12 col-md-6 col-xl-4">
+                <a class="admin-card p-4" href="<?= site_url('admin/email_test') ?>">
+                    <div class="admin-icon mb-4"><i class="bi bi-envelope-check" aria-hidden="true"></i></div>
+                    <h3 class="h5 text-white">Teste de e-mail</h3>
+                    <p class="cyra-muted mb-4">Teste o envio de e-mail com as configurações do .env.</p>
+                    <span class="mt-auto cyra-accent">Acessar <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i></span>
+                </a>
+            </div>
+            <div class="col-12 col-md-6 col-xl-4">
                 <a class="admin-card p-4" href="<?= site_url('admin/qualificacao') ?>">
                     <div class="admin-icon mb-4"><i class="bi bi-calendar-check" aria-hidden="true"></i></div>
                     <h3 class="h5 text-white">Marcação de qualificação</h3>
