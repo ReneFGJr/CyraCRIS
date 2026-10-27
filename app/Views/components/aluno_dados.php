@@ -3,8 +3,17 @@
 $situacaoAluno = ($aluno['situacao'] ?? null) ?: 'Cursando';
 $modalidadeAluno = ['D' => 'Doutorado', 'M' => 'Mestrado'][$aluno['modalidade'] ?? ''] ?? '-';
 $prazoAluno = \App\Libraries\PrazoOrientacao::calcular($aluno);
+$orientadoresPrograma = $orientadoresPrograma ?? [];
+$diasQualificacaoSolicitados = max(0, (int) ($aluno['dias_solicitacao_qualificacao'] ?? 0));
+$diasDefesaSolicitados = max(0, (int) ($aluno['dias_solicitacao_defesa'] ?? 0));
 $previsaoQualificacao = \App\Libraries\PrazoOrientacao::prever($aluno, 18);
 $previsaoDefesa = \App\Libraries\PrazoOrientacao::prever($aluno, 24);
+if ($previsaoQualificacao !== null && $diasQualificacaoSolicitados > 0) {
+    $previsaoQualificacao = $previsaoQualificacao->modify('+' . $diasQualificacaoSolicitados . ' days');
+}
+if ($previsaoDefesa !== null && $diasDefesaSolicitados > 0) {
+    $previsaoDefesa = $previsaoDefesa->modify('+' . $diasDefesaSolicitados . ' days');
+}
 ?>
 <div class="cyra-student-heading">
     <div class="cyra-student-identity">
@@ -22,13 +31,26 @@ $previsaoDefesa = \App\Libraries\PrazoOrientacao::prever($aluno, 24);
     </div>
 </div>
 <div class="d-flex flex-wrap align-items-baseline gap-3 mb-2">
-    <p class="mb-0"><strong>Orientador:</strong> <?= esc(($aluno['orientador'] ?? '') ?: '-') ?></p>
+    <p class="mb-0"><strong>Programa:</strong> <?= esc(($aluno['programa_nome'] ?? '') ?: '-') ?></p>
+    <p class="mb-0"><strong>Linha de pesquisa:</strong> <?= esc(($aluno['linha_pesquisa_nome'] ?? '') ?: '-') ?></p>
+    <p class="mb-0"><strong>Orientador:</strong>
+        <?php if ($orientadoresPrograma !== []) : ?>
+            <?php foreach ($orientadoresPrograma as $indice => $orientacao) : ?>
+                <?php if ($indice > 0) : ?>, <?php endif; ?>
+                <a href="<?= site_url('person/' . (int) $orientacao['orientador_id']) ?>"><?= esc($orientacao['orientador_nome']) ?></a>
+                <span class="small cyra-muted">(<?= ($orientacao['tipo_orientacao'] ?? '') === 'CO_ORIENTADOR' ? 'Coorientador' : 'Orientador' ?>)</span>
+            <?php endforeach; ?>
+        <?php else : ?>
+            <?= esc(($aluno['orientador'] ?? '') ?: '-') ?>
+        <?php endif; ?>
+    </p>
     <p class="mb-0"><strong>Ano:</strong> <?= esc((string) (($aluno['ano'] ?? '') ?: '-')) ?></p>
 </div>
 <div class="row g-3 mt-2">
     <?php foreach (['entrada_programa' => 'Ingresso', 'qualificacao' => 'Qualificação', 'defesa' => 'Defesa'] as $grupo => $tituloGrupo) : ?>
+        <?php $eventoMarcado = $grupo !== 'entrada_programa' && ! empty($aluno['data_' . $grupo]); ?>
         <div class="col-12 <?= $grupo === 'entrada_programa' ? 'cyra-student-ingresso-column' : 'cyra-student-event-column' ?>">
-            <section class="border rounded p-3 h-100 d-flex flex-column">
+            <section class="border rounded p-3 h-100 d-flex flex-column <?= $eventoMarcado ? 'border-success border-3' : '' ?>">
                 <?php if ($grupo === 'entrada_programa') : ?>
                     <div class="d-flex justify-content-between align-items-center gap-2 mb-3">
                         <h4 class="h6 cyra-heading mb-0"><?= esc($tituloGrupo) ?></h4>
@@ -53,21 +75,15 @@ $previsaoDefesa = \App\Libraries\PrazoOrientacao::prever($aluno, 24);
                         </div>
                         <div>
                             <dt class="small cyra-muted">Previsão de qualificação</dt>
-                            <dd><?= esc($previsaoQualificacao ? $previsaoQualificacao->format('d/m/Y') : '-') ?></dd>
+                            <dd><?= esc($previsaoQualificacao ? $previsaoQualificacao->format('d/m/Y') . ' (+' . $diasQualificacaoSolicitados . ' dias)' : '-') ?></dd>
                         </div>
                         <div>
                             <dt class="small cyra-muted">Previsão de defesa</dt>
-                            <dd><?= esc($previsaoDefesa ? $previsaoDefesa->format('d/m/Y') : '-') ?></dd>
+                            <dd><?= esc($previsaoDefesa ? $previsaoDefesa->format('d/m/Y') . ' (+' . $diasDefesaSolicitados . ' dias)' : '-') ?></dd>
                         </div>
                     <?php else : ?>
                         <dt class="small cyra-muted">Data</dt>
                         <dd><?= esc($dataFormatada ? $dataFormatada->format('d/m/Y') : '-') ?></dd>
-                    <?php endif; ?>
-                    <?php if ($grupo === 'entrada_programa') : ?>
-                        <div>
-                        <dt class="small cyra-muted">Extensão do prazo</dt>
-                        <dd><?= esc((string) ($aluno['extensao_dias'] ?? 0)) ?> dias</dd>
-                        </div>
                     <?php endif; ?>
                     <?php if ($grupo !== 'entrada_programa') : ?>
                         <dt class="small cyra-muted">Hora</dt>

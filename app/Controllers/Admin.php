@@ -38,11 +38,17 @@ class Admin extends BaseController
         foreach (['licenca_tipo', 'data_inicio', 'data_fim', 'observacoes'] as $campo) {
             $data[$campo] = trim((string) $this->request->getPost($campo));
         }
+        foreach (['dias_qualificacao', 'dias_defesa'] as $campo) {
+            $valor = trim((string) $this->request->getPost($campo));
+            $data[$campo] = $valor === '' ? '0' : $valor;
+        }
         $rules = [
             'licenca_tipo' => 'required|in_list[saude,maternidade]',
             'data_inicio' => 'required|valid_date[Y-m-d]',
             'data_fim' => 'required|valid_date[Y-m-d]',
             'observacoes' => 'permit_empty|max_length[2000]',
+            'dias_qualificacao' => 'required|is_natural|max_length[10]',
+            'dias_defesa' => 'required|is_natural|max_length[10]',
         ];
         $popup = in_array($data['licenca_tipo'], ['saude', 'maternidade'], true) ? $data['licenca_tipo'] : 'saude';
         $errorUrl = $url . '&licenca=' . $popup;
@@ -52,6 +58,8 @@ class Admin extends BaseController
         if ($data['data_fim'] < $data['data_inicio']) {
             return redirect()->to($errorUrl)->withInput()->with('error', 'A data final da licença deve ser igual ou posterior à data inicial.');
         }
+        $data['dias_qualificacao'] = (int) $data['dias_qualificacao'];
+        $data['dias_defesa'] = (int) $data['dias_defesa'];
         $evento = $data['licenca_tipo'] === 'saude' ? 'Licença saúde' : 'Licença maternidade';
         $authData = session()->get('auth_data');
         $usuarioId = \App\Libraries\IdPessoaAutenticada::extrair(is_array($authData) ? $authData : []);
@@ -78,6 +86,92 @@ class Admin extends BaseController
             return redirect()->to($errorUrl)->withInput()->with('error', 'Não foi possível registrar a licença. Tente novamente.');
         }
         return redirect()->to($url)->with('success', $evento . ' registrada no histórico do aluno.');
+    }
+
+    public function atualizarSolicitacao(int $id): RedirectResponse
+    {
+        if (session()->get('auth_logged_in') !== true) {
+            return redirect()->to(site_url('login'))->with('error', 'Faça login como administrador para editar solicitações.');
+        }
+
+        $alunoId = (int) $this->request->getPost('aluno_id');
+        $query = mb_substr(trim((string) $this->request->getPost('q')), 0, 150);
+        $url = site_url('admin/qualificacao') . '?' . http_build_query(['q' => $query, 'aluno' => $alunoId]);
+        $model = new \App\Models\TmpOrientacaoHistoricoModel();
+        $solicitacao = $model->where('id', $id)
+            ->where('orientacao_id', $alunoId)
+            ->where('tipo', 'Solicitação')
+            ->first();
+
+        if ($alunoId < 1 || $solicitacao === null) {
+            return redirect()->to(site_url('admin/qualificacao'))
+                ->with('error', 'A solicitação não foi encontrada para o aluno selecionado.');
+        }
+
+        $dadosAnteriores = json_decode((string) ($solicitacao['dados_novos'] ?? ''), true);
+        $dadosAnteriores = is_array($dadosAnteriores) ? $dadosAnteriores : [];
+        if (! in_array($solicitacao['evento'], ['Licença saúde', 'Licença maternidade'], true)) {
+            return redirect()->to($url)->with('error', 'Este tipo de solicitação não pode ser editado por este formulário.');
+        }
+
+        $data = [
+            'licenca_tipo' => trim((string) $this->request->getPost('licenca_tipo')),
+            'data_inicio'  => trim((string) $this->request->getPost('data_inicio')),
+            'data_fim'     => trim((string) $this->request->getPost('data_fim')),
+            'observacoes'  => trim((string) $this->request->getPost('observacoes')),
+            'dias_qualificacao' => trim((string) ($this->request->getPost('dias_qualificacao') ?? '0')),
+            'dias_defesa' => trim((string) ($this->request->getPost('dias_defesa') ?? '0')),
+        ];
+        $rules = [
+            'licenca_tipo' => 'required|in_list[saude,maternidade]',
+            'data_inicio'  => 'required|valid_date[Y-m-d]',
+            'data_fim'     => 'required|valid_date[Y-m-d]',
+            'observacoes'  => 'permit_empty|max_length[2000]',
+            'dias_qualificacao' => 'required|is_natural|max_length[10]',
+            'dias_defesa' => 'required|is_natural|max_length[10]',
+        ];
+
+        if (! $this->validateData($data, $rules)) {
+            return redirect()->to($url)
+                ->withInput()
+                ->with('errors', array_values($this->validator->getErrors()));
+        }
+        if ($data['data_fim'] < $data['data_inicio']) {
+            return redirect()->to($url)->withInput()
+                ->with('error', 'A data final da licença deve ser igual ou posterior à data inicial.');
+        }
+        $data['dias_qualificacao'] = (int) $data['dias_qualificacao'];
+        $data['dias_defesa'] = (int) $data['dias_defesa'];
+
+        $evento = $data['licenca_tipo'] === 'saude' ? 'Licença saúde' : 'Licença maternidade';
+        $snapshot = [
+            'evento'       => $solicitacao['evento'],
+            'descricao'    => $solicitacao['descricao'],
+            'dados_novos'  => $dadosAnteriores,
+        ];
+
+        try {
+            $saved = $model->update($id, [
+                'evento'          => $evento,
+                'descricao'       => $data['observacoes'] !== '' ? $data['observacoes'] : null,
+                'dados_anteriores'=> json_encode($snapshot, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR),
+                'dados_novos'     => json_encode($data, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR),
+            ]);
+            if ($saved === false) {
+                throw new \RuntimeException('Não foi possível atualizar a solicitação.');
+            }
+        } catch (\Throwable $exception) {
+            log_message('error', 'Falha ao editar solicitação {requestId} do aluno {studentId}: {message}', [
+                'requestId' => $id,
+                'studentId' => $alunoId,
+                'message'   => $exception->getMessage(),
+            ]);
+
+            return redirect()->to($url)->withInput()
+                ->with('error', 'Não foi possível atualizar a solicitação. Tente novamente.');
+        }
+
+        return redirect()->to($url)->with('success', 'Solicitação atualizada com sucesso.');
     }
 
     public function salvarSituacao(int $id): RedirectResponse
@@ -217,6 +311,10 @@ class Admin extends BaseController
             $solicitacoes = $aluno === null ? [] : (new \App\Models\TmpOrientacaoHistoricoModel())
                 ->where('orientacao_id', $aluno['id'])->where('tipo', 'Solicitação')
                 ->orderBy('created_at', 'DESC')->orderBy('id', 'DESC')->findAll();
+            if ($aluno !== null) {
+                $aluno['dias_solicitacao_qualificacao'] = $this->somarDiasSolicitados($solicitacoes, 'dias_qualificacao');
+                $aluno['dias_solicitacao_defesa'] = $this->somarDiasSolicitados($solicitacoes, 'dias_defesa');
+            }
             $bancaPessoas = [];
             if ($aluno !== null) {
                 $idsBanca = [];
@@ -238,6 +336,21 @@ class Admin extends BaseController
         }
 
         return view('admin/marcacao', compact('title', 'icon'));
+    }
+
+    /** @param array<int, array<string, mixed>> $solicitacoes */
+    private function somarDiasSolicitados(array $solicitacoes, string $campo): int
+    {
+        $total = 0;
+        foreach ($solicitacoes as $solicitacao) {
+            $dados = json_decode((string) ($solicitacao['dados_novos'] ?? ''), true);
+            $dias = is_array($dados) ? filter_var($dados[$campo] ?? 0, FILTER_VALIDATE_INT) : 0;
+            if ($dias !== false && $dias > 0) {
+                $total += $dias;
+            }
+        }
+
+        return $total;
     }
 
     public function index(): string|RedirectResponse

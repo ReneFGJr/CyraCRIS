@@ -6,6 +6,10 @@ use App\Controllers\BaseController;
 use App\Models\PersonModel;
 use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\HTTP\RedirectResponse;
+use RuntimeException;
+use SimpleXMLElement;
+use Throwable;
+use ZipArchive;
 
 class Person extends BaseController
 {
@@ -95,8 +99,251 @@ class Person extends BaseController
         }
 
         return view('admin/person/inport', [
-            'title' => 'Importar pessoas',
+            'title'         => 'Importar pessoas',
+            'lookupResult'  => null,
+            'lattesId'      => '',
         ]);
+    }
+
+    public function searchLattes(): string|RedirectResponse
+    {
+        if (($redirect = $this->requireLogin()) !== null) {
+            return $redirect;
+        }
+
+        $lattesId = preg_replace('/\D/', '', (string) $this->request->getPost('lattes_id')) ?? '';
+        if (preg_match('/^\d{16}$/', $lattesId) !== 1) {
+            return view('admin/person/inport', [
+                'title'        => 'Importar pessoas',
+                'lattesId'     => $lattesId,
+                'lookupResult' => [
+                    'status'  => 'error',
+                    'message' => 'Informe um ID Lattes com exatamente 16 dígitos.',
+                ],
+            ]);
+        }
+
+        $existingPerson = db_connect()->table('individuo')
+            ->where('lattes_id', $lattesId)
+            ->orderBy('use', 'ASC')
+            ->orderBy('id', 'ASC')
+            ->get()
+            ->getRowArray();
+
+        if ($existingPerson !== null) {
+            return view('admin/person/inport', [
+                'title'        => 'Importar pessoas',
+                'lattesId'     => $lattesId,
+                'lookupResult' => [
+                    'status'  => 'duplicate',
+                    'message' => 'Este ID Lattes já está cadastrado.',
+                    'person'  => $existingPerson,
+                ],
+            ]);
+        }
+
+        $personData = [
+            'nome'  => '',
+            'email' => '',
+            'orcid' => '',
+        ];
+        $sources = [];
+
+        try {
+            $personData = $this->fetchLattesPersonData($lattesId);
+            if ($personData['nome'] !== '') {
+                $sources[] = 'serviço de consulta do currículo Lattes';
+            }
+        } catch (Throwable $exception) {
+            log_message('warning', 'Consulta Lattes falhou para o ID {id} ({exception}).', [
+                'id'        => $lattesId,
+                'exception' => $exception::class,
+            ]);
+        }
+
+        $scholarMessage = 'O Google Acadêmico não oferece uma API oficial para localizar uma pessoa pelo ID Lattes.';
+        if ($personData['nome'] === '') {
+            try {
+                $scholarResponse = service('curlrequest')->get('https://scholar.google.com/scholar', [
+                    'query'          => ['hl' => 'pt-BR', 'q' => $lattesId],
+                    'connect_timeout' => 5,
+                    'timeout'         => 10,
+                    'http_errors'     => false,
+                ]);
+                if ($scholarResponse->getStatusCode() === 200) {
+                    $scholarMessage .= ' A busca pública respondeu, mas não foi possível confirmar um perfil correspondente com segurança.';
+                } else {
+                    $scholarMessage .= ' A busca pública não está disponível no momento.';
+                }
+            } catch (Throwable $exception) {
+                log_message('warning', 'Busca pública no Google Acadêmico falhou para o ID Lattes {id} ({exception}).', [
+                    'id'        => $lattesId,
+                    'exception' => $exception::class,
+                ]);
+                $scholarMessage .= ' A busca pública não está disponível no momento.';
+            }
+        }
+
+        $found = $personData['nome'] !== '';
+        return view('admin/person/inport', [
+            'title'        => 'Importar pessoas',
+            'lattesId'     => $lattesId,
+            'lookupResult' => [
+                'status'         => $found ? 'found' : 'not_found',
+                'message'        => $found
+                    ? 'Dados encontrados. Revise-os no cadastro antes de salvar.'
+                    : 'Não foi possível obter dados pessoais automaticamente. Você ainda pode abrir o cadastro e preencher os dados manualmente.',
+                'personData'     => $personData,
+                'sources'        => $sources,
+                'scholarMessage' => $scholarMessage,
+            ],
+        ]);
+    }
+
+    public function registerLattesPerson(): RedirectResponse
+    {
+        if (($redirect = $this->requireLogin()) !== null) {
+            return $redirect;
+        }
+
+        $lattesId = trim((string) $this->request->getPost('lattes_id'));
+        if (preg_match('/^\d{16}$/', $lattesId) !== 1) {
+            return redirect()->to(site_url('admin/person/inport'))
+                ->with('error', 'O ID Lattes deve conter exatamente 16 dígitos.');
+        }
+
+        $existingPerson = db_connect()->table('individuo')
+            ->where('lattes_id', $lattesId)
+            ->orderBy('use', 'ASC')
+            ->orderBy('id', 'ASC')
+            ->get()
+            ->getRowArray();
+        if ($existingPerson !== null) {
+            return redirect()->to(site_url('person/edit/' . (int) $existingPerson['id']))
+                ->with('info', 'Este ID Lattes já estava cadastrado. Você pode editar o cadastro existente.');
+        }
+
+        $name = trim((string) $this->request->getPost('nome'));
+        $email = trim((string) $this->request->getPost('email'));
+        $orcid = trim((string) $this->request->getPost('orcid'));
+        if ($name === '') {
+            $name = '# Docente Lattes';
+        }
+        if (mb_strlen($name) > 255
+            || ($email !== '' && (mb_strlen($email) > 190 || filter_var($email, FILTER_VALIDATE_EMAIL) === false))
+            || ($orcid !== '' && preg_match('/^\d{4}-\d{4}-\d{4}-[\dX]{4}$/i', $orcid) !== 1)) {
+            return redirect()->to(site_url('admin/person/inport'))
+                ->with('error', 'Os dados recebidos são inválidos. Faça a busca novamente e revise os valores.');
+        }
+
+        $personModel = new PersonModel();
+        $personId = $personModel->insert([
+            'nome'      => $name,
+            'lattes_id' => $lattesId,
+            'email'     => $email !== '' ? $email : null,
+            'orcid'     => $orcid !== '' ? strtoupper($orcid) : null,
+        ]);
+        if ($personId === false) {
+            return redirect()->to(site_url('admin/person/inport'))
+                ->with('error', implode(' ', $personModel->errors()));
+        }
+
+        return redirect()->to(site_url('person/edit/' . (int) $personId))
+            ->with('success', 'Cadastro criado. Revise e complete os dados da pessoa.');
+    }
+
+    /** @return array{nome: string, email: string, orcid: string} */
+    private function fetchLattesPersonData(string $lattesId): array
+    {
+        $token = trim((string) env('lattes.apiToken'));
+        if ($token === '') {
+            throw new RuntimeException('O serviço de consulta Lattes não está configurado.');
+        }
+
+        $verifySsl = filter_var(env('lattes.verifySsl', true), FILTER_VALIDATE_BOOL);
+        $caBundle = trim((string) env('lattes.caBundle'));
+        if ($verifySsl && ($caBundle === '' || ! is_file($caBundle))) {
+            throw new RuntimeException('O certificado SSL do serviço Lattes não está configurado.');
+        }
+
+        $response = service('curlrequest')->get('https://brapci.inf.br/ws/api/', [
+            'query' => [
+                'verb'  => 'lattes',
+                'q'     => $lattesId,
+                'token' => $token,
+            ],
+            'connect_timeout' => 10,
+            'timeout'         => 60,
+            'http_errors'     => false,
+            'verify'          => $verifySsl ? $caBundle : false,
+        ]);
+        if ($response->getStatusCode() !== 200) {
+            throw new RuntimeException('O serviço de consulta Lattes respondeu com HTTP ' . $response->getStatusCode() . '.');
+        }
+
+        $temporaryFile = tempnam(WRITEPATH, 'lattes_lookup_');
+        if ($temporaryFile === false) {
+            throw new RuntimeException('Não foi possível preparar o arquivo temporário para consulta Lattes.');
+        }
+
+        try {
+            if (file_put_contents($temporaryFile, $response->getBody(), LOCK_EX) === false) {
+                throw new RuntimeException('Não foi possível gravar a resposta da consulta Lattes.');
+            }
+
+            $zip = new ZipArchive();
+            if ($zip->open($temporaryFile) !== true) {
+                throw new RuntimeException('O serviço de consulta Lattes não retornou um arquivo válido.');
+            }
+
+            $xmlContent = false;
+            for ($index = 0; $index < $zip->numFiles; $index++) {
+                $entryName = (string) $zip->getNameIndex($index);
+                if (str_ends_with(strtolower($entryName), '.xml')) {
+                    $xmlContent = $zip->getFromIndex($index);
+                    break;
+                }
+            }
+            $zip->close();
+
+            if (! is_string($xmlContent)) {
+                throw new RuntimeException('A resposta Lattes não contém um currículo XML.');
+            }
+
+            $previous = libxml_use_internal_errors(true);
+            try {
+                $xml = simplexml_load_string($xmlContent, SimpleXMLElement::class, LIBXML_NONET | LIBXML_NOBLANKS);
+            } finally {
+                libxml_clear_errors();
+                libxml_use_internal_errors($previous);
+            }
+            if (! $xml instanceof SimpleXMLElement || (string) $xml['NUMERO-IDENTIFICADOR'] !== $lattesId) {
+                throw new RuntimeException('O currículo retornado não corresponde ao ID Lattes solicitado.');
+            }
+
+            $generalData = $xml->{'DADOS-GERAIS'};
+            if (! $generalData instanceof SimpleXMLElement) {
+                throw new RuntimeException('O currículo não contém dados pessoais gerais.');
+            }
+            $name = trim((string) $generalData['NOME-COMPLETO']);
+            $orcid = preg_replace('#^https?://orcid\.org/#i', '', trim((string) $generalData['ORCID-ID'])) ?? '';
+            $email = '';
+            $address = $generalData->ENDERECO;
+            $emailSource = trim((string) ($address['ELETRONICO'] ?? ''));
+            if (preg_match('/[A-Z0-9._%+\-]+@[A-Z0-9.\-]+\.[A-Z]{2,}/i', $emailSource, $match) === 1) {
+                $email = $match[0];
+            }
+
+            return [
+                'nome'  => mb_substr($name, 0, 255),
+                'email' => filter_var($email, FILTER_VALIDATE_EMAIL) !== false ? $email : '',
+                'orcid' => preg_match('/^\d{4}-\d{4}-\d{4}-[\dX]{4}$/i', $orcid) === 1 ? strtoupper($orcid) : '',
+            ];
+        } finally {
+            if (is_file($temporaryFile)) {
+                unlink($temporaryFile);
+            }
+        }
     }
 
     public function processInport(): RedirectResponse

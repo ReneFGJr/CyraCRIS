@@ -22,6 +22,14 @@
                                 </div>
                             <?php endforeach; ?>
                         </div>
+                        <div class="row g-3 mb-3">
+                            <?php foreach (['dias_qualificacao' => 'Dias à qualificação', 'dias_defesa' => 'Dias à defesa'] as $campo => $rotulo) : ?>
+                                <div class="col-sm-6">
+                                    <label class="form-label" for="<?= $tipoLicenca . '-' . $campo ?>"><?= esc($rotulo) ?></label>
+                                    <input class="form-control" type="number" min="0" step="1" name="<?= $campo ?>" id="<?= $tipoLicenca . '-' . $campo ?>" value="<?= esc($restaurar ? (string) old($campo, '0') : '0', 'attr') ?>" required>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
                         <label class="form-label" for="<?= $tipoLicenca ?>-observacoes">Observações (opcional)</label>
                         <textarea class="form-control" name="observacoes" id="<?= $tipoLicenca ?>-observacoes" rows="3" maxlength="2000"><?= esc($restaurar ? (string) old('observacoes', '') : '') ?></textarea>
                     </div>

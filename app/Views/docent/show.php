@@ -266,6 +266,19 @@ $numeroWhatsapp = static function (string $valor): string {
                     </aside>
                 <?php endif; ?>
             </div>
+            <?php if (! empty($registroAcademico)) : ?>
+                <section class="mt-5" aria-labelledby="academic-section-title">
+                    <header class="dados-header mb-4">
+                        <h3 class="h5 text-white mb-1" id="academic-section-title"><i class="bi bi-mortarboard me-2 cyra-accent"></i>Dados acadêmicos</h3>
+                        <p class="small cyra-muted mb-0">Ingresso no programa, qualificação e defesa.</p>
+                    </header>
+                    <div class="cyra-panel p-3 p-lg-4">
+                        <h4 class="h6 cyra-heading mb-3">Quadro acadêmico</h4>
+                        <?= view('components/aluno_dados', ['aluno' => $registroAcademico, 'bancaPessoas' => [], 'orientadoresPrograma' => $orientadoresPrograma], ['saveData' => false]) ?>
+                    </div>
+                    <?= view('components/aluno_solicitacoes', ['solicitacoes' => $solicitacoesAcademicas ?? [], 'query' => '', 'historicoPublico' => true], ['saveData' => false]) ?>
+                </section>
+            <?php endif; ?>
         </section>
 
         <section class="tab-pane fade" id="dados" role="tabpanel" aria-labelledby="dados-tab" tabindex="0">

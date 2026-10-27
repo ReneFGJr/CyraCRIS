@@ -1,6 +1,7 @@
 <?php
 /** @var array<int, array<string, mixed>> $programas */
 $rows = $programas ?? [];
+$administradorLogado = session()->get('auth_logged_in') === true;
 ?>
 <?= view('header/header', [
     'title' => 'Programas de Pós-Graduação',
@@ -15,16 +16,23 @@ $rows = $programas ?? [];
             <h1 class="cyra-heading text-white mb-2">Programas de Pós-Graduação</h1>
             <p class="cyra-muted mb-0">Programas avaliados e reconhecidos cadastrados no CyraCRIS.</p>
         </div>
-        <span class="badge text-bg-info rounded-0 px-3 py-2 align-self-start align-self-md-auto">
-            <?= count($rows) ?> <?= count($rows) === 1 ? 'programa' : 'programas' ?>
-        </span>
+        <div class="d-flex flex-wrap align-items-center gap-2">
+            <span class="badge text-bg-info rounded-0 px-3 py-2">
+                <?= count($rows) ?> <?= count($rows) === 1 ? 'programa' : 'programas' ?>
+            </span>
+            <?php if ($administradorLogado) : ?>
+                <a class="btn btn-info rounded-0 px-3" href="<?= site_url('ppg/new') ?>">
+                    <i class="bi bi-plus-lg me-2"></i>Novo programa
+                </a>
+            <?php endif; ?>
+        </div>
     </div>
 
     <?php if ($rows === []) : ?>
         <div class="cyra-panel p-5 text-center">
             <i class="bi bi-inbox display-5 cyra-accent"></i>
             <h2 class="h4 text-white mt-3">Nenhum programa cadastrado</h2>
-            <p class="cyra-muted mb-0">Execute a migration e o seeder para carregar os dados da Plataforma Sucupira.</p>
+            <p class="cyra-muted mb-0">Execute a migration e o seeder para carregar os dados da Plataforma Sucupira ou cadastre um programa manualmente.</p>
         </div>
     <?php else : ?>
         <div class="table-responsive cyra-panel">

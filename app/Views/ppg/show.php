@@ -4,6 +4,7 @@
 /** @var array<int, array<string, mixed>> $linhas */
 /** @var array<int, array<int, array<string, mixed>>> $docentesPorLinha */
 /** @var array<int, array<string, mixed>> $alunos */
+/** @var array<int, array<string, mixed>> $agendamentos */
 /** @var array{nodes: array<int, array<string, mixed>>, links: array<int, array<string, mixed>>} $rede */
 $idsDocentes = [];
 foreach ($docentesPorLinha as $docentesDaLinha) {
@@ -23,10 +24,6 @@ foreach ($alunos as $aluno) {
     $tipoOrientacao = $aluno['tipo'] === 'Doutorado' ? 'Doutorado' : 'Mestrado';
     $orientacoesPorDocente[$docenteId] ??= ['Mestrado' => 0, 'Doutorado' => 0];
     $orientacoesPorDocente[$docenteId][$tipoOrientacao]++;
-}
-$maiorTotalOrientacoes = 0;
-foreach ($orientacoesPorDocente as $totaisOrientacao) {
-    $maiorTotalOrientacoes = max($maiorTotalOrientacoes, $totaisOrientacao['Mestrado'], $totaisOrientacao['Doutorado']);
 }
 $tiposDocente = [
     'PERMANENTE'  => ['Permanentes', 'primary'],
@@ -105,15 +102,16 @@ $fotoPessoaDisponivel = static function (array $pessoa): bool {
     .ppg-chart-line { padding: 1rem; border: 1px solid rgba(151, 205, 225, .12); background: rgba(5, 19, 40, .34); }
     .ppg-chart-line + .ppg-chart-line { margin-top: 1rem; }
     .ppg-chart-row { display: grid; grid-template-columns: minmax(12rem, 1.1fr) minmax(18rem, 3fr); gap: 1rem; align-items: center; padding: .65rem 0; border-top: 1px solid rgba(151, 205, 225, .08); }
-    .ppg-chart-bars { display: grid; gap: .4rem; }
-    .ppg-chart-bar-row { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr) 2rem; gap: .6rem; align-items: center; }
-    .ppg-chart-track { height: .8rem; overflow: hidden; background: rgba(151, 205, 225, .1); }
-    .ppg-chart-bar { display: block; min-width: 0; height: 100%; }
-    .ppg-chart-bar.mestrado { background: linear-gradient(90deg, #1266b1, #17bdc5); }
-    .ppg-chart-bar.doutorado { background: linear-gradient(90deg, #7559d9, #b48cff); }
+    .ppg-chart-people { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem 1rem; }
+    .ppg-chart-type { display: grid; grid-template-columns: 5.5rem minmax(0, 1fr) auto; gap: .6rem; align-items: center; }
+    .ppg-chart-icons { display: flex; flex-wrap: wrap; gap: .1rem .2rem; min-width: 0; }
+    .ppg-chart-icons i { font-size: 1.1rem; line-height: 1.25; }
+    .ppg-chart-icons.mestrado { color: #17bdc5; }
+    .ppg-chart-icons.doutorado { color: #b48cff; }
     @media (max-width: 767.98px) {
         .ppg-chart-row { grid-template-columns: 1fr; gap: .5rem; }
-        .ppg-chart-bar-row { grid-template-columns: 5rem minmax(0, 1fr) 1.75rem; }
+        .ppg-chart-people { grid-template-columns: 1fr; gap: .5rem; }
+        .ppg-chart-type { grid-template-columns: 5rem minmax(0, 1fr) auto; }
     }
     #rede-academica { width: 100%; min-height: 34rem; border: 1px solid rgba(151, 205, 225, .14); background: radial-gradient(circle at center, rgba(18, 102, 177, .14), rgba(5, 19, 40, .8)); }
 </style>
@@ -182,7 +180,61 @@ $fotoPessoaDisponivel = static function (array $pessoa): bool {
         <a class="btn btn-sm rounded-0 ppg-quick-link" href="#dados-programa"><i class="bi bi-info-circle me-1"></i>Dados do programa</a>
         <a class="btn btn-sm rounded-0 ppg-quick-link" href="#informacoes-academicas"><i class="bi bi-list-check me-1"></i>Informações acadêmicas</a>
         <a class="btn btn-sm rounded-0 ppg-quick-link" href="#linhas-docentes"><i class="bi bi-people me-1"></i>Linhas e docentes</a>
+        <a class="btn btn-sm rounded-0 ppg-quick-link" href="#proximos-eventos"><i class="bi bi-calendar-event me-1"></i>Próximas qualificações e defesas</a>
     </nav>
+
+    <section class="cyra-panel p-4 mb-4" id="proximos-eventos" aria-labelledby="proximos-eventos-titulo">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+            <div>
+                <h2 class="h5 text-white mb-1" id="proximos-eventos-titulo"><i class="bi bi-calendar-event me-2 cyra-accent"></i>Próximas qualificações e defesas</h2>
+                <p class="small cyra-muted mb-0">Eventos agendados para hoje ou datas futuras neste programa.</p>
+            </div>
+            <span class="badge border border-light border-opacity-25 text-light rounded-0"><?= count($agendamentos) ?> agendamentos</span>
+        </div>
+        <?php if ($agendamentos === []) : ?>
+            <p class="cyra-muted mb-0">Não há qualificações ou defesas futuras agendadas para este programa.</p>
+        <?php else : ?>
+            <div class="table-responsive">
+                <table class="table table-dark table-hover align-middle mb-0">
+                    <thead><tr><th>Data e hora</th><th>Evento</th><th>Aluno</th><th>Modalidade</th><th>Orientador</th><th>Título</th><th>Local</th></tr></thead>
+                    <tbody>
+                        <?php foreach ($agendamentos as $agendamento) : ?>
+                            <?php
+                            $dataEvento = \DateTimeImmutable::createFromFormat('!Y-m-d', $agendamento['data']);
+                            $localEvento = trim((string) ($agendamento['local'] ?? ''));
+                            $localHttps = filter_var($localEvento, FILTER_VALIDATE_URL) !== false
+                                && strtolower((string) parse_url($localEvento, PHP_URL_SCHEME)) === 'https';
+                            ?>
+                            <tr>
+                                <td class="text-nowrap">
+                                    <?= esc($dataEvento ? $dataEvento->format('d/m/Y') : $agendamento['data']) ?>
+                                    <?= ! empty($agendamento['hora']) ? ' às ' . esc(substr((string) $agendamento['hora'], 0, 5)) : '' ?>
+                                </td>
+                                <td><span class="badge <?= $agendamento['evento'] === 'Defesa' ? 'text-bg-info' : 'bg-primary' ?> rounded-0"><?= esc($agendamento['evento']) ?></span></td>
+                                <td>
+                                    <?php if ($administradorLogado) : ?>
+                                        <a class="text-white text-decoration-none" href="<?= site_url('admin/qualificacao') . '?' . esc(http_build_query(['q' => $agendamento['nome'], 'aluno' => $agendamento['id']]), 'attr') ?>"><?= esc($agendamento['nome']) ?></a>
+                                    <?php else : ?>
+                                        <?= esc($agendamento['nome']) ?>
+                                    <?php endif; ?>
+                                </td>
+                                <td><?= esc($agendamento['modalidade'] !== '' ? $agendamento['modalidade'] : '—') ?></td>
+                                <td><?= esc(($agendamento['orientador'] ?? '') !== '' ? $agendamento['orientador'] : '—') ?></td>
+                                <td class="text-break"><?= esc(($agendamento['titulo'] ?? '') !== '' ? $agendamento['titulo'] : '—') ?></td>
+                                <td class="text-break">
+                                    <?php if ($localHttps) : ?>
+                                        <a class="cyra-accent" href="<?= esc($localEvento, 'attr') ?>" target="_blank" rel="noopener noreferrer"><?= esc($localEvento) ?></a>
+                                    <?php else : ?>
+                                        <?= esc($localEvento !== '' ? $localEvento : '—') ?>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php endif; ?>
+    </section>
 
     <div class="row g-4" id="dados-programa">
         <div class="col-lg-7">
@@ -248,6 +300,25 @@ $fotoPessoaDisponivel = static function (array $pessoa): bool {
                 </ul>
                 <div class="tab-content p-3 p-md-4" id="ppg-tabs-content">
                     <section class="tab-pane fade show active" id="painel-academico" role="tabpanel" aria-labelledby="tab-academico" tabindex="0">
+                        <?php if ($administradorLogado) : ?>
+                            <div class="mb-4">
+                                <button class="btn btn-sm btn-outline-info rounded-0" type="button" data-bs-toggle="collapse" data-bs-target="#painel-atualizacao-capes" aria-expanded="false" aria-controls="painel-atualizacao-capes">
+                                    <i class="bi bi-arrow-repeat me-2" aria-hidden="true"></i>Atualizar dados pela CAPES
+                                </button>
+                                <section class="collapse mt-3" id="painel-atualizacao-capes">
+                                    <div class="cyra-panel p-3 p-md-4">
+                                        <p class="cyra-muted mb-3">Sincroniza áreas de concentração, linhas de pesquisa e cursos (Mestrado/Doutorado) com a Plataforma Sucupira. Os vínculos de docentes existentes serão preservados.</p>
+                                        <form id="form-atualizacao-capes" method="post" action="<?= site_url('ppg/' . (int) $programa['id'] . '/sync-capes') ?>">
+                                            <?= csrf_field() ?>
+                                            <button class="btn btn-info btn-sm rounded-0" id="botao-atualizar-capes" type="submit">
+                                                <i class="bi bi-cloud-download me-2" aria-hidden="true"></i>Buscar e atualizar
+                                            </button>
+                                            <span class="small ms-2" id="resultado-atualizacao-capes" role="status" aria-live="polite"></span>
+                                        </form>
+                                    </div>
+                                </section>
+                            </div>
+                        <?php endif; ?>
                         <div class="row g-4">
                             <div class="col-lg-4"><h3 class="h6 text-white mb-3"><i class="bi bi-award me-2 cyra-accent"></i>Graus acadêmicos</h3><div class="d-flex flex-wrap gap-2"><?php foreach ($listas['graus'] as $grau) : ?><span class="badge border border-info text-info rounded-0 px-3 py-2"><?= esc($grau) ?></span><?php endforeach; ?></div></div>
                             <div class="col-lg-4"><h3 class="h6 text-white mb-3"><i class="bi bi-bullseye me-2 cyra-accent"></i>Áreas de concentração</h3><ul class="cyra-muted mb-0"><?php foreach ($listas['areas_concentracao'] as $area) : ?><li class="mb-2"><?= esc(is_array($area) ? implode(' - ', $area) : $area) ?></li><?php endforeach; ?></ul></div>
@@ -256,10 +327,13 @@ $fotoPessoaDisponivel = static function (array $pessoa): bool {
                         <section class="ppg-orientation-chart mt-4 pt-4" aria-labelledby="grafico-orientacoes-titulo">
                             <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-3">
                                 <div>
-                                    <h3 class="h5 text-white mb-1" id="grafico-orientacoes-titulo"><i class="bi bi-bar-chart-fill me-2 cyra-accent"></i>Orientações por linha e professor</h3>
+                                    <h3 class="h5 text-white mb-1" id="grafico-orientacoes-titulo"><i class="bi bi-people-fill me-2 cyra-accent"></i>Orientações por linha e professor</h3>
                                     <p class="small cyra-muted mb-0">Orientações de mestrado e doutorado vinculadas exclusivamente a este programa.</p>
                                 </div>
-                                <div class="d-flex gap-3 small"><span class="text-info"><i class="bi bi-square-fill me-1"></i>Mestrado</span><span style="color:#b48cff"><i class="bi bi-square-fill me-1"></i>Doutorado</span></div>
+                                <div class="d-flex gap-3 small">
+                                    <span class="text-info"><i class="bi bi-person-fill me-1" aria-hidden="true"></i>Mestrado</span>
+                                    <span style="color:#b48cff"><i class="bi bi-person-fill me-1" aria-hidden="true"></i>Doutorado</span>
+                                </div>
                             </div>
                             <?php if ($linhas === []) : ?>
                                 <p class="cyra-muted mb-0">Nenhuma linha de pesquisa cadastrada.</p>
@@ -275,12 +349,12 @@ $fotoPessoaDisponivel = static function (array $pessoa): bool {
                                                 <?php $totaisGrafico = $orientacoesPorDocente[(int) $docenteGrafico['id']] ?? ['Mestrado' => 0, 'Doutorado' => 0]; ?>
                                                 <div class="ppg-chart-row">
                                                     <a class="text-white text-decoration-none" href="<?= site_url('person/' . (int) $docenteGrafico['id']) ?>"><?= esc($docenteGrafico['nome']) ?></a>
-                                                    <div class="ppg-chart-bars">
-                                                        <?php foreach ([['Mestrado', 'mestrado'], ['Doutorado', 'doutorado']] as [$nivel, $classeBarra]) : ?>
-                                                            <?php $quantidade = (int) $totaisGrafico[$nivel]; $largura = $maiorTotalOrientacoes > 0 ? ($quantidade / $maiorTotalOrientacoes) * 100 : 0; ?>
-                                                            <div class="ppg-chart-bar-row">
+                                                    <div class="ppg-chart-people">
+                                                        <?php foreach ([['Mestrado', 'mestrado'], ['Doutorado', 'doutorado']] as [$nivel, $classeOrientacao]) : ?>
+                                                            <?php $quantidade = (int) $totaisGrafico[$nivel]; ?>
+                                                            <div class="ppg-chart-type">
                                                                 <span class="small cyra-muted"><?= esc($nivel) ?></span>
-                                                                <span class="ppg-chart-track"><span class="ppg-chart-bar <?= $classeBarra ?>" style="width:<?= number_format($largura, 2, '.', '') ?>%"></span></span>
+                                                                <span class="ppg-chart-icons <?= $classeOrientacao ?>" aria-hidden="true"><?php for ($pessoa = 0; $pessoa < $quantidade; $pessoa++) : ?><i class="bi bi-person-fill"></i><?php endfor; ?></span>
                                                                 <strong class="small text-white text-end"><?= $quantidade ?></strong>
                                                             </div>
                                                         <?php endforeach; ?>
@@ -298,7 +372,14 @@ $fotoPessoaDisponivel = static function (array $pessoa): bool {
             <section class="cyra-panel p-4" id="linhas-docentes">
                 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
                     <h2 class="h5 text-white mb-0"><i class="bi bi-diagram-3 me-2 cyra-accent"></i>Linhas de pesquisa e docentes</h2>
-                    <span class="badge border border-light border-opacity-25 text-light rounded-0"><?= count($linhas) ?> linhas</span>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge border border-light border-opacity-25 text-light rounded-0"><?= count($linhas) ?> linhas</span>
+                        <?php if ($administradorLogado) : ?>
+                            <button class="btn btn-sm btn-outline-info rounded-0" id="alternar-manutencao-docentes" type="button" aria-pressed="false">
+                                <i class="bi bi-person-gear me-2" aria-hidden="true"></i>Manutenção dos docentes
+                            </button>
+                        <?php endif; ?>
+                    </div>
                 </div>
 
                 <?php if ($linhas === []) : ?>
@@ -320,17 +401,21 @@ $fotoPessoaDisponivel = static function (array $pessoa): bool {
                                                 </div>
                                             </div>
                                         </div>
-                                        <button class="btn btn-sm btn-outline-info rounded-0 flex-shrink-0" type="button" data-bs-toggle="collapse" data-bs-target="#inserir-docente-<?= (int) $linha['id'] ?>" aria-expanded="false" aria-controls="inserir-docente-<?= (int) $linha['id'] ?>"><i class="bi bi-person-plus me-2"></i>Adicionar docente</button>
+                                        <?php if ($administradorLogado) : ?>
+                                            <button class="btn btn-sm btn-outline-info rounded-0 flex-shrink-0 d-none" type="button" data-manutencao-docentes data-bs-toggle="collapse" data-bs-target="#inserir-docente-<?= (int) $linha['id'] ?>" aria-expanded="false" aria-controls="inserir-docente-<?= (int) $linha['id'] ?>"><i class="bi bi-person-plus me-2"></i>Adicionar docente</button>
+                                        <?php endif; ?>
                                     </div>
                                 </header>
 
-                                <div class="collapse ppg-add-form p-3 p-md-4" id="inserir-docente-<?= (int) $linha['id'] ?>">
-                                    <form class="row g-2 align-items-end" method="post" action="<?= site_url('ppg/' . $programa['id'] . '/linhas/' . $linha['id'] . '/docentes') ?>">
-                                        <?= csrf_field() ?>
-                                        <div class="col-md"><label class="form-label small cyra-muted" for="lattes-id-<?= (int) $linha['id'] ?>">ID Lattes do novo docente</label><input class="form-control form-control-sm rounded-0" id="lattes-id-<?= (int) $linha['id'] ?>" name="lattes_id" type="text" inputmode="numeric" pattern="[0-9]{16}" maxlength="16" placeholder="Informe os 16 dígitos" required></div>
-                                        <div class="col-md-auto"><button class="btn btn-sm btn-info rounded-0 w-100" type="submit"><i class="bi bi-check-lg me-1"></i>Inserir na linha</button></div>
-                                    </form>
-                                </div>
+                                <?php if ($administradorLogado) : ?>
+                                    <div class="collapse ppg-add-form p-3 p-md-4" id="inserir-docente-<?= (int) $linha['id'] ?>">
+                                        <form class="row g-2 align-items-end" method="post" action="<?= site_url('ppg/' . $programa['id'] . '/linhas/' . $linha['id'] . '/docentes') ?>">
+                                            <?= csrf_field() ?>
+                                            <div class="col-md"><label class="form-label small cyra-muted" for="lattes-id-<?= (int) $linha['id'] ?>">ID Lattes do novo docente</label><input class="form-control form-control-sm rounded-0" id="lattes-id-<?= (int) $linha['id'] ?>" name="lattes_id" type="text" inputmode="numeric" pattern="[0-9]{16}" maxlength="16" placeholder="Informe os 16 dígitos" required></div>
+                                            <div class="col-md-auto"><button class="btn btn-sm btn-info rounded-0 w-100" type="submit"><i class="bi bi-check-lg me-1"></i>Inserir na linha</button></div>
+                                        </form>
+                                    </div>
+                                <?php endif; ?>
 
                                 <div class="p-3 p-md-4">
                                     <?php if ($docentes === []) : ?>
@@ -444,6 +529,65 @@ $fotoPessoaDisponivel = static function (array $pessoa): bool {
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
+    const capesForm = document.getElementById('form-atualizacao-capes');
+    if (capesForm) {
+        capesForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const button = document.getElementById('botao-atualizar-capes');
+            const result = document.getElementById('resultado-atualizacao-capes');
+            button.disabled = true;
+            result.className = 'small ms-2 cyra-muted';
+            result.textContent = 'Consultando a CAPES e atualizando o banco de dados...';
+
+            try {
+                const response = await fetch(capesForm.action, {
+                    method: 'POST',
+                    body: new FormData(capesForm),
+                    headers: { 'Accept': 'application/json' },
+                    credentials: 'same-origin',
+                });
+                const payload = await response.json();
+
+                if (payload.csrf) {
+                    document.querySelectorAll('input[name="<?= esc(csrf_token(), 'js') ?>"]').forEach((input) => {
+                        if (input.name === payload.csrf.name) {
+                            input.value = payload.csrf.hash;
+                        }
+                    });
+                }
+
+                if (!response.ok) {
+                    result.className = 'small ms-2 text-danger';
+                    result.textContent = payload.message || 'Não foi possível atualizar os dados pela CAPES.';
+                    return;
+                }
+
+                result.className = 'small ms-2 text-success';
+                result.textContent = payload.message;
+                window.setTimeout(() => window.location.reload(), 800);
+            } catch {
+                result.className = 'small ms-2 text-danger';
+                result.textContent = 'Não foi possível concluir a sincronização. Verifique a conexão e tente novamente.';
+            } finally {
+                button.disabled = false;
+            }
+        });
+    }
+
+    const maintenanceButton = document.getElementById('alternar-manutencao-docentes');
+    if (maintenanceButton) {
+        const controls = document.querySelectorAll('[data-manutencao-docentes]');
+        maintenanceButton.addEventListener('click', () => {
+            const enabled = maintenanceButton.getAttribute('aria-pressed') !== 'true';
+            maintenanceButton.setAttribute('aria-pressed', enabled ? 'true' : 'false');
+            maintenanceButton.innerHTML = enabled
+                ? '<i class="bi bi-x-lg me-2" aria-hidden="true"></i>Encerrar manutenção'
+                : '<i class="bi bi-person-gear me-2" aria-hidden="true"></i>Manutenção dos docentes';
+            controls.forEach((control) => control.classList.toggle('d-none', !enabled));
+        });
+    }
+
     const data = <?= json_encode($rede, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     const svg = document.getElementById('rede-academica');
     if (!svg || !data.nodes.length) return;

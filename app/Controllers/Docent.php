@@ -55,6 +55,58 @@ class Docent extends BaseController
             throw PageNotFoundException::forPageNotFound('Docente não encontrado.');
         }
 
+        $registroAcademico = null;
+        $solicitacoesAcademicas = [];
+        $lattesIdAcademico = trim((string) ($docente['lattes_id'] ?? ''));
+        if ($lattesIdAcademico !== '') {
+            $registroAcademico = $db->table('tmp_orientacoes')
+                ->where('id_lattes', $lattesIdAcademico)
+                ->orderBy('ano', 'DESC')
+                ->orderBy('id', 'DESC')
+                ->get()
+                ->getRowArray();
+        }
+        if ($registroAcademico === null) {
+            $registroAcademico = $db->table('tmp_orientacoes')
+                ->where('nome', (string) $docente['nome'])
+                ->orderBy('ano', 'DESC')
+                ->orderBy('id', 'DESC')
+                ->get()
+                ->getRowArray();
+        }
+        if ($registroAcademico !== null) {
+            $vinculoAcademico = $db->table('tmp_orientacoes t')
+                ->select('p.nome AS programa_nome, lp.nome AS linha_pesquisa_nome')
+                ->join('programas_pos_graduacao p', 'p.id = t.programa_id', 'left')
+                ->join('linhas_pesquisa lp', 'lp.id = t.linha_pesquisa_id', 'left')
+                ->where('t.id', (int) $registroAcademico['id'])
+                ->get()
+                ->getRowArray();
+            $registroAcademico['programa_nome'] = $vinculoAcademico['programa_nome'] ?? '';
+            $registroAcademico['linha_pesquisa_nome'] = $vinculoAcademico['linha_pesquisa_nome'] ?? '';
+
+            $solicitacoesAcademicas = (new \App\Models\TmpOrientacaoHistoricoModel())
+                ->where('orientacao_id', $registroAcademico['id'])
+                ->where('tipo', 'Solicitação')
+                ->orderBy('created_at', 'DESC')
+                ->orderBy('id', 'DESC')
+                ->findAll();
+
+            foreach (['qualificacao', 'defesa'] as $evento) {
+                $campoDias = 'dias_' . $evento;
+                $registroAcademico['dias_solicitacao_' . $evento] = 0;
+                foreach ($solicitacoesAcademicas as $solicitacao) {
+                    $dadosSolicitacao = json_decode((string) ($solicitacao['dados_novos'] ?? ''), true);
+                    if (is_array($dadosSolicitacao)) {
+                        $dias = filter_var($dadosSolicitacao[$campoDias] ?? 0, FILTER_VALIDATE_INT);
+                        if ($dias !== false && $dias > 0) {
+                            $registroAcademico['dias_solicitacao_' . $evento] += $dias;
+                        }
+                    }
+                }
+            }
+        }
+
         $instituicoes = $db->table('individuo_instituicao ii')
             ->select('inst.nome, inst.sigla, ii.tipo_vinculo, ii.principal')
             ->join('instituicao inst', 'inst.id = ii.instituicao_id')
@@ -97,6 +149,16 @@ class Docent extends BaseController
             ->orderBy('o.ano_inicio', 'DESC')
             ->get()
             ->getResultArray();
+
+        $orientadoresPrograma = [];
+        if ($registroAcademico !== null) {
+            $programaAcademicoId = (int) ($registroAcademico['programa_id'] ?? 0);
+            $orientadoresPrograma = array_values(array_filter(
+                $orientadores,
+                static fn (array $orientacao): bool => $programaAcademicoId < 1
+                    || (int) ($orientacao['programa_id'] ?? 0) === $programaAcademicoId
+            ));
+        }
 
         $producoes = $db->table('producoes p')
             ->select('p.*, s.tipo AS source_tipo, s.nome AS source_nome, s.issn AS source_issn, s.isbn AS source_isbn, s.editora AS source_editora')
@@ -145,10 +207,12 @@ class Docent extends BaseController
 
         return view('docent/show', [
             'docente'      => $docente,
+            'registroAcademico' => $registroAcademico,
             'instituicoes' => $instituicoes,
             'linhas'       => $linhas,
             'orientacoes'  => $orientacoes,
             'orientadores' => $orientadores,
+            'orientadoresPrograma' => $orientadoresPrograma,
             'producoes'    => $producoes,
             'projetos'     => $projetos,
             'remissivas'   => $remissivas,
@@ -277,10 +341,15 @@ class Docent extends BaseController
 
             [$xml, $nomeArquivoXml] = $this->lerXmlDoZip($arquivoFonte, $lattesId, true);
             $dados = $this->extrairDados($xml);
+            $dadosDocente = $dados['docente'];
+
+            if (trim((string) ($docente['nome'] ?? '')) !== '# Docente Lattes') {
+                unset($dadosDocente['nome']);
+            }
 
             $db->transStart();
             $this->limparDadosAcademicos(array_values(array_unique([$idAcessado, $id])));
-            $db->table('individuo')->where('id', $id)->update(array_merge($dados['docente'], [
+            $db->table('individuo')->where('id', $id)->update(array_merge($dadosDocente, [
                 'updated_at' => date('Y-m-d H:i:s'),
             ]));
             $this->atualizarInstituicao($id, $dados['instituicao']);

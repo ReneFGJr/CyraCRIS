@@ -1,0 +1,13 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^git diff --check; if \\(\\$\\?\\) \\{ php -l app\\\\Controllers\\\\Ppg\\.php; php -l app\\\\Views\\\\ppg\\\\form\\.php; php -l app\\\\Views\\\\ppg\\\\index\\.php; php -l app\\\\Config\\\\Routes\\.php \\}$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^php -l app\\\\Views\\\\ppg\\\\show\\.php; if \\(\\$\\?\\) \\{ git diff --check \\}$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    },
+    "DockerRun.DisableAutoGenerateConfig": true
+}

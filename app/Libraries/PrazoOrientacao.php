@@ -43,14 +43,17 @@ class PrazoOrientacao
             return ['rotulo' => '-', 'classe' => 'sem-data', 'detalhe' => 'Informe a data de ingresso para calcular o prazo.'];
         }
         $extensaoDias = max(0, (int) ($aluno['extensao_dias'] ?? 0));
-        if ($extensaoDias > 0) {
-            $limite = $limite->modify('+' . $extensaoDias . ' days');
+        $diasSolicitados = max(0, (int) ($aluno['dias_solicitacao_' . $evento] ?? 0));
+        $diasAdicionais = $extensaoDias + $diasSolicitados;
+        if ($diasAdicionais > 0) {
+            $limite = $limite->modify('+' . $diasAdicionais . ' days');
         }
         $atrasado = $hoje > $limite;
         return [
             'rotulo' => $atrasado ? 'Atrasado' : 'Normal',
             'classe' => $atrasado ? 'atrasado' : 'normal',
-            'detalhe' => 'Prazo de ' . $evento . ': ' . $limite->format('d/m/Y') . '.',
+            'detalhe' => 'Prazo de ' . $evento . ': ' . $limite->format('d/m/Y')
+                . ($diasAdicionais > 0 ? ' (inclui +' . $diasAdicionais . ' dias de extensão e solicitações).' : '.'),
         ];
     }
 

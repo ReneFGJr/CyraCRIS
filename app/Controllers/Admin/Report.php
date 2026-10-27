@@ -14,6 +14,38 @@ class Report extends BaseController
                 ->with('error', 'Faça login para acessar os relatórios do sistema.');
         }
 
+        $report = (string) $this->request->getGet('report');
+        if (in_array($report, ['estudantes-ativos', 'egressos'], true)) {
+            $ativos = $report === 'estudantes-ativos';
+            $builder = db_connect()->table('tmp_orientacoes t')
+                ->select('t.id, t.nome, t.id_lattes, t.cracha, t.ano, t.modalidade, t.situacao, t.orientador, t.data_entrada_programa, t.data_qualificacao, t.data_defesa, p.nome AS programa_nome, lp.nome AS linha_pesquisa_nome')
+                ->join('programas_pos_graduacao p', 'p.id = t.programa_id', 'left')
+                ->join('linhas_pesquisa lp', 'lp.id = t.linha_pesquisa_id', 'left');
+
+            if ($ativos) {
+                $builder->groupStart()
+                    ->whereIn('t.situacao', ['Cursando', 'Qualificado'])
+                    ->orWhere('t.situacao IS NULL', null, false)
+                    ->orWhere('t.situacao', '')
+                    ->groupEnd();
+            } else {
+                $builder->whereIn('t.situacao', ['Defendido', 'Diplomando']);
+            }
+
+            $estudantes = $builder
+                ->orderBy('t.nome', 'ASC')
+                ->orderBy('t.ano', 'DESC')
+                ->orderBy('t.id', 'ASC')
+                ->get()
+                ->getResultArray();
+
+            return view('admin/report/students', [
+                'title' => $ativos ? 'Todos os estudantes ativos' : 'Todos os egressos',
+                'report' => $report,
+                'estudantes' => $estudantes,
+            ]);
+        }
+
         return view('admin/report/index', [
             'title' => 'Relatórios do sistema',
             'groups' => [
